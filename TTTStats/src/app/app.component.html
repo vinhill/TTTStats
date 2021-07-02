@@ -1,4 +1,3 @@
-<!-- Margin zero, as otherwise a scrollbar appears. TODO find a better fix? -->
 <div class="container">
 	<div class="row justify-content-center">
 		<div class="masonry">
@@ -12,6 +11,8 @@
 			<div class="grid-item"></div>
 			<div class="grid-item big"></div>
 			<div class="grid-item"></div>
+			<div class="grid-item big" *ngFor="let res of results" style="padding: 1em">{{res}}</div>
 		</div>
 	</div>
 </div>
+<!-- TODO for small displays, have all be span 1 -->
