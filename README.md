@@ -8,5 +8,6 @@ resttt.glitch.io. It uses a mysql database hosted at vmd76968.contaboserver.net.
 
 ## Build & Deploy
 
+- From within the TTTStats folder containing src, angular.json etc.
 - ng build --base-href="https://vinhill.github.io/TTTStats/"
 - npx angular-cli-ghpages --dir=dist/TTTStats

@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+	</head>
+	<body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+			<div class="navbar-brand">
+				Temporary Testpage for REST calls
+			</div>
+		</nav>
+		
+		<form style="margin-top:1%;margin-left:20%;margin-right:20%">
+			<div class="form-group row">
+				<label for="uritf" class="col-sm-2 col-form-label"> URI: </label>
+				<div class="col-sm-10">
+					<input id="uritf" type="text" value="https://resttt.glitch.me/api/v1" class="form-control" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="bodytf" class="col-sm-2 col-form-label"> Body: </label>
+				<div class="col-sm-10">
+					<input id="bodytf" type="text" value="username=mamu&password=passw0r1" class="form-control" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="methodtf" class="col-sm-2 col-form-label"> Methode: </label>
+				<div class="col-sm-10">
+					<input id="methodtf" type="text" value="POST" class="form-control" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<label for="encodetf" class="col-sm-2 col-form-label" > Codierung: </label>
+				<div class="col-sm-10">
+					<input id="encodetf" type="text" value="application/x-www-form-urlencoded" class="form-control"  />
+				</div>
+			</div>
+			
+			<input id="submitbtn" type="button" value="Submit" class="btn btn-secondary btn-lg btn-block" />
+		</form>
+		
+		<p id="out" style="margin:1%;font-size:20px">
+			Hier steht nach Knopfdruck die Serverantwort.
+		</p>
+	
+	</body>
+	<script>
+		async function submit() {
+			let uri = document.getElementById("uritf").value;
+			let body = document.getElementById("bodytf").value;
+			let method = document.getElementById("methodtf").value;
+			let encode = document.getElementById("encodetf").value;
+			
+			let response;
+			if (method === 'GET') {
+				response = await fetch(uri, {
+					method: method,
+					body: null,
+					headers: {
+						'Content-Type': encode
+					}
+				});
+			} else {
+				response = await fetch(uri, {
+					method: method,
+					body: body,
+					headers: {
+						'Content-Type': encode
+					}
+				});
+			}
+			console.log(response);
+			response.json().then(function(data) {
+				console.log(data);
+				let out = document.getElementById("out");
+				out.innerHTML = JSON.stringify(data);
+			});
+		}
+		
+		document.getElementById("submitbtn").addEventListener("click", submit);
+	</script>
+</html>
