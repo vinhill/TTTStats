@@ -1,28 +1,18 @@
-.masonry {
-	display: grid;
-	grid-gap: 10px;
-	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-	grid-auto-rows: 200px;
-	grid-auto-flow: dense;
+#page-container {
+	position: relative;
+  min-height: 100vh;
 }
-.grid-item {
-	display: flex;
-	justify-content: center;
-	align-items: center;
+#content-wrap {
+	padding-bottom: 2.5em;
+}
+footer {
+	position: absolute;
+	bottom: 0;
 	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	border-radius: 5px;
-  background: #e6e5e4;
-  border: 2px solid #b6b5b4;
+	/* same as content bottom margin */
+	height: 2.5em;
 }
-.masonry .wide {
-	grid-column: span 2;
-}
-.masonry .tall {
-	grid-row: span 2;
-}
-.masonry .big {
-	grid-column: span 2;
-	grid-row: span 2;
+nav {
+	/* same as the pedding of navbar bootstrap class for to and bottom */
+	padding-left: .5rem;
 }

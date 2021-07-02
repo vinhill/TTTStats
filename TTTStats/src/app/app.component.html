@@ -1,18 +1,47 @@
-<div class="container">
-	<div class="row justify-content-center">
-		<div class="masonry">
-			<div class="grid-item"></div>
-			<div class="grid-item wide"></div>
-			<div class="grid-item"></div>
-			<div class="grid-item tall"></div>
-			<div class="grid-item"></div>
-			<div class="grid-item big"></div>
-			<div class="grid-item wide"></div>
-			<div class="grid-item"></div>
-			<div class="grid-item big"></div>
-			<div class="grid-item"></div>
-			<div class="grid-item big" *ngFor="let res of results" style="padding: 1em">{{res}}</div>
+<div id="page-container">
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<a class="navbar-brand" href="#">Vinhill Github</a>
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav mr-auto">
+				<li class="nav-item active">
+					<a class="nav-link" href="../index.html">Home</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link active" href="#">TTT</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="../impressum.html">Impressum</a>
+				</li>
+			</ul>
 		</div>
+	</nav>
+	<!-- Content -->
+	<div id="content-wrap" class="container">
+	
+		<div class="masonry">
+			<div class="masonry-item">
+				<resttt name="PlayerGameCount"></resttt>
+			</div>
+			<div class="masonry-item wide">
+				<resttt name="MapCount"></resttt>
+			</div>
+			<div class="masonry-item big">
+				<resttt name="RoleCount"></resttt>
+			</div>
+			<div class="masonry-item">
+				<resttt name="PlayerKillCount"></resttt>
+			</div>
+		</div>
+		
 	</div>
+	<!-- Footer -->
+	<footer class="text-center bg-light">
+		<div class="text-center p-2">
+			© 2021 Copyright Vincent Hilla
+		</div>
+	</footer>
 </div>
-<!-- TODO for small displays, have all be span 1 -->
