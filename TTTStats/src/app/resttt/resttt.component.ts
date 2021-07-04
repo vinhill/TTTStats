@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { RestttService } from '../resttt.service';
 
 @Component({
@@ -6,16 +6,20 @@ import { RestttService } from '../resttt.service';
   templateUrl: './resttt.component.html',
   styleUrls: ['./resttt.component.css']
 })
-export class RestttComponent implements OnInit {
+export class RestttComponent {
 	content: string = "Loading...";
+	name: string = "";
 	
-	@Input() name!: string;
-
-  constructor(private resttt:RestttService) { }
-
-  async ngOnInit() {
+	@Input("name") set setName(name: string) {
+		this.name = name;
+		this.content = "Loading...";
+		this.reload();
+	};
+	
+	async reload() {
 		let res = await this.resttt.get(this.name);
 		this.content = JSON.stringify(res);
-  }
+	}
 
+  constructor(private resttt:RestttService) { }
 }
