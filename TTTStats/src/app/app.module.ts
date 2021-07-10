@@ -7,6 +7,8 @@ import { RestttComponent } from './resttt/resttt.component';
 import { OverviewComponent } from './overview/overview.component';
 import { PlayerComponent } from './player/player.component';
 
+import { ChartsModule } from 'ng2-charts';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -16,7 +18,8 @@ import { PlayerComponent } from './player/player.component';
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+		ChartsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,16 +1,18 @@
 <div id="content-wrap" class="container">
-	<div class="masonry">
-		<div class="masonry-item">
+	<div dataMasonry='{ "itemSelector": ".masonry-item" }'>
+	
+		<div class="masonry-item col-sm-12 col-md-4">
 			<resttt name="PlayerGameCount"></resttt>
 		</div>
-		<div class="masonry-item wide">
+		<div class="masonry-item col-sm-12 col-md-4">
 			<resttt name="MapCount"></resttt>
 		</div>
-		<div class="masonry-item big">
-			<resttt name="RoleCount"></resttt>
+		<div class="masonry-item col-sm-12 col-md-4">
+			<resttt name="RoleCount" chart="polar"></resttt>
 		</div>
-		<div class="masonry-item">
+		<div class="masonry-item col-sm-12 col-md-4">
 			<resttt name="PlayerKillCount"></resttt>
 		</div>
+		
 	</div>
 </div>
