@@ -1,18 +1,27 @@
 <div id="content-wrap" class="container">
 	<div dataMasonry='{ "itemSelector": ".masonry-item" }'>
-	
-		<div class="masonry-item col-sm-12 col-md-4">
-			<resttt name="PlayerGameCount"></resttt>
-		</div>
-		<div class="masonry-item col-sm-12 col-md-4">
-			<resttt name="MapCount"></resttt>
-		</div>
-		<div class="masonry-item col-sm-12 col-md-4">
-			<resttt name="RoleCount" chart="polar"></resttt>
-		</div>
-		<div class="masonry-item col-sm-12 col-md-4">
-			<resttt name="PlayerKillCount"></resttt>
-		</div>
-		
+		<!-- See https://www.npmjs.com/package/ng2-charts -->
+
+		<card>
+			<canvas baseChart
+		    [data]="[[10,20,30], [30,20,10]]"
+		    [labels]="['a', 'b', 'c']"
+		    chartType="doughnut">
+		  </canvas>
+		</card>
+
+		<card>
+			<resttt query="PlayerGameCount" display="text"></resttt>
+		</card>
+		<card>
+			<resttt query="MapCount" display="table"></resttt>
+		</card>
+		<card>
+			<resttt query="RoleCount" display="table"></resttt>
+		</card>
+		<card>
+			<resttt query="PlayerKillCount" display="table"></resttt>
+		</card>
+
 	</div>
 </div>

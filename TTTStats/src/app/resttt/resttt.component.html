@@ -1,3 +1,29 @@
-<div>
-	{{content}}
+<div *ngIf="loaded">
+  <div *ngIf="display == 'text'">
+    {{stringify(result)}}
+  </div>
+
+  <div *ngIf="display == 'table'">
+    <table class="table">
+      <thead>
+        <tr>
+          <th *ngFor="let key of keys(result[0])">{{key}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of result">
+          <td *ngFor="let key of keys(result[0])">{{row[key]}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="display == 'chart'">
+    To be implemented...
+  </div>
+</div>
+<div *ngIf="!loaded">
+  <div class="spinner-border text-success" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
 </div>

@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
-  styleUrls: ['./player.component.css', '../masonry.css']
+  styleUrls: ['./player.component.css']
 })
 export class PlayerComponent implements OnInit {
   name: string = "";
@@ -16,7 +16,7 @@ export class PlayerComponent implements OnInit {
 		this.setPlayerName(params.name);
 	});
   }
-  
+
   setPlayerName(name: string) {
 	  this.name = name;
   }

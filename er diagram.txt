@@ -1,0 +1,67 @@
+// use https://dbdiagram.io/d
+
+Table role {
+  name varchar
+  team varchar
+  color varchar
+}
+
+Table player {
+  name varchar
+}
+
+Table match {
+  mid int
+  map varchar
+  winner varchar [ref: > role.team]
+}
+
+Table participates {
+  mid int [ref: > match.mid]
+  player varchar [ref: > player.name]
+  init_role varchar [ref: > role.name]
+  role varchar [ref: > role.name]
+}
+
+Table kills {
+  mid int [ref: > match.mid]
+  attacker varchar [ref: > player.name]
+  victim varchar [ref: > player.name]
+  atkrole varchar [ref: > role.name]
+  vktrole varchar [ref: > role.name]
+  time time
+  weapon varchar
+}
+
+Table dies {
+  mid int [ref: > match.mid]
+  player varchar [ref: > player.name]
+  reason varchar
+}
+
+Table damages {
+  mid int [ref: > match.mid]
+  attacker varchar [ref: > player.name]
+  victim varchar [ref: > player.name]
+  atkrole varchar [ref: > role.name]
+  vktrole varchar [ref: > role.name]
+  time time
+  weapon varchar
+  damage int
+}
+
+Table respawns {
+  mid int [ref: > match.mid]
+  player varchar [ref: > player.name]
+  role varchar [ref: > role.name]
+  causee varchar [ref: > player.name]
+}
+
+Table configs {
+  filename varchar
+}
+
+Table wins {
+  mid int [ref: > match.mid]
+  role varchar [ref: > role.name]
+}
