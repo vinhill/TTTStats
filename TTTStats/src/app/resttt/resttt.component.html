@@ -1,29 +1,58 @@
 <div *ngIf="loaded">
+
+  <!-- Text -->
   <div *ngIf="display == 'text'">
     {{stringify(result)}}
   </div>
 
+  <!-- Table -->
   <div *ngIf="display == 'table'">
     <table class="table">
       <thead>
         <tr>
-          <th *ngFor="let key of keys(result[0])">{{key}}</th>
+          <th *ngFor="let key of columns">{{key}}</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let row of result">
-          <td *ngFor="let key of keys(result[0])">{{row[key]}}</td>
+          <td *ngFor="let key of columns">{{row[key]}}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
+<!-- Chart -->
   <div *ngIf="display == 'chart'">
-    To be implemented...
+		<canvas baseChart *ngIf="data != ''"
+	    [data]="get_column(data)"
+	    [labels]="get_column(label)"
+	    [chartType]="type"
+      [legend]="legend"
+      [options]="options">
+	  </canvas>
+  		<canvas baseChart *ngIf="datas.length != 0"
+  	    [data]="get_columns(datas)"
+  	    [labels]="get_column(label)"
+  	    [chartType]="type"
+        [legend]="legend"
+        [options]="options">
+  	  </canvas>
   </div>
 </div>
+
+<!-- Loading -->
 <div *ngIf="!loaded">
-  <div class="spinner-border text-success" role="status">
-    <span class="sr-only">Loading...</span>
+  <div class="row">
+    <div class="col-4"></div>
+    <div class="col-4">
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-secondary" role="status"></div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="d-flex flex-row-reverse">
+        <button type="button" class="btn btn-secondary btn-reload" (click)="load()" [delay]="2500" hidden>Reload</button>
+      </div>
+    </div>
   </div>
 </div>

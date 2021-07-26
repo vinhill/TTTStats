@@ -7,6 +7,7 @@ import { CardComponent } from './card/card.component';
 import { OverviewComponent } from './overview/overview.component';
 import { PlayerComponent } from './player/player.component';
 import { RestttComponent } from './resttt/resttt.component';
+import { DelayDirective } from './delay.directive';
 
 import { ChartsModule } from 'ng2-charts';
 
@@ -16,7 +17,8 @@ import { ChartsModule } from 'ng2-charts';
     CardComponent,
     OverviewComponent,
     PlayerComponent,
-    RestttComponent
+    RestttComponent,
+    DelayDirective
   ],
   imports: [
     BrowserModule,

@@ -10,14 +10,41 @@ export class RestttComponent implements OnInit {
   loaded: boolean = false;
   result: any = "";
 
+  // REST Query
   @Input() query!: string;
+  // Display mode
   @Input() display!: string;
 
-  constructor(public resttt: RestttService) { }
+  // table column keys
+  @Input() columns: string[] = [];
 
-  async ngOnInit() {
+  // chart data keys
+  @Input() data: string = "";
+  @Input() datas: string[] = [];
+  // chart label key
+  @Input() label: string = "";
+  // chart type, see https://www.npmjs.com/package/ng2-charts
+  @Input() type: any = "";
+  // chart legend toggle
+  @Input() legend: boolean = true;
+  // chart options
+  @Input() options: any = "";
+
+  constructor(private resttt: RestttService) { }
+
+  ngOnInit() {
+    this.load();
+  }
+
+  async load() {
+    this.loaded = false;
     this.result = await this.resttt.get(this.query);
+    console.log(this.result);
     this.loaded = true;
+    // If no columns where provided, show all
+    if (this.columns.length == 0 && this.result.length != 0) {
+      this.columns = this.keys(this.result[0]);
+    }
   }
 
   stringify(obj: any): string {
@@ -26,6 +53,25 @@ export class RestttComponent implements OnInit {
 
   keys(obj: any): string[] {
     return Object.keys(obj);
+  }
+
+  get_columns(keys: string[]): any {
+    /*
+    [{c1: 0, c2: 1}, {c1: 3, c2: 2}]
+    to
+    {c1: [0, 3], c2: [1,2]}
+    */
+    let res: any = [];
+    for (let key of keys) {
+      res.push(this.result.map(function(row: any) {
+        return row[key]
+      }));
+    }
+    return res;
+  }
+
+  get_column(key: string): any {
+    return this.get_columns([key])[0];
   }
 
 }

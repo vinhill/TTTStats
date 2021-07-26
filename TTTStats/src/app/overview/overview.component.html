@@ -1,26 +1,20 @@
 <div id="content-wrap" class="container">
+	<div class="d-flex justify-content-center">
+		<h1 class="display-3">TTT Overview</h1>
+	</div>
 	<div dataMasonry='{ "itemSelector": ".masonry-item" }'>
-		<!-- See https://www.npmjs.com/package/ng2-charts -->
 
-		<card>
-			<canvas baseChart
-		    [data]="[[10,20,30], [30,20,10]]"
-		    [labels]="['a', 'b', 'c']"
-		    chartType="doughnut">
-		  </canvas>
+		<card title="Spiele">
+			<resttt query="PlayerGameCount" display="chart" label="player" data="rounds" type="bar" [legend]="false" [options]="{scales:{yAxes:[{ticks:{beginAtZero:true}}]}}"></resttt>
 		</card>
-
-		<card>
-			<resttt query="PlayerGameCount" display="text"></resttt>
+		<card title="Karten">
+			<resttt query="MapCount" display="chart" label="map" [datas]="['count']" type="doughnut"></resttt>
 		</card>
-		<card>
-			<resttt query="MapCount" display="table"></resttt>
+		<card title="Rollen" size="large">
+			<resttt query="RoleCount" display="chart" label="role" data="count" type="pie"></resttt>
 		</card>
-		<card>
-			<resttt query="RoleCount" display="table"></resttt>
-		</card>
-		<card>
-			<resttt query="PlayerKillCount" display="table"></resttt>
+		<card title="Kills">
+			<resttt query="PlayerKillCount" display="table" [columns]="['player','kills','wrong','killsPerGame']"></resttt>
 		</card>
 
 	</div>
