@@ -20,60 +20,60 @@ router.get("/makedb", async function(req,res,next){
   // create table linking roles to teams e.g. vampire to traitor
   await db.queryAdmin("CREATE TABLE roles (role VARCHAR(10) PRIMARY KEY, team ENUM('Detective', 'Innocent', 'Traitor', 'Killer', 'Other', 'Side_Role'), colour TEXT)");
   let roles = [
-      ["Detective", "Detective", "#843001"],
-      ["Sheriff", "Detective", "#D60004"],
-      ["Sniffer", "Detective", "#3D6F00"],
-      ["Vigilante", "Detective", "#343434"],
-      ["Banker", "Detective", "#FF40FF"],
-      ["Innocent", "Innocent", "#01C700"],
-      ["Medium", "Innocent", "#01C700"],
-      ["Spy", "Innocent", "#01C700"],
-      ["Clairvoyant", "Innocent", "#01C700"],
-      ["Beacon", "Innocent", "#01C700"],
-      ["Priest", "Innocent", "#01C700"],
-      ["Survivalist", "Innocent", "#01C700"],
-      ["Lycanthrope", "Innocent", "#01C700"],
-      ["Trapper", "Innocent", "#01C700"],
-      ["Pharaoh", "Innocent", "#01C700"],
-      ["Wrath", "Innocent", "#01C700"],
-      ["Occultist", "Innocent", "#01C700"],
-      ["Spectre", "Innocent", "#01C700"],
-      ["Shinigami", "Innocent", "#01C700"],
-      ["Traitor", "Traitor", "#01C700"],
-      ["Executioner", "Traitor", "#01C700"],
-      ["Hitman", "Traitor", "#01C700"],
-      ["Glutton", "Traitor", "#01C700"],
-      ["Blight", "Traitor", "#01C700"],
-      ["Vampire", "Traitor", "#01C700"],
-      ["Mesmerist", "Traitor", "#01C700"],
-      ["Accomplice", "Traitor", "#01C700"],
-      ["Impostor", "Traitor", "#01C700"],
-      ["Defective", "Traitor", "#01C700"],
-      ["Serialkiller", "Killer", "#37005D"],
-      ["Jackal", "Killer", "#37005D"], //Can have a Sidekick
-      ["Restless", "Killer", "#37005D"],
-      ["Doppelganger", "Killer", "#37005D"],
-      ["Necromancer", "Killer", "#37005D"],
-      ["Infected", "Killer", "#37005D"],
-      ["Hidden", "Killer", "#37005D"],
-      ["Amnesiac", "Other", "#BC05FF"], //Changes Role -> wins with that team
-      ["Pirate Captain", "Other", "#BC05FF"], //Wins with a team
-      ["Pirate", "Other", "#BC05FF"], //Wins with a team
-      ["Bodyguard", "Other", "#BC05FF"], //?
-      ["Drunk", "Other", "#BC05FF"], //Changes Role -> wins with that team
-      ["Jester", "Other", "#BC05FF"], //Wins on Kill
-      ["Unknown", "Other", "#BC05FF"], //Dies -> comes back and changes role -> wins with that team
-      ["Medic", "Other", "#BC05FF"], //cant win
-      ["Mimic", "Other", "#BC05FF"],  //Changes Role -> wins with that team
-      ["Marker", "Other", "#BC05FF"], //wins alone
-      ["Cupid", "Other", "#BC05FF"], //cant win
-      ["Sidekick", "Side_Role", "#7800FF"], //Wins with whoever he is sidekicked to
-      ["Deputy", "Side_Role", "#7800FF"], //Is an inno/detective (maybe change role to innocent/detective?)
-      ["Thrall", "Side_Role", "#7800FF"], //Is a traitor (maybe change role to traitor?)
-      ["Ravenous", "Side_Role", "#7800FF"], //Wins alone
-      ["Graverobber", "Side_Role", "#7800FF"], //Is a traitor (maybe change role to traitor?)
-      ["Zombie", "Side_Role", "#7800FF"], //Wins with Necromancer
-      ["In Love", "Side_Role", "#7800FF"] //Wins with Partner (or your team when both in same team)
+      ["Detective", "Detective", "#1440a4"],
+      ["Sheriff", "Detective", "#5978a7"],
+      ["Sniffer", "Detective", "#597cd0"],
+      ["Vigilante", "Detective", "#4e35db"],
+      ["Banker", "Detective", "#86bc65"],
+      ["Innocent", "Innocent", "#00a01d"],
+      ["Medium", "Innocent", "#70cb25"],
+      ["Spy", "Innocent", "#fb7e4e"],
+      ["Clairvoyant", "Innocent", "#d5c740"],
+      ["Beacon", "Innocent", "#d0d185"],
+      ["Priest", "Innocent", "#a6bb60"],
+      ["Survivalist", "Innocent", "#55855f"],
+      ["Lycanthrope", "Innocent", "#517d2e"],
+      ["Trapper", "Innocent", "#5f6b5d"],
+      ["Pharaoh", "Innocent", "#a2a925"],
+      ["Wrath", "Innocent", "#5e6e41"],
+      ["Occultist", "Innocent", "#244e42"],
+      ["Spectre", "Innocent", "#57a2a5"],
+      ["Shinigami", "Innocent", "#817e79"],
+      ["Traitor", "Traitor", "#d22722"],
+      ["Executioner", "Traitor", "#5f4230"],
+      ["Hitman", "Traitor", "#d96856"],
+      ["Glutton", "Traitor", "#b53824"],
+      ["Blight", "Traitor", "#ca3c2b"],
+      ["Vampire", "Traitor", "#962720"],
+      ["Mesmerist", "Traitor", "#c12e4b"],
+      ["Accomplice", "Traitor", "#660c16"],
+      ["Impostor", "Traitor", "#c50c0c"],
+      ["Defective", "Traitor", "#432c94"],
+      ["Serialkiller", "Killer", "#406c6d"],
+      ["Jackal", "Killer", "#67adb5"], //Can have a Sidekick
+      ["Restless", "Killer", "#b1a35c"],
+      ["Doppelganger", "Killer", "#852ec0"],
+      ["Necromancer", "Killer", "#843454"],
+      ["Infected", "Killer", "#763f54"],
+      ["Hidden", "Killer", "#171717"],
+      ["Amnesiac", "Other", "#7f6fda"], //Changes Role -> wins with that team
+      ["Pirate Captain", "Other", "#613721"], //Wins with a team
+      ["Pirate", "Other", "#d09542"], //Wins with a team
+      ["Bodyguard", "Other", "#dc8f19"], //?
+      ["Drunk", "Other", "#d7a018"], //Changes Role -> wins with that team
+      ["Jester", "Other", "#d73e90"], //Wins on Kill
+      ["Unknown", "Other", "#a7b5b6"], //Dies -> comes back and changes role -> wins with that team
+      ["Medic", "Other", "#189f81"], //cant win
+      ["Mimic", "Other", "#983fab"],  //Changes Role -> wins with that team
+      ["Marker", "Other", "#7d5383"], //wins alone
+      ["Cupid", "Other", "#e22e8f"], //cant win
+      ["Sidekick", "Side_Role", "#aaa8a9"], //Wins with whoever he is sidekicked to
+      ["Deputy", "Side_Role", "#45679d"], //Is an inno/detective (maybe change role to innocent/detective?)
+      ["Thrall", "Side_Role", "#ff1919"], //Is a traitor (maybe change role to traitor?)
+      ["Ravenous", "Side_Role", "#aa2e0d"], //Wins alone
+      ["Graverobber", "Side_Role", "#b65a33"], //Is a traitor (maybe change role to traitor?)
+      ["Zombie", "Side_Role", "#3b1223"], //Wins with Necromancer
+      ["In Love", "Side_Role", "#e22e8f"] //Wins with Partner (or your team when both in same team)
   ];
 
   // Note how this is not async, so be careful with assuming this already is executed.
