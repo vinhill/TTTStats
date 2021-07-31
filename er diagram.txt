@@ -3,6 +3,7 @@
 Table role {
   name varchar
   team varchar
+  superteam varchar
   color varchar
 }
 
@@ -13,7 +14,13 @@ Table player {
 Table match {
   mid int
   map varchar
-  winner varchar [ref: > role.team]
+}
+
+Table buys {
+  mid int [ref: > match.mid]
+  name varcher [ref: > player.name]
+  item varchar
+  time time
 }
 
 Table participates {
@@ -30,13 +37,14 @@ Table kills {
   atkrole varchar [ref: > role.name]
   vktrole varchar [ref: > role.name]
   time time
-  weapon varchar
+  weapon optional[varchar]
 }
 
 Table dies {
   mid int [ref: > match.mid]
   player varchar [ref: > player.name]
   reason varchar
+  time time
 }
 
 Table damages {
@@ -46,15 +54,17 @@ Table damages {
   atkrole varchar [ref: > role.name]
   vktrole varchar [ref: > role.name]
   time time
-  weapon varchar
+  weapon optional[varchar]
   damage int
 }
 
-Table respawns {
+Table rolechange {
   mid int [ref: > match.mid]
   player varchar [ref: > player.name]
   role varchar [ref: > role.name]
-  causee varchar [ref: > player.name]
+  causee optinal[varchar] [ref: > player.name]
+  reason varchar
+  time time
 }
 
 Table configs {
@@ -63,5 +73,5 @@ Table configs {
 
 Table wins {
   mid int [ref: > match.mid]
-  role varchar [ref: > role.name]
+  team varchar [ref: > role.team]
 }
