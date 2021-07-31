@@ -165,6 +165,6 @@ class BoundedCache {
 }
 
 module.exports = {
-  "Heap": Heap,
-  "BoundedCache": BoundedCache
+  Heap,
+  BoundedCache
 }

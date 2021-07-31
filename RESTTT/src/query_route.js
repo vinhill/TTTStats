@@ -37,6 +37,11 @@ router.post("/custom", async function(req, res, next) {
   next();
 });
 
+router.get("/Players", async function(req,res,next){
+  req.query = "SELECT name FROM player ORDER BY name ASC";
+  next();
+});
+
 router.get("/PlayerGameCount", async function(req,res,next){
   req.query = "SELECT player, COUNT(mid) as rounds FROM participates GROUP BY player ORDER BY rounds DESC";
   next();
@@ -60,16 +65,32 @@ router.get("/PlayerKillCount", async function(req,res,next){
   next();
 });
 
+router.get("/PlayerRoles/:name", async function(req,res,next){
+  let name = req.params.name;
+  req.query = "SELECT roles.role, COUNT(mid) as count, colour "
+            + "FROM participates JOIN roles ON roles.role = participates.role "
+            + "WHERE player = ? "
+            + "GROUP BY roles.role "
+            + "ORDER BY count DESC";
+  req.sqlparams = [name];
+  next();
+});
+
 router.use("/", async function(req,res,next){
   if(!req.query) {
     // none of the previous query routes were activated
     // pass on to next middleware
     next();
   }
+  if(!req.sqlparams) {
+    req.sqlparams = [];
+  }
   
   // query database and return result
   try{
-    let data = await db.getCache(req.query);
+    let data = null;
+    let query = db.format(req.query, req.sqlparams);
+    data = await db.getCache(query);
     res.status(200).json(data);
   }catch(e) {
     res.status(400).json(`Could not query database for ${req.query} because of an error: ${e}`);

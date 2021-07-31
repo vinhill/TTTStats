@@ -15,8 +15,11 @@ router.get("/makedb", async function(req,res,next){
   await db.queryAdmin("DROP TABLE IF EXISTS kills");
   await db.queryAdmin("DROP TABLE IF EXISTS damages");
   await db.queryAdmin("DROP TABLE IF EXISTS roles");
+  await db.queryAdmin("DROP TABLE IF EXISTS configs");
   await db.queryAdmin("SET FOREIGN_KEY_CHECKS = 1");
 
+  await db.queryAdmin("CREATE TABLE configs (filename VARCHAR(30) PRIMARY KEY)");
+  
   // create table linking roles to teams e.g. vampire to traitor
   await db.queryAdmin("CREATE TABLE roles (role VARCHAR(10) PRIMARY KEY, team ENUM('Traitors', 'Killer', 'Jester', 'Innocent', 'None'), colour TEXT)");
   let roles = [

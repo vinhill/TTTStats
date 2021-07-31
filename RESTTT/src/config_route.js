@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const db = require("./database.js");
+const fetch = require("node-fetch");
 
 const join_re = /Client "(?<steam_name>\w*)" spawned in server <(?<steam_id>STEAM_[0-9:]*)> .*/;
 const leave_re = /Dropped "(?<steam_name>\w*)" from server<(?<steam_id>STEAM_[0-9:]*)>/;
@@ -10,12 +11,15 @@ const result_re = /ServerLog: Result: (?<group>Innocent|Traitors|Killer|Jester) 
 const map_re = /Map: (?<map>.*)/;
 const start_re = /ServerLog: Round proper has begun.../;
 
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
 async function update_db_through_log(log, date) {
   let clients = new Set();
   let roles = new Map();
   let mid = null;
   let map = null;
-
 
   for (let line of log) {
     // join
@@ -23,9 +27,9 @@ async function update_db_through_log(log, date) {
     if (match) {
      clients.add(match.groups.steam_name);
       // add player to player table, if it doesn't exist
-      await db.queryReader(
-        "INSERT OR IGNORE INTO player (name) VALUES (?)",
-        [match.groups.steam_name,]
+      await db.queryAdmin(
+        "INSERT IGNORE INTO player (name) VALUES (?)",
+        [match.groups.steam_name]
       );
       continue;
     }
@@ -55,16 +59,15 @@ async function update_db_through_log(log, date) {
     // round started
     match = start_re.exec(line);
     if (match) {
-      // TODO does this return the inserted row?
-      await db.queryReader(
+      await db.queryAdmin(
         "INSERT INTO round (map, date) VALUES (?, ?)",
-        (map, date)
+        [map, date]
       );
-      // TODO how to get the mid?
-      let [res, fields] = await db.queryReader("SELECT mid FROM round ORDER BY mid DESC LIMIT 1");
+      // get the mid of the just inserted round
+      let res = await db.queryReader("SELECT mid FROM round ORDER BY mid DESC LIMIT 1");
       let mid = res[0].mid;
       for (let [k, v] of roles.entries()) {
-        await db.queryReader(
+        await db.queryAdmin(
           "INSERT INTO participates (mid, player, role) VALUES (?, ?, ?)",
           [mid, k, v]
         );
@@ -78,18 +81,18 @@ async function update_db_through_log(log, date) {
       let attacker = match.groups.atk_name;
       let victim = match.groups.vkt_name;
       // for some reason, this log entry isn't capitalized
-      let atkrole = match.groups.atk_role.capitalize();
-      let vktrole = match.groups.vkt_role.capitalize();
-      let time = match.groupstime;
+      let atkrole = capitalizeFirstLetter(match.groups.atk_role);
+      let vktrole = capitalizeFirstLetter(match.groups.vkt_role);
+      let time = match.groups.time;
       if (match.groups.type == "DMG") {
-        await db.queryReader(
+        await db.queryAdmin(
           "INSERT INTO damages (mid, attacker, victim, atkrole, vktrole, time, damage) VALUES (?, ?, ?, ?, ?, ?, ?)",
-          (mid, attacker, victim, atkrole, vktrole, time, match.groups.dmg)
+          [mid, attacker, victim, atkrole, vktrole, time, match.groups.dmg]
         );
       } else {
-        await db.queryReader(
+        await db.queryAdmin(
           "INSERT INTO kills (mid, attacker, victim, atkrole, vktrole, time) VALUES (?, ?, ?, ?, ?, ?)",
-          (mid, attacker, victim, atkrole, vktrole, time)
+          [mid, attacker, victim, atkrole, vktrole, time]
         );
       }
       continue;
@@ -98,9 +101,9 @@ async function update_db_through_log(log, date) {
     // round result
     match = result_re.exec(line);
     if (match) {
-      db.queryReader(
-        "UPDATE round SET winner_team = ? WHERE mid = ?",
-        (match.groups.group, mid)
+      db.queryAdmin(
+        "UPDATE round SET winner = ? WHERE mid = ?",
+        [match.groups.group, mid]
       );
       continue;
     }
@@ -110,9 +113,18 @@ async function update_db_through_log(log, date) {
 router.post("/parse", async function(req,res,next){
   // check request parameters
   let filename = req.body.name;
+  let date = req.body.date;
   if (!filename) {
     res.status(400).json("The config/parse route requires the 'name' field in the body. It will be resolved to the URL 'https://raw.githubusercontent.com/vinhill/TTTStats/master/logs/<name>'");
     return;
+  }
+  if(!date) {
+    res.status(400).json("The config/parse route requires the 'date' field in the body.");
+    return;
+  }
+  let date_re = /^....-..-..$/;
+  if(!date_re.exec(date)) {
+    res.status(400).json("The config/parse route requires a date in the format YYYY-MM-DD");
   }
   
   // check if already present
@@ -124,18 +136,26 @@ router.post("/parse", async function(req,res,next){
   
   // retreive log
   let data = null;
+  let status = 500;
   try{
     let fetched = await fetch(`https://raw.githubusercontent.com/vinhill/TTTStats/master/logs/${filename}`);
-    let data = await fetched.text();
+    data = await fetched.text();
+    status = fetched.status;
   }catch(e){
     res.status(400).json(`Could not get config file because of an error: ${e}`);
     return;
   }
+  if(status != 200) {
+    res.status(status).json(`Could not get config file: ${data}`);
+  }
   
   // parse
-  update_db_through_log(data.split("\n"));
+  update_db_through_log(data.split("\n"), date);
   db.clearCache();
   res.status(200).end();
+  
+  // if everything worked, add filename to configs table
+  await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [filename]);
 });
 
 module.exports = router;

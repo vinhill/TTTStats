@@ -55,10 +55,10 @@ function getFullCon() {
   });
 }
 
-function queryReader(query) {
+function queryReader(query, params=[]) {
   return new Promise(async function(res, rej){
     let con = await getReadOnlyCon();
-    con.query(query, function(err, result, fields) {
+    con.query(query, params, function(err, result, fields) {
       if(err) {
         console.error(`Error while querying db read-only for "${query}": ${err}`);
         rej(err);
@@ -117,12 +117,17 @@ async function getCache(query) {
   }
 }
 
+function format(query, params) {
+  return mysql.format(query, params);
+}
+
 module.exports = {
-  "getReadOnlyCon": getReadOnlyCon,
-  "getFullCon": getFullCon,
-  "shutdown": shutdown,
-  "queryAdmin": queryAdmin,
-  "queryReader": queryReader,
-  "getCache": getCache,
-  "clearCache": clearCache
+  getReadOnlyCon,
+  getFullCon,
+  shutdown,
+  queryAdmin,
+  queryReader,
+  getCache,
+  clearCache,
+  format
 };
