@@ -75,3 +75,9 @@ Table wins {
   mid int [ref: > match.mid]
   team varchar [ref: > role.team]
 }
+
+Table love {
+  mid int [ref: > match.mid]
+  first varchar [ref: > player.name]
+  second varchar [ref: > player.name]
+}
