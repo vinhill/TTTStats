@@ -1,18 +1,16 @@
 #page-container {
-	position: relative;
-  min-height: 100vh;
+	height: 100vh;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
 }
-#content-wrap {
-	padding-bottom: 2.5em;
+nav {
+	/* same as the pedding of navbar bootstrap class for top and bottom */
+	padding-left: .5rem;
 }
 footer {
-	position: absolute;
-	bottom: 0;
+	margin-top: auto;
 	width: 100%;
 	/* same as content bottom margin */
 	height: 2.5em;
-}
-nav {
-	/* same as the pedding of navbar bootstrap class for to and bottom */
-	padding-left: .5rem;
 }
