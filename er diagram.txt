@@ -26,44 +26,39 @@ Table buys {
 Table participates {
   mid int [ref: > match.mid]
   player varchar [ref: > player.name]
-  init_role varchar [ref: > role.name]
-  role varchar [ref: > role.name]
-}
-
-Table kills {
-  mid int [ref: > match.mid]
-  attacker varchar [ref: > player.name]
-  victim varchar [ref: > player.name]
-  atkrole varchar [ref: > role.name]
-  vktrole varchar [ref: > role.name]
-  time time
-  weapon optional[varchar]
+  startrole varchar [ref: > role.name]
+  mainrole varchar [ref: > role.name]
 }
 
 Table dies {
   mid int [ref: > match.mid]
   player varchar [ref: > player.name]
-  reason varchar
+  vktrole varchar [ref: > role.name]
+  reason enum
+  causee varchar [ref: > player.name]
+  atkrole varchar [ref: > role.name]
+  weapon optional[varchar]
   time time
 }
 
 Table damages {
   mid int [ref: > match.mid]
-  attacker varchar [ref: > player.name]
-  victim varchar [ref: > player.name]
-  atkrole varchar [ref: > role.name]
+  player varchar [ref: > player.name]
   vktrole varchar [ref: > role.name]
-  time time
+  reason enum
+  causee varchar [ref: > player.name]
+  atkrole varchar [ref: > role.name]
   weapon optional[varchar]
+  time time
   damage int
 }
 
 Table rolechange {
   mid int [ref: > match.mid]
   player varchar [ref: > player.name]
-  role varchar [ref: > role.name]
-  causee optinal[varchar] [ref: > player.name]
-  reason varchar
+  causee varchar [ref: > player.name]
+  fromrole varchar [ref: > role.name]
+  torole varchar [ref: > role.name]
   time time
 }
 
@@ -76,8 +71,15 @@ Table wins {
   team varchar [ref: > role.team]
 }
 
-Table love {
+Table loves {
   mid int [ref: > match.mid]
   first varchar [ref: > player.name]
   second varchar [ref: > player.name]
+}
+
+TABLE revives {
+  mid int [ref: > match.mid]
+  player varchar [ref: > player.name]
+  causee varchar [ref: > player.name]
+  reason enum
 }
