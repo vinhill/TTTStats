@@ -8,6 +8,7 @@ class CacheObject {
 }
 
 class Heap {
+  /*Simple js min / max heap implementation*/
   constructor(isMin=false) {
     this._nodes = [];
     this._isMin = isMin
@@ -121,6 +122,16 @@ class Heap {
 }
 
 class BoundedCache {
+  /*
+  Priority max heap with limited size.
+  If size is surpassed, elements of lowest priority are removed.
+  
+  Destined to be used as query cache:
+  Query: result - pairs are inserted and their priority
+  should be incremented with each request. Frequently used
+  queries thus stay in the cache while rather one-time queries
+  will be overwritten.
+  */
   constructor(max_elements) {
     this._max_elements = max_elements;
     this.clear();

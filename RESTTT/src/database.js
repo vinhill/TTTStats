@@ -1,4 +1,12 @@
+/*
+Module for accessing the database.
+Primary methods to query the db are
+- getCache (reccommended): queryReader but results are cached for repeated access
+- queryAdmin: full access
+- queryReader: select-only access
+*/
 const mysql = require('mysql');
+const fs = require('fs');
 const BoundedCache = require("./structs.js").BoundedCache;
 const cache = new BoundedCache(100);
 
@@ -12,7 +20,7 @@ function getReadOnlyCon() {
         host: "vmd76968.contaboserver.net",
         port: 3306,
         user: "reader",
-        password: "JTCRsA82FpS96RLEoJzKJMVUqEx3Jp",
+        password: process.env.READERPW,
         database: "ttt_stats"
       });
 
@@ -37,7 +45,7 @@ function getFullCon() {
         host: "vmd76968.contaboserver.net",
         port: 3306,
         user: "admin",
-        password: "uq29eYLPLhY6LKrPNNByncYg",
+        password: process.env.ADMINPW,
         database: "ttt_stats"
       });
 
@@ -52,6 +60,20 @@ function getFullCon() {
     }
       
     res(_admin_con);
+  });
+}
+
+function readQueryFile(queryFileName) {
+  return new Promise(function(res,rej){
+    const path = `src/queries/${queryFileName}.sql`;
+
+    fs.readFile(path, 'utf8', (err, data) => {
+      if (err) {
+        rej(err);
+      }else{
+        res(data);
+      }
+    })
   });
 }
 
@@ -105,9 +127,9 @@ async function getCache(query) {
     let res = await queryReader(query);
     if (JSON.stringify(res).length > 5000) {
       console.log(`The query '${query}' had a result that was too long to be cached.`);
-    }else {
-      cache.set(query, res);
+      res = "Query result too long";
     }
+    cache.set(query, res);
     return res;
   }
   else {
@@ -125,6 +147,7 @@ module.exports = {
   getReadOnlyCon,
   getFullCon,
   shutdown,
+  readQueryFile,
   queryAdmin,
   queryReader,
   getCache,

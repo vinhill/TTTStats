@@ -1,22 +1,10 @@
+/*
+Main REST routes for getting TTT statistics
+*/
 const express = require("express");
 const router = express.Router();
 const util = require("util");
 const db = require("./database.js");
-const fs = require('fs');
-
-function loadQuery(queryFileName) {
-  return new Promise(function(res,rej){
-    const path = `src/queries/${queryFileName}.sql`;
-
-    fs.readFile(path, 'utf8', (err, data) => {
-      if (err) {
-        rej(err);
-      }else{
-        res(data);
-      }
-    })
-  });
-}
 
 router.post("/custom", async function(req, res, next) {  
   // check request parameters
@@ -61,7 +49,7 @@ router.get("/RoleCount", async function(req,res,next){
 });
 
 router.get("/PlayerKillCount", async function(req,res,next){
-  req.query = await loadQuery("PlayerKillCount");
+  req.query = await db.readQueryFile("PlayerKillCount");
   next();
 });
 

@@ -1,3 +1,6 @@
+/*
+REST routes for loading game configs
+*/
 const express = require("express");
 const router = express.Router();
 const db = require("./database.js");
