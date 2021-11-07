@@ -1,9 +1,9 @@
 <div id="content-wrap" class="container">
-	<div class="d-flex justify-content-center">
-		<h1 class="display-3">{{name}}</h1>
-	</div>
 	<div dataMasonry='{ "itemSelector": ".masonry-item" }'>
 
+		<card>
+			<h1 class="display-3">{{name}}</h1>
+		</card>
 		<card title="Rollen">
 				<resttt query="PlayerRoles/{{name}}" display="chart" label="role" data="count" type="doughnut"></resttt>
 		</card>

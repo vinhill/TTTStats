@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { RestttService } from '../resttt.service';
 
 @Component({
@@ -6,7 +6,7 @@ import { RestttService } from '../resttt.service';
   templateUrl: './resttt.component.html',
   styleUrls: ['./resttt.component.css']
 })
-export class RestttComponent implements OnInit {
+export class RestttComponent implements OnChanges {
   loaded: boolean = false;
   result: any = "";
 
@@ -32,7 +32,7 @@ export class RestttComponent implements OnInit {
 
   constructor(private resttt: RestttService) { }
 
-  ngOnInit() {
+  ngOnChanges() {
     this.load();
   }
 
