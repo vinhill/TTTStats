@@ -4,7 +4,7 @@ Main REST routes for getting TTT statistics
 const express = require("express");
 const router = express.Router();
 const util = require("util");
-const db = require("./database.js");
+const db = require("../database.js");
 
 router.post("/custom", async function(req, res, next) {  
   // check request parameters
@@ -36,15 +36,16 @@ router.get("/PlayerGameCount", async function(req,res,next){
 });
 
 router.get("/MapCount", async function(req,res,next){
-  req.query = "SELECT map, COUNT(mid) as count FROM round GROUP BY map ORDER BY count DESC";
+  req.query = "SELECT map, COUNT(mid) as count FROM game GROUP BY map ORDER BY count DESC";
   next();
 });
 
 router.get("/RoleCount", async function(req,res,next){
-  req.query = "SELECT roles.role, COUNT(mid) as count, colour "
-            + "FROM participates JOIN roles ON roles.role = participates.role "
-            + "GROUP BY roles.role "
-            + "ORDER BY count DESC";
+  req.query = "SELECT startrole, COUNT(mid) as count, colour "
+              + "FROM participates "
+              + "JOIN role ON role.name = startrole "
+              + "GROUP BY startrole "
+              + "ORDER BY count DESC ";
   next();
 });
 
@@ -55,11 +56,12 @@ router.get("/PlayerKillCount", async function(req,res,next){
 
 router.get("/PlayerRoles/:name", async function(req,res,next){
   let name = req.params.name;
-  req.query = "SELECT roles.role, COUNT(mid) as count, colour "
-            + "FROM participates JOIN roles ON roles.role = participates.role "
-            + "WHERE player = ? "
-            + "GROUP BY roles.role "
-            + "ORDER BY count DESC";
+  req.query = "SELECT startrole, COUNT(mid) as count, colour "
+              + "FROM participates "
+              + "JOIN role ON role.name = startrole "
+              + "WHERE player = ? "
+              + "GROUP BY startrole "
+              + "ORDER BY count DESC ";
   req.sqlparams = [name];
   next();
 });

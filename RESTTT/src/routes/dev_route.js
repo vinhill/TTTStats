@@ -5,14 +5,14 @@ These routes might be dangerous and allow direct external access to the db as we
 const express = require("express");
 const router = express.Router();
 const path = require('path');
-const db = require("./database.js");
+const db = require("../database.js");
 
 router.get("/", function(req,res,next) {
   res.sendFile(path.join(__dirname, '/../dev.html'));
 })
 
 router.get("/makedb", async function(req,res,next){
-  await db.queryAdmin(await db.readQueryFile("CreateDB"));
+  db.queryAdmin(await db.readQueryFile("CreateDB"));
   res.status(200).end();
 });
 

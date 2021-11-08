@@ -81,7 +81,10 @@
 				console.log(data);
 				let out = document.getElementById("out");
 				out.innerHTML = JSON.stringify(data);
-			});
+			}).catch(function(err) {
+        console.log(err);
+        out.innerHTML = `Error ${err.message}, Status ${response.status}`;
+      });
 		}
 		
 		document.getElementById("submitbtn").addEventListener("click", submit);

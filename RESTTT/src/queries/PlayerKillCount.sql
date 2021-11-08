@@ -5,18 +5,18 @@ SELECT
     (a.kills - 2 * a.wrong) AS score,
     b.rounds,
     ROUND((CAST(a.kills - 2 * a.wrong AS float) / CAST(b.rounds AS float)), 2) AS killsPerGame
-FROM (
+FROM (-- kills per player
     SELECT
-        attacker AS player,
+        causee AS player,
         COUNT(*) AS kills,
         sum(case when atkroles.team = vktroles.team then 1 else 0 end) AS wrong
-    FROM
-        kills
-        JOIN roles AS atkroles ON atkroles.role = kills.atkrole
-        JOIN roles AS vktroles ON vktroles.role = kills.vktrole
-    GROUP BY attacker
+    FROM dies
+		JOIN role AS atkroles ON atkroles.name = dies.atkrole
+		JOIN role AS vktroles ON vktroles.name = dies.vktrole
+		WHERE causee IS NOT NULL
+    GROUP BY causee
     ) a
-NATURAL JOIN (
+NATURAL JOIN (-- rounds played per player
     SELECT COUNT(mid) as rounds, player FROM participates GROUP BY player
 ) b
 ORDER BY score DESC

@@ -4,7 +4,7 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const is_debug = true;
+const is_debug = false;
 
 //
 // Frontend
@@ -25,7 +25,7 @@ app.use(bodyParser.json())//application/json
 if(is_debug) {
   app.use(cors(/*{ credentials:true, origin:"https://vinhill.github.io/TTTStats/" }*/));
 }else{
-  app.use(cors({origin:"https://vinhill.github.io/TTTStats/" }));
+  app.use(cors({origin:"https://vinhill.github.io" }));
 }
 //
 // API V1
@@ -38,10 +38,10 @@ if(is_debug) {
   });
 }
 
-app.use("/api/v1/query", require("./src/query_route.js"));
-app.use("/api/v1/config", require("./src/config_route.js"));
+app.use("/api/v1/query", require("./src/routes/query_route.js"));
+app.use("/api/v1/config", require("./src/routes/config_route.js"));
 if(is_debug){
-  app.use("/api/v1/dev", require("./src/dev_route.js"));
+  app.use("/api/v1/dev", require("./src/routes/dev_route.js"));
 }
 
 app.use("/", function(req,res,next){

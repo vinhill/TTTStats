@@ -7,6 +7,7 @@ Primary methods to query the db are
 */
 const mysql = require('mysql');
 const fs = require('fs');
+const { performance } = require('perf_hooks');
 const BoundedCache = require("./structs.js").BoundedCache;
 const cache = new BoundedCache(100);
 
@@ -46,7 +47,8 @@ function getFullCon() {
         port: 3306,
         user: "admin",
         password: process.env.ADMINPW,
-        database: "ttt_stats"
+        database: "ttt_stats",
+        multipleStatements: true
       });
 
       _admin_con.connect(function(err) {
@@ -80,7 +82,14 @@ function readQueryFile(queryFileName) {
 function queryReader(query, params=[]) {
   return new Promise(async function(res, rej){
     let con = await getReadOnlyCon();
+    var startTime = performance.now();
+    
     con.query(query, params, function(err, result, fields) {
+      var endTime = performance.now();
+      if (endTime - startTime > 5*1000) {
+        console.log(`Query ${query} took long (${endTime-startTime} ms)`);
+      }
+      
       if(err) {
         console.error(`Error while querying db read-only for "${query}": ${err}`);
         rej(err);
@@ -94,7 +103,14 @@ function queryReader(query, params=[]) {
 function queryAdmin(query, params=[]) {
   return new Promise(async function(res, rej){
     let con = await getFullCon();
+    var startTime = performance.now();
+    
     con.query(query, params, function(err, result, fields) {
+      var endTime = performance.now();
+      if (endTime - startTime > 5*1000) {
+        console.log(`Query ${query} took long (${endTime-startTime} ms)`);
+      }
+      
       if(err) {
         console.error(`Error while querying db as admin for "${query}": ${err}`);
         rej(err);

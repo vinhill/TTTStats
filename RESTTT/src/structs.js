@@ -175,7 +175,63 @@ class BoundedCache {
   }
 }
 
+class LogParser {
+  /*
+  Class to make parsing logfiles easier.
+  
+  It handles iterating the lines and testing the regexes.
+  So one only has to provide the regexes and callbacks.
+  */
+  
+  constructor(state={}) {
+    this.state = state;
+    this.workers = [];
+    this.prepared = true;
+  }
+  
+  /*
+  Attach a callback(match, state) to the parser
+  that is executed whenever the regex matches a line (without \n)
+  */
+  attach(regex, callback, priority=0) {
+    // if regex then callback(match, state)
+    this.prepared = false;
+    this.workers.push({
+      regex: regex,
+      callback: callback,
+      priority: priority
+    });
+  }
+  
+  prepare() {
+    // sort workers by priorities
+    this.workers.sort((a, b) => b.priority - a.priority);
+    this.prepared = true;
+  }
+  
+  async exec_line(line) {
+    if (!this.prepared)
+      throw "LogParser wasn't prepared, call prepare";
+    
+    for (let worker of this.workers) {
+      let match = worker.regex.exec(line);
+      if (match)
+        await worker.callback(match, this.state);
+    }
+  }
+  
+  async exec(lines) {
+    if(!this.prepared)
+      this.prepare();
+    
+    for(let line of lines) {
+      await this.exec_line(line);
+    }
+  }
+}
+
 module.exports = {
   Heap,
-  BoundedCache
+  BoundedCache,
+  LogParser
 }
