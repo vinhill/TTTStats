@@ -1,6 +1,6 @@
 import { Directive, Input, OnInit, ElementRef } from '@angular/core';
-import { RestttService } from './resttt.service';
 
+/* Attribute for DOM Element to make it fade in / fade out after some initial delay */
 @Directive({
   selector: '[delay]'
 })

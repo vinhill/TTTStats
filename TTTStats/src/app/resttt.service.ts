@@ -16,6 +16,9 @@ export class RestttService {
 				'Content-Type': "application/json"
 			}
 		});
+		if(res.status != 200) {
+			console.log(await res.json());
+		}
 		return await res.json();
 	}
 	
@@ -26,6 +29,9 @@ export class RestttService {
 				'Content-Type': "application/json"
 			}
 		});
+		if(res.status != 200) {
+			console.log(await res.json());
+		}
 		return await res.json();
 	}
 }

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { DocsComponent } from './docs/docs.component';
 import { OverviewComponent } from './overview/overview.component';
 import { PlayerComponent } from './player/player.component';
 
@@ -7,6 +8,7 @@ const routes: Routes = [
   // Default route
   { path: '', redirectTo: '/overview', pathMatch: 'full' },
   { path: 'overview', component: OverviewComponent },
+  { path: 'docs', component: DocsComponent },
   { path: 'player/:name', component: PlayerComponent }
 ];
 

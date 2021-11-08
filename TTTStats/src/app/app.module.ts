@@ -10,6 +10,7 @@ import { RestttComponent } from './resttt/resttt.component';
 import { DelayDirective } from './delay.directive';
 
 import { ChartsModule } from 'ng2-charts';
+import { DocsComponent } from './docs/docs.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { ChartsModule } from 'ng2-charts';
     OverviewComponent,
     PlayerComponent,
     RestttComponent,
-    DelayDirective
+    DelayDirective,
+    DocsComponent
   ],
   imports: [
     BrowserModule,
