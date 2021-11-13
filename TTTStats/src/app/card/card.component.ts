@@ -17,15 +17,15 @@ export class CardComponent {
 
   @Input() set size(size: string) {
     if (size == "tiny") {
-      this.classes = "col-sm-6 col-md-5 col-lg-4 col-xl-3";
+      this.classes = "col-6 col-md-4 col-lg-3 col-xl-2";
     } else if (size == "small") {
-      this.classes = "col-sm-12 col-md-6 col-lg-4 col-xl-3";
+      this.classes = "col-6 col-md-6 col-lg-4 col-xl-3";
     } else if (size == "medium") {
-      this.classes = "col-sm-12 col-md-8 col-lg-6 col-xl-4";
+      this.classes = "col-12 col-md-8 col-lg-6 col-xl-4";
     } else if(size == "large") {
-      this.classes = "col-sm-12 col-md-12 col-lg-8 col-xl-6";
+      this.classes = "col-12 col-lg-8 col-xl-6";
     }else if (size == "xlarge") {
-      this.classes = "col-12";
+      this.classes = "col-lg-12 col-xl-8";
     }
   }
 }

@@ -1,9 +1,10 @@
 .btn-reload {
-  height: 3rem;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+  height: 2.5rem;
+}
+.btn-reload:active {
+  transform: translateY(4px);
 }
 .spinner-border {
-  width: 5rem;
-  height: 5rem; 
+  width: 2.5rem;
+  height: 2.5rem;
 }

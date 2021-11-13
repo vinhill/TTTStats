@@ -1,6 +1,18 @@
 .card-header {
   color: white;
 }
-.display-4 {
+.groupheader {
   border-bottom: dotted grey;
+}
+.spinner-border {
+  width: 3rem;
+  height: 3rem; 
+}
+.roledescr {
+  margin-bottom: 0px;
+}
+.rolecard {
+  padding-bottom: 0.5em;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }

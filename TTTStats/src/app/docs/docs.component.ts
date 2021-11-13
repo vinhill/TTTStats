@@ -15,6 +15,7 @@ export class DocsComponent implements OnInit {
     "Other": []
   };
   groupNames: any = Object.keys(this.groups);
+  loaded: boolean = false;
 
   constructor(private resttt: RestttService) { }
 
@@ -24,9 +25,17 @@ export class DocsComponent implements OnInit {
 
   async load() {
     let roles = await this.resttt.get("Roles");
+    // sort roles by team
     for (let group of Object.keys(this.groups)) {
       this.groups[group] = roles.filter(function(r:any) { return r.superteam == group; });
     }
+    // sort teams by length of role descriptions
+    for (let group of Object.keys(this.groups)) {
+      this.groups[group].sort(function(a:any, b:any) {
+        return b.descr.length - a.descr.length;
+      });
+    }
+    this.loaded = true;
   }
 
 }
