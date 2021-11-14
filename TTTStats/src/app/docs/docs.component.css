@@ -4,10 +4,6 @@
 .groupheader {
   border-bottom: dotted grey;
 }
-.spinner-border {
-  width: 3rem;
-  height: 3rem; 
-}
 .roledescr {
   margin-bottom: 0px;
 }
@@ -15,4 +11,14 @@
   padding-bottom: 0.5em;
   padding-left: 0.5em;
   padding-right: 0.5em;
+}
+.btn-reload {
+  height: 2.5rem;
+}
+.btn-reload:active {
+  transform: translateY(4px);
+}
+.spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
 }
