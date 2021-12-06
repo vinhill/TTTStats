@@ -26,7 +26,8 @@ keep = [
     'ServerLog: ..:..... - ROUND_ENDED at given time',
     'ServerLog: ..:..... - DMG:',
     'ServerLog: ..:..... - KILL:',
-    "ServerLog: \w+ took \d+ credits? from the body of"
+    "ServerLog: \w+ took \d+ credits? from the body of",
+    "\w+ confirmed the death of \w+"
 ]
 
 remove = [
@@ -66,7 +67,12 @@ remove = [
     "^Refusing to load ",
     "^Incompatible add-on detected",
     "--> Detected add-on",
-    ".* con var created"
+    ".* con var created",
+    "CMaterial::PrecacheVars: error",
+    "Player Customizer Spawn",
+    "DataTable warning",
+    "Warning: you appear to be idle/AFK",
+    "MDLCache: Failed load of"
 ]
 
 def match(line, regexes):
@@ -87,15 +93,14 @@ if __name__ == "__main__":
     fin = open("console.log", "r", encoding="utf-8")
     ferr = open("unknown.log", "w", encoding="utf-8")
     
-    if os.path.exists(f"logs/{datestr}.log"):
-        i = 1;
-        while (os.path.exists(f"logs/{datestr} ({i}).log")):
-            i += 1
-        fout = open(f"logs/{datestr} ({i}).log", "w", encoding="utf-8")
-        print(f"Writing cleaned log to 'logs/{datestr} ({i}).log'")
-    else:
-        fout = open(f"logs/{datestr}.log", "w", encoding="utf-8")
-        print(f"Writing cleaned log to 'logs/{datestr}.log'")
+    foutname = f"logs/{datestr}.log"
+    foutidx = 0
+    while (os.path.exists(foutname)):
+        foutidx += 1
+        foutname = f"logs/{datestr} ({foutidx}).log"
+            
+    print(f"Writing cleaned log to '{foutname}'...")
+    fout = open(foutname, "w", encoding="utf-8")
 
     # flush stdout before using tqdm progress bar
     sys.stdout.flush()
@@ -107,5 +112,12 @@ if __name__ == "__main__":
             pass
         else:
             ferr.write(line)
+    
+    fin.close()
+    fout.close()
+    ferr.close()
+    print("cleaned log finished, copying raw log...")
+    
+    os.rename("console.log", f"logs/{datestr} ({foutidx}).raw.log")
     
     print("Finished!")
