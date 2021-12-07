@@ -27,7 +27,8 @@ keep = [
     'ServerLog: ..:..... - DMG:',
     'ServerLog: ..:..... - KILL:',
     "ServerLog: \w+ took \d+ credits? from the body of",
-    "\w+ confirmed the death of \w+"
+    "\w+ confirmed the death of \w+",
+    "The round has begun!"
 ]
 
 remove = [
@@ -77,7 +78,7 @@ remove = [
 
 def match(line, regexes):
     for regex in regexes:
-        if re.match(re.compile(regex), line):
+        if re.search(re.compile(regex), line):
             return True
     return False
 

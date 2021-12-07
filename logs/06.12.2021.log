@@ -4,6 +4,7 @@ Client "Schnitzelboy" spawned in server <STEAM_0:1:64530231> (took 74 seconds).
 ServerLog: Round proper has begun...
 ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent
 ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is innocent
+[TTT2]:	The round has begun!
 ServerLog: Round ended.
 ServerLog: Result: innocents wins.
 ServerLog: 00:01.01 - ROUND_ENDED at given time
@@ -12,6 +13,7 @@ ServerLog: 00:01.01 - ROUND_END: Schnitzelboy was innocent team innocents
 ServerLog: Round proper has begun...
 ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent
 ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is innocent
+[TTT2]:	The round has begun!
 ServerLog: Round ended.
 ServerLog: Result: innocents wins.
 ServerLog: 00:01.01 - ROUND_ENDED at given time
@@ -24,6 +26,7 @@ ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent
 ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is innocent
 ServerLog: 00:00.00 - ROUND_START: vinno is detective
 ServerLog: 00:00.00 - ROUND_START: Poci is traitor
+[TTT2]:	The round has begun!
 ServerLog: 01:07.86 - CP_DMG EXPL: Zumoari [innocent, innocents] <Weapon [810][weapon_ttt_green_smokegrenade]>, (Entity [308][ttt_firegrenade_proj], ) damaged Schnitzelboy [innocent, innocents] for 7.6268005371094
 Zumoari (996.186600) hurt Schnitzelboy (1000.000000) and gets penalised for 3.813400
 ServerLog: 01:07.86 - DMG: 	 Zumoari [innocent] damaged Schnitzelboy [innocent] for 8 dmg
@@ -124,6 +127,7 @@ ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent
 ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is innocent
 ServerLog: 00:00.00 - ROUND_START: vinno is detective
 ServerLog: 00:00.00 - ROUND_START: Poci is traitor
+[TTT2]:	The round has begun!
 ServerLog: 00:22.98 - CP_DMG BULLET: Schnitzelboy [innocent, innocents] <Weapon [1113][weapon_ttt_galil]>, (Player [2][Schnitzelboy], Schnitzelboy) damaged Zumoari [innocent, innocents] for 18
 Schnitzelboy (991.222420) hurt Zumoari (975.286599) and gets penalised for 8.777580
 ServerLog: 00:22.98 - DMG: 	 Schnitzelboy [innocent] damaged Zumoari [innocent] for 18 dmg
@@ -168,6 +172,7 @@ ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is beacon
 ServerLog: 00:00.00 - ROUND_START: vinno is survivalist
 ServerLog: 00:00.00 - ROUND_START: Poci is glutton
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is necromancer
+[TTT2]:	The round has begun!
 ServerLog: 01:04.82 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged GhastM4n [necromancer, necromancers] for 9.5233345031738
 ServerLog: 01:40.27 - CP_OE: GhastM4n [necromancer]  ordered weapon_ttt_jetpack
 ServerLog: 01:45.91 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged GhastM4n [necromancer, necromancers] for 2.5964558124542
@@ -213,6 +218,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is glutton
 ServerLog: 00:00.00 - ROUND_START: Poci is blocker
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is restless
 ServerLog: 00:00.00 - ROUND_START: V8Block is trapper
+[TTT2]:	The round has begun!
 ServerLog: 00:04.65 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Zumoari [lycanthrope, innocents] for 24.53261756897
 ServerLog: 00:15.10 - CP_OE: Schnitzelboy [revolutionary]  ordered item_infini_shoot
 ServerLog: 00:50.20 - CP_OE: Schnitzelboy [revolutionary]  ordered item_radar
@@ -281,6 +287,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is impostor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is spectre
 ServerLog: 00:00.00 - ROUND_START: V8Block is innocent
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is vigilante
+[TTT2]:	The round has begun!
 ServerLog: 00:36.46 - CP_OE: Zumoari [traitor]  ordered melonlauncher
 ServerLog: 01:35.24 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged GhastM4n [spectre, innocents] for 16.572494506836
 ServerLog: 01:35.85 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Schnitzelboy [occultist, innocents] for 26.745695114136
@@ -450,6 +457,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is survivalist
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is serialkiller
 ServerLog: 00:00.00 - ROUND_START: V8Block is innocent
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is spy
+[TTT2]:	The round has begun!
 ServerLog: 00:05.57 - CP_DMG OTHER<1>: nonplayer (Entity [194][prop_physics_multiplayer], ) damaged Poci [survivalist, innocents] for 5
 ServerLog: 00:45.95 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Zumoari [executioner, traitors] for 8.5626792907715
 ServerLog: 01:20.36 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Miamelodie [spy, innocents] for 3.2178113460541
@@ -563,6 +571,9 @@ ServerLog: 03:15.01 - ROUND_END: Poci was survivalist team innocents
 ServerLog: 03:15.01 - ROUND_END: GhastM4n was serialkiller team serialkillers
 ServerLog: 03:15.01 - ROUND_END: V8Block was innocent team innocents
 ServerLog: 03:15.01 - ROUND_END: Miamelodie was spy team innocents
+[TTT2]:	Schnitzelboy confirmed the death of V8Block.
+[TTT2]:	Schnitzelboy confirmed the death of GhastM4n.
+[TTT2]:	Schnitzelboy confirmed the death of Poci.
 ServerLog: Round proper has begun...
 ServerLog: 00:00.00 - ROUND_START: Zumoari is spy
 ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is innocent
@@ -571,6 +582,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is glutton
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is jackal
 ServerLog: 00:00.00 - ROUND_START: V8Block is restless
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is blocker
+[TTT2]:	The round has begun!
 ServerLog: 00:15.15 - CP_OE: GhastM4n [jackal]  ordered Tracker
 ServerLog: 00:53.23 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged V8Block [restless, restlesss] for 7.5518183708191
 ServerLog: 01:01.30 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Miamelodie [blocker, traitors] for 27.719776153564
@@ -706,6 +718,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is survivalist
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is marker
 ServerLog: 00:00.00 - ROUND_START: V8Block is jackal
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is traitor
+[TTT2]:	The round has begun!
 ServerLog: 00:12.91 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Zumoari [innocent, innocents] for 24.53261756897
 ServerLog: 00:14.01 - CP_OE: V8Block [jackal]  ordered item_infini_shoot
 ServerLog: 00:16.80 - CP_OE: V8Block [jackal]  ordered item_armor
@@ -917,6 +930,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is traitor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is marker
 ServerLog: 00:00.00 - ROUND_START: V8Block is restless
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is beacon
+[TTT2]:	The round has begun!
 ServerLog: 00:12.99 - CP_OE: Poci [traitor]  ordered item_radar
 ServerLog: 00:49.19 - CP_DMG BULLET: V8Block [restless, restlesss] <Weapon [769][ttt_m9k_svt40]>, (Player [6][V8Block], V8Block) damaged GhastM4n [marker, markers] for 35
 ServerLog: 00:49.19 - DMG: 	 V8Block [restless] damaged GhastM4n [marker] for 25 dmg
@@ -1097,7 +1111,9 @@ ServerLog: 04:58.55 - CP_DMG BULLET: Zumoari [mesmerist, traitors] <Weapon [976]
 ServerLog: 04:58.55 - CP_DMG OTHER<128>: Zumoari [mesmerist, traitors] <Weapon [976][weapon_zm_improvised]>, (Weapon [976][weapon_zm_improvised], ) damaged GhastM4n [marker, markers] for 0
 ServerLog: 04:59.04 - CP_DMG BULLET: Zumoari [mesmerist, traitors] <Weapon [976][weapon_zm_improvised]>, (Player [1][Zumoari], Zumoari) damaged GhastM4n [marker, markers] for 0
 ServerLog: 04:59.04 - CP_DMG OTHER<128>: Zumoari [mesmerist, traitors] <Weapon [976][weapon_zm_improvised]>, (Weapon [976][weapon_zm_improvised], ) damaged GhastM4n [marker, markers] for 0
+[TTT2]:	vinno confirmed the death of Poci.
 ServerLog: vinno took 1 credits from the body of Poci
+[TTT2]:	vinno confirmed the death of V8Block.
 ServerLog: 05:44.19 - CP_OE: vinno [thrall]  ordered item_radar
 ServerLog: 06:39.61 - CP_DMG BULLET: GhastM4n [marker, markers] <Weapon [786][weapon_zm_pistol]>, (Player [5][GhastM4n], GhastM4n) damaged vinno [thrall, traitors] for 0
 ServerLog: [ULX] Zumoari trainfucked V8Block
@@ -1124,6 +1140,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is traitor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is mimic
 ServerLog: 00:00.00 - ROUND_START: V8Block is vampire
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is spy
+[TTT2]:	The round has begun!
 ServerLog: 00:18.30 - CP_DMG OTHER<8>: nonplayer (Entity [119][env_fire], ) damaged Schnitzelboy [spectre, innocents] for 1
 ServerLog: 00:20.82 - CP_DMG BULLET: V8Block [vampire, traitors] <Weapon [755][weapon_ttt_ru556]>, (Player [6][V8Block], V8Block) damaged GhastM4n [mimic, nones] for 13.199999809265
 ServerLog: 00:20.82 - DMG: 	 V8Block [vampire] damaged GhastM4n [mimic] for 13 dmg
@@ -1238,6 +1255,9 @@ ServerLog: 02:10.01 - DMG: 	 vinno [necromancer] damaged V8Block [vampire] for 1
 ServerLog: 02:10.01 - KILL:	 vinno [necromancer] killed V8Block [vampire]
 ServerLog: 02:10.01 - CP_KILL: vinno [necromancer, necromancers] <Weapon [746][weapon_ttt_g3sg1]>, (Player [3][vinno], vinno) killed V8Block [vampire, traitors]
 ServerLog: 02:19.71 - CP_OE: vinno [necromancer]  ordered weapon_ttt_proximitymine
+[TTT2]:	Schnitzelboy confirmed the death of GhastM4n.
+[TTT2]:	Schnitzelboy confirmed the death of Zumoari.
+[TTT2]:	Schnitzelboy confirmed the death of Miamelodie.
 ServerLog: 02:32.73 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Poci [traitor, traitors] for 3.2178113460541
 ServerLog: 02:33.41 - CP_OE: vinno [necromancer]  ordered weapon_ttt_turtlenade
 ServerLog: 03:06.83 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Schnitzelboy [spectre, innocents] for 23.434658050537
@@ -1300,6 +1320,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is liar
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent
 ServerLog: 00:00.00 - ROUND_START: V8Block is vampire
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is spy
+[TTT2]:	The round has begun!
 ServerLog: 00:15.45 - CP_DMG BULLET: V8Block [vampire, traitors] <Weapon [479][weapon_ttt_m590]>, (Player [6][V8Block], V8Block) damaged Zumoari [spectre, innocents] for 42
 ServerLog: 00:15.45 - DMG: 	 V8Block [vampire] damaged Zumoari [spectre] for 42 dmg
 ServerLog: 00:15.45 - CP_DMG BULLET: V8Block [vampire, traitors] <Weapon [479][weapon_ttt_m590]>, (Player [6][V8Block], V8Block) damaged Poci [liar, innocents] for 39.932350158691
@@ -1374,6 +1395,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is spy
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is traitor
 ServerLog: 00:00.00 - ROUND_START: V8Block is restless
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is innocent
+[TTT2]:	The round has begun!
 ServerLog: 00:06.70 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged vinno [glutton, traitors] for 7.1405053138733
 ServerLog: 00:21.13 - CP_DMG BULLET: V8Block [restless, restlesss] <Weapon [552][weapon_ap_mrca1]>, (Player [6][V8Block], V8Block) damaged vinno [glutton, traitors] for 19
 ServerLog: 00:21.13 - DMG: 	 V8Block [restless] damaged vinno [glutton] for 19 dmg
@@ -1656,6 +1678,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is innocent
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is medium
 ServerLog: 00:00.00 - ROUND_START: V8Block is priest
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is jackal
+[TTT2]:	The round has begun!
 ServerLog: 00:11.03 - CP_TC: Zumoari [glutton] changed Team from nones to traitors
 ServerLog: 00:11.03 - CP_RC: Zumoari changed Role from 57 to 1
 ServerLog: 00:11.03 - CP_TC: Zumoari [glutton] changed Team from nones to traitors
@@ -1797,6 +1820,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is spy
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is survivalist
 ServerLog: 00:00.00 - ROUND_START: V8Block is pirate_captain
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is innocent
+[TTT2]:	The round has begun!
 ServerLog: 00:36.04 - CP_OE: vinno [blight]  ordered item_radar
 ServerLog: 00:47.25 - CP_OE: GhastM4n [survivalist]  ordered weapon_ttt_teleport
 ServerLog: 00:50.39 - CP_TC: V8Block [pirate_captain] changed Team from pirates to traitors
@@ -1960,6 +1984,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is trapper
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent
 ServerLog: 00:00.00 - ROUND_START: V8Block is bodyguard
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is traitor
+[TTT2]:	The round has begun!
 ServerLog: 00:00.06 - CP_TC: V8Block [bodyguard] changed Team from innocents to traitors
 ServerLog: 00:28.32 - CP_OE: Schnitzelboy [jackal]  ordered item_infini_shoot
 ServerLog: 00:30.61 - CP_OE: Schnitzelboy [jackal]  ordered item_radar
@@ -2133,6 +2158,7 @@ ServerLog: 05:46.01 - ROUND_END: Poci was trapper team innocents
 ServerLog: 05:46.01 - ROUND_END: GhastM4n was innocent team innocents
 ServerLog: 05:46.01 - ROUND_END: V8Block was bodyguard team traitors
 ServerLog: 05:46.01 - ROUND_END: Miamelodie was traitor team traitors
+[TTT2]:	Miamelodie confirmed the death of V8Block.
 ServerLog: Round proper has begun...
 ServerLog: 00:00.00 - ROUND_START: Zumoari is medium
 ServerLog: 00:00.00 - ROUND_START: Schnitzelboy is traitor
@@ -2141,6 +2167,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is spectre
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent
 ServerLog: 00:00.00 - ROUND_START: V8Block is marker
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is amnesiac
+[TTT2]:	The round has begun!
 ServerLog: 00:32.61 - CP_DMG BULLET: vinno [glutton, traitors] <Weapon [587][weapon_ttt_mp9]>, (Player [3][vinno], vinno) damaged V8Block [marker, markers] for 18
 ServerLog: 00:32.61 - DMG: 	 vinno [glutton] damaged V8Block [marker] for 13 dmg
 ServerLog: 00:32.69 - CP_DMG BULLET: vinno [glutton, traitors] <Weapon [587][weapon_ttt_mp9]>, (Player [3][vinno], vinno) damaged V8Block [marker, markers] for 18
@@ -2207,6 +2234,7 @@ ServerLog: 01:02.98 - DMG: 	 Poci [spectre] damaged vinno [glutton] for 98 dmg
 ServerLog: 01:02.98 - KILL:	 Poci [spectre] killed vinno [glutton]
 Poci (1000.000000) killed vinno (1000.000000) and gets REWARDED 12.000001
 ServerLog: 01:02.98 - CP_KILL: Poci [spectre, innocents] <Weapon [567][weapon_ttt_pump]>, (Player [4][Poci], Poci) killed vinno [glutton, traitors]
+[TTT2]:	Poci confirmed the death of V8Block.
 ServerLog: 01:53.70 - CP_DMG BULLET: Schnitzelboy [traitor, traitors] <Weapon [539][weapon_ttt_pump]>, (Player [2][Schnitzelboy], Schnitzelboy) damaged Zumoari [medium, innocents] for 37.099998474121
 ServerLog: 01:53.70 - DMG: 	 Schnitzelboy [traitor] damaged Zumoari [medium] for 26 dmg
 ServerLog: 01:55.83 - CP_DMG BULLET: Zumoari [medium, innocents] <Weapon [558][weapon_ttt_mp5k]>, (Player [1][Zumoari], Zumoari) damaged Schnitzelboy [traitor, traitors] for 11
@@ -2258,6 +2286,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is survivalist
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is mesmerist
 ServerLog: 00:00.00 - ROUND_START: V8Block is innocent
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is jackal
+[TTT2]:	The round has begun!
 ServerLog: 00:04.51 - CP_OE: Zumoari [sniffer]  ordered item_infini_shoot
 ServerLog: 00:40.76 - CP_TC: vinno [sidekick] changed Team from traitors to jackals
 ServerLog: 00:40.76 - CP_RC: vinno changed Role from 1 to 49
@@ -2424,6 +2453,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is traitor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is spectre
 ServerLog: 00:00.00 - ROUND_START: V8Block is spy
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is innocent
+[TTT2]:	The round has begun!
 ServerLog: 00:36.87 - CP_OE: Poci [traitor]  ordered melonlauncher
 ServerLog: 00:42.18 - CP_OE: Schnitzelboy [blight]  ordered item_infini_shoot
 ServerLog: Round ended.
@@ -2444,6 +2474,7 @@ ServerLog: 00:00.00 - ROUND_START: Poci is occultist
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is restless
 ServerLog: 00:00.00 - ROUND_START: V8Block is traitor
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is survivalist
+[TTT2]:	The round has begun!
 ServerLog: 00:12.09 - CP_OE: V8Block [traitor]  ordered item_infini_shoot
 ServerLog: 00:14.74 - CP_OE: V8Block [traitor]  ordered item_armor
 ServerLog: 00:17.88 - CP_OE: Schnitzelboy [blight]  ordered item_infini_shoot
@@ -2628,6 +2659,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is undecided
 ServerLog: 00:00.00 - ROUND_START: Poci is spectre
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is medium
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is mimic
+[TTT2]:	The round has begun!
 ServerLog: 00:24.85 - CP_TC: vinno [doppelganger] changed Team from nones to doppelgangers
 ServerLog: 00:24.85 - CP_RC: vinno changed Role from 57 to 19
 ServerLog: 00:24.85 - CP_TC: vinno [doppelganger] changed Team from nones to doppelgangers
@@ -2731,6 +2763,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is traitor
 ServerLog: 00:00.00 - ROUND_START: Poci is mimic
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is jester
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is spectre
+[TTT2]:	The round has begun!
 ServerLog: 01:07.52 - CP_DMG BULLET: Schnitzelboy [hitman, traitors] <Weapon [1108][weapon_zm_mac10]>, (Player [2][Schnitzelboy], Schnitzelboy) damaged Poci [mimic, nones] for 12
 ServerLog: 01:07.52 - DMG: 	 Schnitzelboy [hitman] damaged Poci [mimic] for 12 dmg
 ServerLog: 01:07.59 - CP_DMG BULLET: Schnitzelboy [hitman, traitors] <Weapon [1108][weapon_zm_mac10]>, (Player [2][Schnitzelboy], Schnitzelboy) damaged Poci [mimic, nones] for 12
@@ -2822,6 +2855,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is traitor
 ServerLog: 00:00.00 - ROUND_START: Poci is spy
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is liar
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is vampire
+[TTT2]:	The round has begun!
 ServerLog: 00:06.27 - TTT2-Vampire: Miamelodie transformed into a pigeon.
 ServerLog: 00:06.29 - CP_DMG OTHER<0>: nonplayer (Entity [0][worldspawn]) damaged Miamelodie [vampire, traitors] for 1
 ServerLog: 00:08.30 - CP_DMG OTHER<0>: nonplayer (Entity [0][worldspawn]) damaged Miamelodie [vampire, traitors] for 1
@@ -2942,6 +2976,7 @@ ServerLog: 02:26.19 - DMG: 	 Schnitzelboy [liar] damaged Miamelodie [vampire] fo
 ServerLog: 02:26.19 - KILL:	 Schnitzelboy [liar] killed Miamelodie [vampire]
 Schnitzelboy (1000.000000) killed Miamelodie (971.874999) and gets REWARDED 12.000001
 ServerLog: 02:26.19 - CP_KILL: Schnitzelboy [liar, innocents] <Weapon [1122][weapon_ttt_mp5k]>, (Player [2][Schnitzelboy], Schnitzelboy) killed Miamelodie [vampire, traitors]
+[TTT2]:	Schnitzelboy confirmed the death of GhastM4n.
 ServerLog: 02:36.00 - CP_DMG BULLET: Schnitzelboy [liar, innocents] <Weapon [1122][weapon_ttt_mp5k]>, (Player [2][Schnitzelboy], Schnitzelboy) damaged vinno [traitor, traitors] for 20
 Schnitzelboy (1000.000000) hurt vinno (1000.000000) and gets REWARDED 6.000000
 ServerLog: 02:36.00 - DMG: 	 Schnitzelboy [liar] damaged vinno [traitor] for 20 dmg
@@ -2986,6 +3021,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is impostor
 ServerLog: 00:00.00 - ROUND_START: Poci is jester
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is traitor
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is spectre
+[TTT2]:	The round has begun!
 ServerLog: 00:06.18 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Zumoari [cursed, nones] for 7.1405053138733
 ServerLog: 00:07.80 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Zumoari [cursed, nones] for 44.910179138184
 ServerLog: 00:14.43 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Schnitzelboy [spy, innocents] for 63.561668395996
@@ -3195,6 +3231,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is survivalist
 ServerLog: 00:00.00 - ROUND_START: Poci is amnesiac
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is traitor
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is blocker
+[TTT2]:	The round has begun!
 ServerLog: 00:17.58 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Schnitzelboy [spy, innocents] for 4.2142224311829
 ServerLog: 00:29.10 - CP_OE: vinno [survivalist]  ordered weapon_dubgun
 ServerLog: 01:35.37 - CP_OE: Miamelodie [blocker]  ordered melonlauncher
@@ -3247,6 +3284,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is restless
 ServerLog: 00:00.00 - ROUND_START: Poci is traitor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is necromancer
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is blocker
+[TTT2]:	The round has begun!
 ServerLog: 00:28.83 - CP_OE: Poci [traitor]  ordered item_radar
 ServerLog: 01:03.60 - CP_OE: Poci [traitor]  ordered weapon_ttt_awp
 ServerLog: 02:18.26 - CP_DMG BULLET: GhastM4n [necromancer, necromancers] <Weapon [1308][weapon_ttt_mp5]>, (Player [5][GhastM4n], GhastM4n) damaged Poci [traitor, traitors] for 9.8999996185303
@@ -3393,6 +3431,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is spectre
 ServerLog: 00:00.00 - ROUND_START: Poci is pirate_captain
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is vampire
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is shinigami
+[TTT2]:	The round has begun!
 ServerLog: 00:11.34 - CP_TC: Schnitzelboy [vampire] changed Team from nones to traitors
 ServerLog: 00:11.34 - CP_RC: Schnitzelboy changed Role from 16 to 1
 ServerLog: 00:11.34 - CP_TC: Schnitzelboy [vampire] changed Team from nones to traitors
@@ -3616,6 +3655,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is pirate_captain
 ServerLog: 00:00.00 - ROUND_START: Poci is impostor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is traitor
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is spy
+[TTT2]:	The round has begun!
 ServerLog: 00:15.79 - CP_TC: vinno [pirate_captain] changed Team from pirates to innocents
 ServerLog: 00:19.09 - CP_DMG BULLET: GhastM4n [traitor, traitors] <Weapon [1307][weapon_ap_tec9]>, (Player [5][GhastM4n], GhastM4n) damaged Zumoari [liar, innocents] for 12
 ServerLog: 00:19.09 - DMG: 	 GhastM4n [traitor] damaged Zumoari [liar] for 12 dmg
@@ -3738,6 +3778,7 @@ ServerLog: 00:00.00 - ROUND_START: vinno is mimic
 ServerLog: 00:00.00 - ROUND_START: Poci is traitor
 ServerLog: 00:00.00 - ROUND_START: GhastM4n is bodyguard
 ServerLog: 00:00.00 - ROUND_START: Miamelodie is executioner
+[TTT2]:	The round has begun!
 ServerLog: 00:00.06 - CP_TC: GhastM4n [bodyguard] changed Team from innocents to nones
 ServerLog: 00:09.50 - CP_RC: vinno changed Role from 36 to 13
 ServerLog: 00:09.50 - CP_RC: GhastM4n changed Role from 13 to 8
