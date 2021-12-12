@@ -6,17 +6,12 @@
 		<resttt query="PlayerGameCount" display="chart" label="player" data="rounds" type="bar" [legend]="false" [options]="{scales:{yAxes:[{ticks:{beginAtZero:true}}]}}"></resttt>
 	</card>
 	<card title="Karten">
-		<resttt query="MapCount" display="chart" label="map" [data]="['count']" type="doughnut" [options]="{legend:{position:'right'}}"></resttt>
+		<resttt query="MapCount" display="chart" label="map" data="count" type="doughnut" [options]="{legend:{position:'right'}}"></resttt>
 	</card>
 	<card title="Rollen" size="large">
-		<resttt query="RoleCount" display="chart" label="startrole" data="count" type="pie"></resttt>
+		<resttt query="RoleCount" display="chart" label="startrole" data="count" type="doughnut" [legend]="false" colors="colour"></resttt>
 	</card>
 	<card title="Kills">
 		<resttt query="PlayerKillCount" display="table" [columns]="['player','kills','wrong','killsPerGame']" [cnames]="{'killsPerGame': 'kpg'}"></resttt>
 	</card>
-
-	<card title="TestPlot">
-		
-	</card>
-
 </div>

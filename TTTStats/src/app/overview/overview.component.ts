@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { DatastoreService } from '../datastore.service';
 
 @Component({
   selector: 'app-overview',
@@ -8,7 +7,7 @@ import { DatastoreService } from '../datastore.service';
 })
 export class OverviewComponent implements OnInit {
 
-  constructor(private datastore: DatastoreService) { }
+  constructor() { }
 
   ngOnInit(): void {
   }
