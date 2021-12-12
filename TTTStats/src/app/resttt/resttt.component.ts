@@ -17,10 +17,11 @@ export class RestttComponent implements OnChanges {
 
   // table column keys
   @Input() columns: string[] = [];
+  @Input() cnames: any = [];
 
   // chart data keys
   @Input() data: string = "";
-  @Input() datas: string[] = [];
+  @Input() datas: string[] = [];  // for multiple columns
   // chart label key
   @Input() label: string = "";
   // chart type, see https://www.npmjs.com/package/ng2-charts

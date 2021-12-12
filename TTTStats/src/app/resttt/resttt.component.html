@@ -10,7 +10,7 @@
     <table class="table">
       <thead>
         <tr>
-          <th *ngFor="let key of columns">{{key}}</th>
+          <th *ngFor="let key of columns">{{cnames[key] || key}}</th>
         </tr>
       </thead>
       <tbody>
