@@ -23,20 +23,13 @@
 
 <!-- Chart -->
   <div *ngIf="display == 'chart'">
-		<canvas baseChart *ngIf="data != ''"
-	    [data]="get_column(data)"
-	    [labels]="get_column(label)"
+		<canvas baseChart *ngIf="data"
+	    [data]="get_column_data(data)"
+	    [labels]="get_column_data(label)"
 	    [chartType]="type"
       [legend]="legend"
       [options]="options">
 	  </canvas>
-  		<canvas baseChart *ngIf="datas.length != 0"
-  	    [data]="get_columns(datas)"
-  	    [labels]="get_column(label)"
-  	    [chartType]="type"
-        [legend]="legend"
-        [options]="options">
-  	  </canvas>
   </div>
 </div>
 

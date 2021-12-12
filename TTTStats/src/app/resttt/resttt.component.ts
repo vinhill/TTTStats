@@ -19,9 +19,8 @@ export class RestttComponent implements OnChanges {
   @Input() columns: string[] = [];
   @Input() cnames: any = [];
 
-  // chart data keys
-  @Input() data: string = "";
-  @Input() datas: string[] = [];  // for multiple columns
+  // chart data key or keys
+  @Input() data: string | string[] = "";
   // chart label key
   @Input() label: string = "";
   // chart type, see https://www.npmjs.com/package/ng2-charts
@@ -56,7 +55,7 @@ export class RestttComponent implements OnChanges {
     return Object.keys(obj);
   }
 
-  get_columns(keys: string[]): any {
+  protected get_columns(keys: string[]): any {
     /*
     [{c1: 0, c2: 1}, {c1: 3, c2: 2}]
     to
@@ -71,8 +70,13 @@ export class RestttComponent implements OnChanges {
     return res;
   }
 
-  get_column(key: string): any {
-    return this.get_columns([key])[0];
+  get_column_data(key: string | string[]): any {
+    if (key instanceof Array) {
+      return this.get_columns(key);
+    }
+    else {
+      return this.get_columns([key])[0];
+    }
   }
 
 }

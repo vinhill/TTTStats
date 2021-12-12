@@ -6,7 +6,7 @@
 		<resttt query="PlayerGameCount" display="chart" label="player" data="rounds" type="bar" [legend]="false" [options]="{scales:{yAxes:[{ticks:{beginAtZero:true}}]}}"></resttt>
 	</card>
 	<card title="Karten">
-		<resttt query="MapCount" display="chart" label="map" [datas]="['count']" type="doughnut" [options]="{legend:{position:'right'}}"></resttt>
+		<resttt query="MapCount" display="chart" label="map" [data]="['count']" type="doughnut" [options]="{legend:{position:'right'}}"></resttt>
 	</card>
 	<card title="Rollen" size="large">
 		<resttt query="RoleCount" display="chart" label="startrole" data="count" type="pie"></resttt>
