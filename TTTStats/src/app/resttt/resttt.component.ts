@@ -21,6 +21,8 @@ export class RestttComponent implements OnChanges {
 
   // chart data key or keys
   @Input() data: string | string[] = "";
+  // chart color key
+  @Input() colors: any = "";
   // chart label key
   @Input() label: string = "";
   // chart type, see https://www.npmjs.com/package/ng2-charts
@@ -38,8 +40,7 @@ export class RestttComponent implements OnChanges {
 
   async load() {
     this.loaded = false;
-    this.result = await this.resttt.get(this.query);
-    console.log(this.result);
+    this.result = await this.resttt.get(this.query, true);
     this.loaded = true;
     // If no columns where provided, show all
     if (this.columns.length == 0 && this.result.length != 0) {
@@ -55,27 +56,17 @@ export class RestttComponent implements OnChanges {
     return Object.keys(obj);
   }
 
-  protected get_columns(keys: string[]): any {
-    /*
-    [{c1: 0, c2: 1}, {c1: 3, c2: 2}]
-    to
-    {c1: [0, 3], c2: [1,2]}
-    */
-    let res: any = [];
-    for (let key of keys) {
-      res.push(this.result.map(function(row: any) {
-        return row[key]
-      }));
-    }
-    return res;
-  }
-
   get_column_data(key: string | string[]): any {
-    if (key instanceof Array) {
-      return this.get_columns(key);
-    }
-    else {
-      return this.get_columns([key])[0];
+    try{
+      if (key instanceof Array) {
+        return key.map( (value: any) => this.result.cols[value]);
+      }
+      else {
+        return this.result.cols[key];
+      }
+    }catch(e){
+      // To catch type errors resulting from a key not existing
+      console.log(`Error ${e} in get_column_data for key ${key}. Result is ${JSON.stringify(this.result)}, loaded is ${this.loaded}`);
     }
   }
 

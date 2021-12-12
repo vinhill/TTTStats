@@ -8,9 +8,13 @@ import { OverviewComponent } from './overview/overview.component';
 import { PlayerComponent } from './player/player.component';
 import { RestttComponent } from './resttt/resttt.component';
 import { DelayDirective } from './delay.directive';
+import { DocsComponent } from './docs/docs.component';
 
 import { ChartsModule } from 'ng2-charts';
-import { DocsComponent } from './docs/docs.component';
+import * as PlotlyJS from 'plotly.js-dist-min';
+import { PlotlyModule } from 'angular-plotly.js';
+
+PlotlyModule.plotlyjs = PlotlyJS;
 
 @NgModule({
   declarations: [
@@ -25,7 +29,8 @@ import { DocsComponent } from './docs/docs.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
-		ChartsModule
+		ChartsModule,
+    PlotlyModule
   ],
   providers: [],
   bootstrap: [AppComponent]

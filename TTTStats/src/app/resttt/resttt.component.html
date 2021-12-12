@@ -23,7 +23,7 @@
 
 <!-- Chart -->
   <div *ngIf="display == 'chart'">
-		<canvas baseChart *ngIf="data"
+		<canvas baseChart
 	    [data]="get_column_data(data)"
 	    [labels]="get_column_data(label)"
 	    [chartType]="type"
@@ -31,6 +31,14 @@
       [options]="options">
 	  </canvas>
   </div>
+
+  <div *ngIf="display == 'plotly'">
+    <plotly-plot
+      [data]="[{x: get_column_data(label), y: get_column_data(data), type: type}]">
+    </plotly-plot>
+  </div>
+
+<!-- endif -->
 </div>
 
 <!-- Loading -->
