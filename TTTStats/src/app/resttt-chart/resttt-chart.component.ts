@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { RestttService } from '../resttt.service';
-import { UtilsService } from '../utils.service';
+import { getColormap } from '../utils';
 import { ChartConfiguration } from 'chart.js';
 
 @Component({
@@ -34,7 +34,7 @@ export class RestttChartComponent implements OnChanges {
   // chart options
   @Input() coptions: ChartConfiguration["options"] | undefined;
 
-  constructor(private resttt: RestttService, private utils: UtilsService) { }
+  constructor(private resttt: RestttService) { }
 
   ngOnChanges() {
     this.load();
@@ -55,7 +55,7 @@ export class RestttChartComponent implements OnChanges {
 
     for (let key of this._datakeys) {
       let data: any[] = this.result.cols[key];
-      let colors = this.utils.getColormap(this.cmap, data.length);
+      let colors = getColormap(this.cmap, data.length);
 
       this._chartData.datasets.push({
         data: data,
