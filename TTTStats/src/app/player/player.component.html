@@ -2,6 +2,9 @@
 	<div dataMasonry='{ "itemSelector": ".masonry-item" }'>
 		<card>
 			<h1 class="display-3">{{name}}</h1>
+			<p>You playerd {{rounds}} rounds!</p>
+			<p>During these, you got {{kills}} kills</p>
+			<p *ngIf="teamkills">... but {{teamkills}} of those where WRONG!</p>
 		</card>
 		<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
 			<resttt #rrc

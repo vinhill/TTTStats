@@ -24,8 +24,7 @@
 	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
 		<resttt-table #rpkc
 			query="PlayerKillCount"
-			[datakeys]="['player','kills','wrong','killsPerGame']"
-			[cnames]="{'killsPerGame': 'kpg'}">
+			[datakeys]="['player','kills','wrong']">
 		</resttt-table>
 	</card>
 	<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">

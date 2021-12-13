@@ -46,9 +46,11 @@ export class RestttService {
 	}
 
 	async get(key: string, includeCols: boolean = false) : Promise<any> {
-		if (!this.cache[key]) {
+		let cached = this.cache[key];
+		if (!cached || (!cached.cols && includeCols) ) {
 			this.cache[key] = await this.getNoCache(key, includeCols);
 		}
+
 		return this.cache[key];
 	}
 
