@@ -20,7 +20,7 @@
 			labelkey="map"
 			datakeys="count"
 			ctype="doughnut"
-			[coptions]="{responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'right'}}}">
+			[coptions]="{aspectRatio: 2, plugins:{legend:{position:'right'}}}">
 		</resttt>
 	</card>
 	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
@@ -31,8 +31,8 @@
 			[cnames]="{'killsPerGame': 'kpg'}">
 		</resttt>
 	</card>
-	<card title="Rollen" size="large" [loaded]="roleplot != null" [reloadCallback]="loadRolePlot">
-		<plotly-plot
+	<card title="Rollen" size="large" [loaded]="roleplotLoaded" [reloadCallback]="loadRolePlot">
+		<plotly-plot *ngIf="roleplotLoaded"
 			[data]="roleplot?.data"
 			[layout]="roleplot?.layout"
 			[config]="{responsive: true}">

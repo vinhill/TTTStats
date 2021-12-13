@@ -7,6 +7,7 @@ import { RestttService } from '../resttt.service';
   styleUrls: ['./overview.component.css']
 })
 export class OverviewComponent implements OnInit {
+  roleplotLoaded: boolean = false
   roleplot: any = null;
 
   constructor(private resttt: RestttService) { }
@@ -19,6 +20,7 @@ export class OverviewComponent implements OnInit {
     let table = await this.resttt.get("RoleCount", true);
     let dataitem = {
       type: "treemap",
+      branchvalues: "total",
       labels: table.cols.startrole,
       parents: table.cols.superteam,
       values: table.cols.count,
@@ -31,8 +33,7 @@ export class OverviewComponent implements OnInit {
       let group = dataitem.parents[i];
       if (!values.has(group))
         values.set(group, 0);
-      else
-        values.set(group, values.get(group) + dataitem.values[i]);
+      values.set(group, values.get(group) + dataitem.values[i]);
     }
 
     // add suffix to parents to make superteam names unique
@@ -60,5 +61,6 @@ export class OverviewComponent implements OnInit {
         margin: {l: 0, r: 0, b: 0, t:0},
       }
     };
+    this.roleplotLoaded = true;
   }
 }
