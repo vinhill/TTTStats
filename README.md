@@ -16,3 +16,4 @@ If some bundle is too large, do
 - add "sourceMap": true, "namedChunks": true to the development build in angular.json
 - ng build TTTStats --base-href="https://vinhill.github.io/TTTStats/"
 - source-map-explorer the_bundle_file.js
+- check which parts are too large and do something against it. I.e. lazy-loading
