@@ -43,7 +43,7 @@ export class Colormap {
   The keys are percentage and the values are the color in a rgba format.
   You can have as many "color stops" (%) as you like.
   0% and 100% is not optional.*/
-  const colormaps : {[key: string]: Colormap} = {
+  var colormaps : {[key: string]: Colormap} = {
     cool: Colormap.fromObject({
       0: [255, 255, 255],
       20: [220, 237, 200],
@@ -64,7 +64,11 @@ export class Colormap {
       45: [232, 82, 133],
       65: [106, 27, 154],
       100: [0, 0, 0]
-    })
+    }),
+    score: Colormap.fromObject({
+      0: [255, 0, 0],
+      100: [0, 255, 0]
+    }),
   };
 
 export function randInt(min: number, max: number): number {

@@ -28,7 +28,7 @@ export class RestttService {
 		return content;
 	}
 	
-	async get(name: string, includeCols: boolean = false): Promise<any> {
+	async getNoCache(name: string, includeCols: boolean = false): Promise<any> {
 		let res = await fetch(`https://resttt.glitch.me/api/v1/query/${name}`, {
 			method: "GET",
 			headers: {
@@ -45,9 +45,9 @@ export class RestttService {
 		return content;
 	}
 
-	async getCache(key: string, includeCols: boolean = false) : Promise<any> {
+	async get(key: string, includeCols: boolean = false) : Promise<any> {
 		if (!this.cache[key]) {
-			this.cache[key] = await this.get(key, includeCols);
+			this.cache[key] = await this.getNoCache(key, includeCols);
 		}
 		return this.cache[key];
 	}

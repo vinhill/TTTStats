@@ -1,0 +1,11 @@
+.btn-reload {
+    height: 2.5rem;
+  }
+  .btn-reload:active {
+    transform: translateY(4px);
+  }
+  .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
