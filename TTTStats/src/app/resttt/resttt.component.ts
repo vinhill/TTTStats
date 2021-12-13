@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { RestttService } from '../resttt.service';
 import { UtilsService } from '../utils.service';
-import { ChartDataSets } from 'chart.js';
+import { ChartConfiguration } from 'chart.js';
 
 @Component({
   selector: 'resttt',
@@ -12,6 +12,7 @@ export class RestttComponent implements OnChanges {
   loaded: boolean = false;
   result: any;
   _datakeys: string[] = [];
+  _chartData: ChartConfiguration["data"] | undefined;
 
   // REST Query
   @Input() query!: string;
@@ -35,10 +36,8 @@ export class RestttComponent implements OnChanges {
   @Input() labelkey: string = "";
   // chart type, see https://www.npmjs.com/package/ng2-charts
   @Input() ctype: any = "";
-  // chart legend toggle
-  @Input() clegend: boolean = true;
   // chart options
-  @Input() coptions: any = "";
+  @Input() coptions: ChartConfiguration["options"] | undefined;
 
   constructor(private resttt: RestttService, private utils: UtilsService) { }
 
@@ -49,6 +48,8 @@ export class RestttComponent implements OnChanges {
   async load() {
     this.loaded = false;
     this.result = await this.resttt.get(this.query, true);
+    if (this.display == "chart")
+      this.makeChartDataset();
     this.loaded = true;
   }
 
@@ -74,19 +75,23 @@ export class RestttComponent implements OnChanges {
     }
   }
 
-  getChartDataset() : ChartDataSets[] {
-    let datasets: ChartDataSets[] = [];
+  makeChartDataset() {
+    this._chartData = {
+      datasets: [],
+      labels: this.result.cols[this.labelkey]
+    };
 
     for (let key of this._datakeys) {
       let data: any[] = this.result.cols[key];
+      let colors = this.utils.getColormap(this.cmap, data.length);
 
-      datasets.push({
+      this._chartData.datasets.push({
         data: data,
-        backgroundColor: this.utils.getColormap(this.cmap, data.length),
+        backgroundColor: colors,
+        hoverBackgroundColor: colors,
+        borderColor: "#ffffff",
       });
     }
-
-    return datasets;
   }
 
 }

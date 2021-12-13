@@ -9,8 +9,8 @@
 			labelkey="player"
 			datakeys="rounds"
 			ctype="bar"
-			[clegend]="false"
-			[coptions]="{scales:{yAxes:[{ticks:{beginAtZero:true}}]}}">
+			cmap="cool"
+			[coptions]="{plugins:{legend:{display: false}}}">
 		</resttt>
 	</card>
 	<card title="Karten" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
@@ -20,7 +20,7 @@
 			labelkey="map"
 			datakeys="count"
 			ctype="doughnut"
-			[coptions]="{legend:{position:'right'}}">
+			[coptions]="{responsive: true, maintainAspectRatio: false, plugins:{legend:{position:'right'}}}">
 		</resttt>
 	</card>
 	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
@@ -31,9 +31,6 @@
 			[cnames]="{'killsPerGame': 'kpg'}">
 		</resttt>
 	</card>
-	<!--card title="Rollen" size="large">
-		<resttt query="RoleCount" display="chart" label="startrole" data="count" type="doughnut" [legend]="false" colors="colour"></resttt>
-	</card-->
 	<card title="Rollen" size="large" [loaded]="roleplot != null" [reloadCallback]="loadRolePlot">
 		<plotly-plot
 			[data]="roleplot?.data"

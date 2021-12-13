@@ -10,11 +10,7 @@ import { RestttComponent } from './resttt/resttt.component';
 import { DelayDirective } from './delay.directive';
 import { DocsComponent } from './docs/docs.component';
 
-import { ChartsModule } from 'ng2-charts';
-
-//import * as PlotlyJS from 'plotly.js-dist-min';
-//import { PlotlyModule } from 'angular-plotly.js';
-//PlotlyModule.plotlyjs = PlotlyJS;
+import { NgChartsModule } from 'ng2-charts';
 
 import { PlotlyViaCDNModule } from 'angular-plotly.js';
 PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
@@ -32,8 +28,7 @@ PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
   imports: [
     BrowserModule,
     AppRoutingModule,
-		ChartsModule,
-    //PlotlyModule,
+		NgChartsModule,
 		PlotlyViaCDNModule,
   ],
   providers: [],

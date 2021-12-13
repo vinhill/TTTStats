@@ -22,10 +22,8 @@
 <!-- Chart -->
 <div *ngIf="display == 'chart' && loaded">
   <canvas baseChart
-    [datasets]="getChartDataset()"
-    [labels]="get_column_data(labelkey)"
-    [chartType]="ctype"
-    [legend]="clegend"
+    [data]="_chartData"
+    [type]="ctype"
     [options]="coptions">
   </canvas>
 </div>
