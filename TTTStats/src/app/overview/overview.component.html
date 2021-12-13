@@ -33,4 +33,12 @@
 			display="RoleTM">
 		</resttt>
 	</card>
+	<card title="Meistgekauft" ize="large" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
+		<resttt-chart #rpp
+			query="PopularPurchases"
+			labelkey="item"
+			datakeys="amount"
+			ctype="doughnut">
+		</resttt-chart>
+	</card>
 </div>
