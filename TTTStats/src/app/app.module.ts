@@ -7,6 +7,8 @@ import { CardComponent } from './card/card.component';
 import { OverviewComponent } from './overview/overview.component';
 import { PlayerComponent } from './player/player.component';
 import { RestttComponent } from './resttt/resttt.component';
+import { RestttTableComponent } from './resttt-table/resttt-table.component';
+import { RestttChartComponent } from './resttt-chart/resttt-chart.component';
 import { DelayDirective } from './delay.directive';
 import { DocsComponent } from './docs/docs.component';
 
@@ -23,7 +25,9 @@ PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
     PlayerComponent,
     RestttComponent,
     DelayDirective,
-    DocsComponent
+    DocsComponent,
+    RestttTableComponent,
+    RestttChartComponent
   ],
   imports: [
     BrowserModule,

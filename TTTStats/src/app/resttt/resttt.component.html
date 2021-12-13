@@ -1,29 +1,12 @@
 <!-- Text -->
 <div *ngIf="display == 'text'">
-  {{stringify(result)}}
+  {{stringify(_result)}}
 </div>
 
-<!-- Table -->
-<div *ngIf="display == 'table'">
-  <table class="table">
-    <thead>
-      <tr>
-        <th *ngFor="let key of _datakeys">{{cnames[key] || key}}</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let row of result">
-        <td *ngFor="let key of _datakeys">{{row[key]}}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<!-- Chart -->
-<div *ngIf="display == 'chart' && loaded">
-  <canvas baseChart
-    [data]="_chartData"
-    [type]="ctype"
-    [options]="coptions">
-  </canvas>
+<div *ngIf="display == 'RoleTM'">
+  <plotly-plot *ngIf="loaded"
+			[data]="_treemap?.data"
+			[layout]="_treemap?.layout"
+			[config]="{responsive: true}">
+		</plotly-plot>
 </div>

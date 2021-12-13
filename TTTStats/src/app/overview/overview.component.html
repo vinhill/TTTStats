@@ -3,39 +3,35 @@
 		<h1 class="display-3">TTT Overview</h1>
 	</card>
 	<card title="Spiele" [loaded]="rpgc.loaded" [reloadCallback]="rpgc.load">
-		<resttt #rpgc
+		<resttt-chart #rpgc
 			query="PlayerGameCount"
-			display="chart"
 			labelkey="player"
 			datakeys="rounds"
 			ctype="bar"
 			cmap="cool"
 			[coptions]="{plugins:{legend:{display: false}}}">
-		</resttt>
+		</resttt-chart>
 	</card>
 	<card title="Karten" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
-		<resttt #rmc
+		<resttt-chart #rmc
 			query="MapCount"
-			display="chart"
 			labelkey="map"
 			datakeys="count"
 			ctype="doughnut"
 			[coptions]="{aspectRatio: 2, plugins:{legend:{position:'right'}}}">
-		</resttt>
+		</resttt-chart>
 	</card>
 	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
-		<resttt #rpkc
+		<resttt-table #rpkc
 			query="PlayerKillCount"
-			display="table"
 			[datakeys]="['player','kills','wrong','killsPerGame']"
 			[cnames]="{'killsPerGame': 'kpg'}">
-		</resttt>
+		</resttt-table>
 	</card>
-	<card title="Rollen" size="large" [loaded]="roleplotLoaded" [reloadCallback]="loadRolePlot">
-		<plotly-plot *ngIf="roleplotLoaded"
-			[data]="roleplot?.data"
-			[layout]="roleplot?.layout"
-			[config]="{responsive: true}">
-		</plotly-plot>
+	<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
+		<resttt #rrc
+			query="RoleCount"
+			display="RoleTM">
+		</resttt>
 	</card>
 </div>

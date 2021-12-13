@@ -1,7 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { RestttService } from '../resttt.service';
-import { UtilsService } from '../utils.service';
-import { ChartConfiguration } from 'chart.js';
 
 @Component({
   selector: 'resttt',
@@ -10,36 +8,15 @@ import { ChartConfiguration } from 'chart.js';
 })
 export class RestttComponent implements OnChanges {
   loaded: boolean = false;
-  result: any;
-  _datakeys: string[] = [];
-  _chartData: ChartConfiguration["data"] | undefined;
+  _result: any;
+  _treemap: any;
 
   // REST Query
   @Input() query!: string;
-  // Display mode text table or chart
+  // Display mode text or RoleTM
   @Input() display!: string;
-  // data key or keys to be displayed
-  @Input("datakeys") set datakeysetter(keys: string | string[]) {
-    if (keys instanceof Array) {
-      this._datakeys = keys;
-    }else{
-      this._datakeys = [keys];
-    }
-  };
 
-  // table column display names
-  @Input() cnames: any = [];
-
-  // chart color key
-  @Input() cmap: string = "chartjs";
-  // chart label key
-  @Input() labelkey: string = "";
-  // chart type, see https://www.npmjs.com/package/ng2-charts
-  @Input() ctype: any = "";
-  // chart options
-  @Input() coptions: ChartConfiguration["options"] | undefined;
-
-  constructor(private resttt: RestttService, private utils: UtilsService) { }
+  constructor(private resttt: RestttService) { }
 
   ngOnChanges() {
     this.load();
@@ -47,9 +24,9 @@ export class RestttComponent implements OnChanges {
 
   async load() {
     this.loaded = false;
-    this.result = await this.resttt.get(this.query, true);
-    if (this.display == "chart")
-      this.makeChartDataset();
+    this._result = await this.resttt.get(this.query, true);
+    if (this.display == "RoleTM")
+      this.loadRoleTreemap();
     this.loaded = true;
   }
 
@@ -57,41 +34,49 @@ export class RestttComponent implements OnChanges {
     return JSON.stringify(obj);
   }
 
-  keys(obj: any): string[] {
-    return Object.keys(obj);
-  }
-
-  get_column_data(key: string | string[]): any {
-    try{
-      if (key instanceof Array) {
-        return key.map( (value: any) => this.result.cols[value]);
-      }
-      else {
-        return this.result.cols[key];
-      }
-    }catch(e){
-      // To catch type errors resulting from a key not existing
-      console.log(`Error ${e} in get_column_data for key ${key}. Result is ${JSON.stringify(this.result)}, loaded is ${this.loaded}`);
-    }
-  }
-
-  makeChartDataset() {
-    this._chartData = {
-      datasets: [],
-      labels: this.result.cols[this.labelkey]
+  loadRoleTreemap() {
+    let dataitem = {
+      type: "treemap",
+      branchvalues: "total",
+      labels: this._result.cols.startrole,
+      parents: this._result.cols.superteam,
+      values: this._result.cols.count,
+      marker: {colors: this._result.cols.colour},
     };
 
-    for (let key of this._datakeys) {
-      let data: any[] = this.result.cols[key];
-      let colors = this.utils.getColormap(this.cmap, data.length);
-
-      this._chartData.datasets.push({
-        data: data,
-        backgroundColor: colors,
-        hoverBackgroundColor: colors,
-        borderColor: "#ffffff",
-      });
+    // aggregate group value from subgroups
+    let values = new Map<string, number>();
+    for (let i = 0; i < dataitem.labels.length; i++) {
+      let group = dataitem.parents[i];
+      if (!values.has(group))
+        values.set(group, 0);
+      values.set(group, values.get(group) + dataitem.values[i]);
     }
-  }
 
+    // add suffix to parents to make superteam names unique
+    dataitem.parents = dataitem.parents.map((val: any) => val + "s");
+
+    // add first-level groups in sunburst plot
+    let groups = [
+      {name: "Traitors", color: "#d22722", value: values.get("Traitor")},
+      {name: "Innocents", color: "#00a01d", value: values.get("Innocent")},
+      {name: "Detectives", color: "#1440a4", value: values.get("Detective")},
+      {name: "Others", color: "#b8b8b8", value: values.get("Other")},
+      {name: "Killers", color: "#f542ef", value: values.get("Killer")}
+    ];
+    for (let group of groups) {
+      dataitem.labels.push(group.name);
+      dataitem.marker.colors.push(group.color);
+      dataitem.parents.push("");
+      dataitem.values.push(group.value);
+    }
+
+    // finalize roleplot data
+    this._treemap = {
+      data: [dataitem],
+      layout: {
+        margin: {l: 0, r: 0, b: 0, t:0},
+      }
+    };
+  }
 }

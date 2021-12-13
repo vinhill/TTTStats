@@ -3,12 +3,11 @@
 		<card>
 			<h1 class="display-3">{{name}}</h1>
 		</card>
-		<card title="Rollen" size="large" [loaded]="roleplotLoaded" [reloadCallback]="loadRolePlot">
-			<plotly-plot *ngIf="roleplotLoaded"
-				[data]="roleplot?.data"
-				[layout]="roleplot?.layout"
-				[config]="{responsive: true}">
-			</plotly-plot>
+		<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
+			<resttt #rrc
+				query="PlayerRoles/{{name}}"
+				display="RoleTM">
+			</resttt>
 		</card>
 	</div>
 </div>
