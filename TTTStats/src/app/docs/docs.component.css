@@ -8,9 +8,7 @@
   margin-bottom: 0px;
 }
 .rolecard {
-  padding-bottom: 0.5em;
-  padding-left: 0.5em;
-  padding-right: 0.5em;
+  padding: 0.5em;
 }
 .btn-reload {
   height: 2.5rem;
@@ -21,4 +19,7 @@
 .spinner-border {
   width: 2.5rem;
   height: 2.5rem;
+}
+.card {
+  height: 100%;
 }
