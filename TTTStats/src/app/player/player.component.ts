@@ -1,6 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { RestttService } from '../resttt.service';
+import { CardComponent } from '../card/card.component';
+import { ExecLimiter } from '../utils';
+
+declare var Masonry: any;
+declare var ResizeObserver: any;
 
 @Component({
   selector: 'app-player',
@@ -13,7 +18,32 @@ export class PlayerComponent implements OnInit {
   kills: number | undefined;
   teamkills: number | undefined;
 
-  constructor(private route: ActivatedRoute, private resttt: RestttService) { }
+  masonry: any;
+  resizeObserver: ResizeObserver;
+  executor: ExecLimiter;
+
+  constructor(private route: ActivatedRoute, private resttt: RestttService) {
+    this.resizeObserver = new ResizeObserver((entries: any) => {
+      this.executor.requestExec();
+    });
+    this.executor = new ExecLimiter(() => {
+      this.masonry.layout();
+    });
+  }
+
+  @ViewChild('masonry')
+  set initMasonry(elem: any) {
+    this.masonry = new Masonry(elem.nativeElement, {
+      itemSelector: '.masonry-item',
+    });
+  }
+
+  @ViewChildren(CardComponent, {read: ElementRef})
+  set observeCards(cards: QueryList<ElementRef>) {
+    for (let child of cards) {
+      this.resizeObserver.observe(child.nativeElement.firstChild);
+    }
+  };
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {

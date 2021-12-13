@@ -135,3 +135,47 @@ export function getColormap(palette: string, num: number) : string[] {
   else 
     return steppedColormap(palette, num);
 }
+
+/*
+ * Limits the call frequency of an function.
+ * 
+ * The given function will only be called
+ * every exec_cooldown milliseconds.
+ * 
+ * If a call is requested during the cooldown,
+ * it will be executed afterwards
+ * and all additional calls are ignored.
+ */
+export class ExecLimiter {
+  private func: () => void;
+  
+  private lastExec: number;
+  private pending: boolean;
+
+  private exec_cooldown: number;
+
+  constructor(func: () => void, exec_cooldown: number = 200) {
+    this.exec_cooldown = exec_cooldown;
+    this.func = func;
+    this.lastExec = 0;
+    this.pending = false;
+  }
+
+  public requestExec() {
+    if (Date.now() - this.lastExec > this.exec_cooldown) {
+      this.doExec();
+    }else if (!this.pending) {
+      this.pending = true;
+      setTimeout(() => {
+        this.doExec();
+      }, this.exec_cooldown - (Date.now() - this.lastExec) );
+    }
+    // else: already pending
+  }
+
+  public doExec() {
+    this.lastExec = Date.now();
+    this.pending = false;
+    this.func();
+  }
+}
