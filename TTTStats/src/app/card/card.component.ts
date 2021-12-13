@@ -8,6 +8,11 @@ import { Component, Input } from '@angular/core';
 export class CardComponent {
   @Input() title!: string;
 
+  // be default, content is shown immediately
+  @Input() loaded: boolean = true;
+
+  @Input() reloadCallback?: () => void;
+
   classes: string = "";
 
   constructor() {

@@ -11,10 +11,13 @@ import { DelayDirective } from './delay.directive';
 import { DocsComponent } from './docs/docs.component';
 
 import { ChartsModule } from 'ng2-charts';
-import * as PlotlyJS from 'plotly.js-dist-min';
-import { PlotlyModule } from 'angular-plotly.js';
 
-PlotlyModule.plotlyjs = PlotlyJS;
+//import * as PlotlyJS from 'plotly.js-dist-min';
+//import { PlotlyModule } from 'angular-plotly.js';
+//PlotlyModule.plotlyjs = PlotlyJS;
+
+import { PlotlyViaCDNModule } from 'angular-plotly.js';
+PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
 
 @NgModule({
   declarations: [
@@ -30,7 +33,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     BrowserModule,
     AppRoutingModule,
 		ChartsModule,
-    PlotlyModule
+    //PlotlyModule,
+		PlotlyViaCDNModule,
   ],
   providers: [],
   bootstrap: [AppComponent]

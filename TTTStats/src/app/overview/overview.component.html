@@ -8,24 +8,19 @@
 	<card title="Karten">
 		<resttt query="MapCount" display="chart" label="map" data="count" type="doughnut" [options]="{legend:{position:'right'}}"></resttt>
 	</card>
-	<card title="Kills">
-		<resttt query="PlayerKillCount" display="table" [columns]="['player','kills','wrong','killsPerGame']" [cnames]="{'killsPerGame': 'kpg'}"></resttt>
+	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
+		<resttt #rpkc
+			query="PlayerKillCount"
+			display="table"
+			[columns]="['player','kills','wrong','killsPerGame']"
+			[cnames]="{'killsPerGame': 'kpg'}">
+		</resttt>
 	</card>
 	<!--card title="Rollen" size="large">
 		<resttt query="RoleCount" display="chart" label="startrole" data="count" type="doughnut" [legend]="false" colors="colour"></resttt>
 	</card-->
-	<card title="Rollen" size="large">
-		<div *ngIf="roleplot == null">
-			<div class="row">
-			  <div class="col-4"></div>
-			  <div class="col-4">
-				<div class="d-flex justify-content-center">
-				  <div class="spinner-border text-secondary" role="status"></div>
-				</div>
-			  </div>
-			</div>
-		</div>
-		<plotly-plot *ngIf="roleplot != null" 
+	<card title="Rollen" size="large" [loaded]="roleplot != null" [reloadCallback]="loadRolePlot">
+		<plotly-plot 
 			[data]="roleplot.data"
 			[layout]="roleplot.layout"
 			[config]="{responsive: true}">

@@ -3,7 +3,22 @@
 		<h5 class="card-header" *ngIf="title">{{title}}</h5>
 	  	<div class="card-body">
 			<!-- Container for dynamic content from where the tag is used -->
-			<ng-content></ng-content>
+			<ng-content *ngIf="loaded"></ng-content>
+			<div *ngIf="!loaded">
+				<div class="row">
+				  <div class="col-4"></div>
+				  <div class="col-4">
+					<div class="d-flex justify-content-center">
+					  <div class="spinner-border text-secondary" role="status"></div>
+					</div>
+				  </div>
+				  <div class="col-4" *ngIf="reloadCallback">
+					<div class="d-flex flex-row-reverse">
+					  <button class="btn btn-secondary btn-reload" (click)="reloadCallback()" [delay]="2500" hidden>Reload</button>
+					</div>
+				  </div>
+				</div>
+			  </div>
 	  	</div>
 	</div>
 </div>
