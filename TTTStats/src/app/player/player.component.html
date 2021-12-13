@@ -1,19 +1,14 @@
 <div id="content-wrap" class="container">
 	<div dataMasonry='{ "itemSelector": ".masonry-item" }'>
-
 		<card>
 			<h1 class="display-3">{{name}}</h1>
 		</card>
-		<card title="Rollen" [loaded]="rpc.loaded" [reloadCallback]="rpc.load">
-			<resttt #rpc
-				query="PlayerRoles/{{name}}"
-				display="chart"
-				labelkey="startrole"
-				datakeys="count"
-				ctype="doughnut"
-				[coptions]="{plugins:{legend:{display:false}}}">
-			</resttt>
+		<card title="Rollen" size="large" [loaded]="roleplotLoaded" [reloadCallback]="loadRolePlot">
+			<plotly-plot *ngIf="roleplotLoaded"
+				[data]="roleplot?.data"
+				[layout]="roleplot?.layout"
+				[config]="{responsive: true}">
+			</plotly-plot>
 		</card>
-
 	</div>
 </div>
