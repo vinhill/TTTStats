@@ -2,17 +2,32 @@
 	<card>
 		<h1 class="display-3">TTT Overview</h1>
 	</card>
-	<card title="Spiele">
-		<resttt query="PlayerGameCount" display="chart" label="player" data="rounds" type="bar" [legend]="false" [options]="{scales:{yAxes:[{ticks:{beginAtZero:true}}]}}"></resttt>
+	<card title="Spiele" [loaded]="rpgc.loaded" [reloadCallback]="rpgc.load">
+		<resttt #rpgc
+			query="PlayerGameCount"
+			display="chart"
+			labelkey="player"
+			datakeys="rounds"
+			ctype="bar"
+			[clegend]="false"
+			[coptions]="{scales:{yAxes:[{ticks:{beginAtZero:true}}]}}">
+		</resttt>
 	</card>
-	<card title="Karten">
-		<resttt query="MapCount" display="chart" label="map" data="count" type="doughnut" [options]="{legend:{position:'right'}}"></resttt>
+	<card title="Karten" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
+		<resttt #rmc
+			query="MapCount"
+			display="chart"
+			labelkey="map"
+			datakeys="count"
+			ctype="doughnut"
+			[coptions]="{legend:{position:'right'}}">
+		</resttt>
 	</card>
 	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
 		<resttt #rpkc
 			query="PlayerKillCount"
 			display="table"
-			[columns]="['player','kills','wrong','killsPerGame']"
+			[datakeys]="['player','kills','wrong','killsPerGame']"
 			[cnames]="{'killsPerGame': 'kpg'}">
 		</resttt>
 	</card>
@@ -20,9 +35,9 @@
 		<resttt query="RoleCount" display="chart" label="startrole" data="count" type="doughnut" [legend]="false" colors="colour"></resttt>
 	</card-->
 	<card title="Rollen" size="large" [loaded]="roleplot != null" [reloadCallback]="loadRolePlot">
-		<plotly-plot 
-			[data]="roleplot.data"
-			[layout]="roleplot.layout"
+		<plotly-plot
+			[data]="roleplot?.data"
+			[layout]="roleplot?.layout"
 			[config]="{responsive: true}">
 		</plotly-plot>
 	</card>

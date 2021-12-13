@@ -4,8 +4,15 @@
 		<card>
 			<h1 class="display-3">{{name}}</h1>
 		</card>
-		<card title="Rollen">
-			<resttt query="PlayerRoles/{{name}}" display="chart" label="startrole" data="count" type="doughnut" [legend]="false"></resttt>
+		<card title="Rollen" [loaded]="rpc.loaded" [reloadCallback]="rpc.load">
+			<resttt #rpc
+				query="PlayerRoles/{{name}}"
+				display="chart"
+				labelkey="startrole"
+				datakeys="count"
+				ctype="doughnut"
+				[clegend]="false">
+			</resttt>
 		</card>
 
 	</div>

@@ -1,59 +1,31 @@
-<div *ngIf="loaded">
-
-  <!-- Text -->
-  <div *ngIf="display == 'text'">
-    {{stringify(result)}}
-  </div>
-
-  <!-- Table -->
-  <div *ngIf="display == 'table'">
-    <table class="table">
-      <thead>
-        <tr>
-          <th *ngFor="let key of columns">{{cnames[key] || key}}</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let row of result">
-          <td *ngFor="let key of columns">{{row[key]}}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-<!-- Chart -->
-  <div *ngIf="display == 'chart'">
-		<canvas baseChart
-	    [data]="get_column_data(data)"
-	    [labels]="get_column_data(label)"
-	    [chartType]="type"
-      [legend]="legend"
-      [options]="options">
-	  </canvas>
-  </div>
-
-  <div *ngIf="display == 'plotly'">
-    <plotly-plot
-      [data]="[{x: get_column_data(label), y: get_column_data(data), type: type}]">
-    </plotly-plot>
-  </div>
-
-<!-- endif -->
+<!-- Text -->
+<div *ngIf="display == 'text'">
+  {{stringify(result)}}
 </div>
 
-<!-- Loading -->
-<div *ngIf="!loaded">
-  <div class="row">
-    <div class="col-4"></div>
-    <div class="col-4">
-      <div class="d-flex justify-content-center">
-        <div class="spinner-border text-secondary" role="status"></div>
-      </div>
-    </div>
-    <div class="col-4">
-      <div class="d-flex flex-row-reverse">
-        <button class="btn btn-secondary btn-reload" (click)="load()" [delay]="2500" hidden>Reload</button>
-      </div>
-    </div>
-  </div>
+<!-- Table -->
+<div *ngIf="display == 'table'">
+  <table class="table">
+    <thead>
+      <tr>
+        <th *ngFor="let key of _datakeys">{{cnames[key] || key}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of result">
+        <td *ngFor="let key of _datakeys">{{row[key]}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Chart -->
+<div *ngIf="display == 'chart' && loaded">
+  <canvas baseChart
+    [datasets]="getChartDataset()"
+    [labels]="get_column_data(labelkey)"
+    [chartType]="ctype"
+    [legend]="clegend"
+    [options]="coptions">
+  </canvas>
 </div>

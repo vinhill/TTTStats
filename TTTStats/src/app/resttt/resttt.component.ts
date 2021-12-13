@@ -1,5 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { RestttService } from '../resttt.service';
+import { UtilsService } from '../utils.service';
+import { ChartDataSets } from 'chart.js';
 
 @Component({
   selector: 'resttt',
@@ -8,31 +10,37 @@ import { RestttService } from '../resttt.service';
 })
 export class RestttComponent implements OnChanges {
   loaded: boolean = false;
-  result: any = "";
+  result: any;
+  _datakeys: string[] = [];
 
   // REST Query
   @Input() query!: string;
-  // Display mode
+  // Display mode text table or chart
   @Input() display!: string;
+  // data key or keys to be displayed
+  @Input("datakeys") set datakeysetter(keys: string | string[]) {
+    if (keys instanceof Array) {
+      this._datakeys = keys;
+    }else{
+      this._datakeys = [keys];
+    }
+  };
 
-  // table column keys
-  @Input() columns: string[] = [];
+  // table column display names
   @Input() cnames: any = [];
 
-  // chart data key or keys
-  @Input() data: string | string[] = "";
   // chart color key
-  @Input() colors: any = "";
+  @Input() cmap: string = "chartjs";
   // chart label key
-  @Input() label: string = "";
+  @Input() labelkey: string = "";
   // chart type, see https://www.npmjs.com/package/ng2-charts
-  @Input() type: any = "";
+  @Input() ctype: any = "";
   // chart legend toggle
-  @Input() legend: boolean = true;
+  @Input() clegend: boolean = true;
   // chart options
-  @Input() options: any = "";
+  @Input() coptions: any = "";
 
-  constructor(private resttt: RestttService) { }
+  constructor(private resttt: RestttService, private utils: UtilsService) { }
 
   ngOnChanges() {
     this.load();
@@ -42,10 +50,6 @@ export class RestttComponent implements OnChanges {
     this.loaded = false;
     this.result = await this.resttt.get(this.query, true);
     this.loaded = true;
-    // If no columns where provided, show all
-    if (this.columns.length == 0 && this.result.length != 0) {
-      this.columns = this.keys(this.result[0]);
-    }
   }
 
   stringify(obj: any): string {
@@ -68,6 +72,21 @@ export class RestttComponent implements OnChanges {
       // To catch type errors resulting from a key not existing
       console.log(`Error ${e} in get_column_data for key ${key}. Result is ${JSON.stringify(this.result)}, loaded is ${this.loaded}`);
     }
+  }
+
+  getChartDataset() : ChartDataSets[] {
+    let datasets: ChartDataSets[] = [];
+
+    for (let key of this._datakeys) {
+      let data: any[] = this.result.cols[key];
+
+      datasets.push({
+        data: data,
+        backgroundColor: this.utils.getColormap(this.cmap, data.length),
+      });
+    }
+
+    return datasets;
   }
 
 }

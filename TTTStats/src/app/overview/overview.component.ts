@@ -44,7 +44,6 @@ export class OverviewComponent implements OnInit {
       dataitem.values.push(0);
     }
 
-    console.log(dataitem);
     // finalize roleplot data
     this.roleplot = {
       data: [dataitem],
