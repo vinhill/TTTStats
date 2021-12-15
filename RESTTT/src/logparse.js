@@ -28,9 +28,12 @@ function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function makeSingluar(string) {
+function makeSingular(string) {
   // trim away any trailing s
-  return /(?<singular>\w*)s?/.exec(string).groups.singular;
+  if (string.at(-1))
+    return string.substr(0, string.length-1);
+  else
+    return string;
 }
 
 // maps from what is logged to the team names
@@ -45,7 +48,7 @@ function translateWinner(group) {
   if (group == "restless")
     return "Restless";
   // else no s at the end, just capitalize and trim trailing s
-  return capitalizeFirstLetter(makeSingluar(group));
+  return capitalizeFirstLetter(makeSingular(group));
 }
 
 function parseEntity(entitystr) {

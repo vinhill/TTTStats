@@ -152,6 +152,11 @@ class BoundedCache {
     return this._map.has(key);
   }
   
+  update(key, value) {
+    let cache = this._map.get(key);
+    cache.value = value;
+  }
+  
   clear() {
     this._map = new Map();
     this._minHeap = new Heap(true);

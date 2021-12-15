@@ -62,6 +62,15 @@ router.get("/PlayerRoles/:name", async function(req,res,next){
               + "WHERE player = ? "
               + "GROUP BY startrole "
               + "ORDER BY count DESC ";
+  /*
+  TODO
+  SELECT startrole, COUNT(mid) as count, colour, superteam, player
+  FROM participates
+  JOIN role ON role.name = startrole
+  GROUP BY startrole, player
+  ORDER BY count DESC
+  to be more general and have fewer queries?
+  */
   req.sqlparams = [name];
   next();
 });
@@ -75,6 +84,16 @@ router.get("/PopularPurchases/:name", async function(req, res, next) {
   let name = req.params.name;
   req.queryStr = "SELECT item, count(*) as amount FROM buys WHERE player = ? GROUP BY item ORDER BY amount DESC LIMIT 10";
   req.sqlparams = [name];
+  next();
+});
+
+router.get("/TeamWincount", async function(req, res, next) {
+  req.queryStr = "SELECT team, COUNT(mid) AS count FROM wins GROUP BY team";
+  next();
+});
+
+router.get("/PlayerTeamWincount", async function(req, res, next) {
+  req.queryStr = await db.readQueryFile("PlayerTeamWincount");
   next();
 });
 
