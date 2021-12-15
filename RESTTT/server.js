@@ -4,7 +4,7 @@ const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const is_debug = false;
+const is_debug = true;
 
 //
 // Frontend
@@ -23,7 +23,7 @@ app.use(bodyParser.json())//application/json
 
 //cors is necessary for frontend to send requests to backend
 if(is_debug) {
-  app.use(cors(/*{ credentials:true, origin:"https://vinhill.github.io/TTTStats/" }*/));
+  app.use(cors());
 }else{
   app.use(cors({origin:"https://vinhill.github.io" }));
 }

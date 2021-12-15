@@ -1,3 +1,5 @@
+const { performance } = require('perf_hooks');
+
 class CacheObject {
   constructor(key, value, priority, index) {
     this.key = key;
@@ -183,15 +185,18 @@ class LogParser {
   So one only has to provide the regexes and callbacks.
   */
   
-  constructor(state={}) {
+  constructor(state={}, break_on_error=true, debug=false) {
     this.state = state;
     this.workers = [];
     this.prepared = true;
+    this.break_on_error = break_on_error;
+    this.debug = debug;
   }
   
   /*
   Attach a callback(match, state) to the parser
   that is executed whenever the regex matches a line (without \n)
+  Callback can return false, if the remaining callbacks shouldn't be executed
   */
   attach(regex, callback, priority=0) {
     // if regex then callback(match, state)
@@ -201,10 +206,12 @@ class LogParser {
       callback: callback,
       priority: priority
     });
+    if (this.debug)
+      console.log(`[LogParser] attached callback ${callback.name} to regex ${regex}`);
   }
   
   prepare() {
-    // sort workers by priorities
+    // sort workers by priorities descending
     this.workers.sort((a, b) => b.priority - a.priority);
     this.prepared = true;
   }
@@ -213,10 +220,31 @@ class LogParser {
     if (!this.prepared)
       throw "LogParser wasn't prepared, call prepare";
     
+    if (this.debug)
+      console.log(`[LogParser] Executing line ${line}`);
+    
     for (let worker of this.workers) {
       let match = worker.regex.exec(line);
-      if (match)
-        await worker.callback(match, this.state);
+      if (match) {
+        if (this.debug)
+          console.log(`[LogParser] callback ${worker.callback.name} matched`);
+        
+        if (this.break_on_error) {
+          let ret = await worker.callback(match.groups, this.state);
+          
+          if (ret === false)
+            return;
+        }else {
+          try {
+            let ret = await worker.callback(match.groups, this.state);
+
+            if (ret === false)
+              return;
+          }catch(err) {
+            console.log(`Error during logparse: ${err}`);
+          }
+        }
+      }
     }
   }
   
@@ -224,9 +252,13 @@ class LogParser {
     if(!this.prepared)
       this.prepare();
     
+    let startTime = performance.now();
     for(let line of lines) {
       await this.exec_line(line);
     }
+    let endTime = performance.now();
+    
+    console.log(`Logfile finished parsing (took ${endTime-startTime} ms).`);
   }
 }
 

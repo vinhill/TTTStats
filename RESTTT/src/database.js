@@ -13,6 +13,7 @@ const cache = new BoundedCache(100);
 
 let _read_only_con = null;
 let _admin_con = null;
+const log_queries = false;
 
 function getReadOnlyCon() {
   return new Promise(function(res, rej){
@@ -91,10 +92,14 @@ function queryReader(query, params=[]) {
       }
       
       if(err) {
-        console.error(`Error while querying db read-only for "${query}": ${err}`);
+        console.error(`Error while querying db read-only for "${query}, ${params}": ${err}`);
         rej(err);
       }else {
         res(result);
+      
+        if (log_queries) {
+          console.log(`Queries ${query} and got ${JSON.stringify(result)}`);
+        }
       }
     })
   });
@@ -112,10 +117,14 @@ function queryAdmin(query, params=[]) {
       }
       
       if(err) {
-        console.error(`Error while querying db as admin for "${query}": ${err}`);
+        console.error(`Error while querying db as admin for "${query}, ${params}": ${err}`);
         rej(err);
       }else {
         res(result);
+      
+        if (log_queries) {
+          console.log(`Queries ${query} and got ${JSON.stringify(result)}`);
+        }
       }
     })
   });

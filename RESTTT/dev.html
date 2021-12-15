@@ -17,34 +17,51 @@
 			</div>
 		</nav>
 		
-		<form style="margin-top:1%;margin-left:20%;margin-right:20%">
-			<div class="form-group row">
-				<label for="uritf" class="col-sm-2 col-form-label"> URI: </label>
-				<div class="col-sm-10">
-					<input id="uritf" type="text" value="https://resttt.glitch.me/api/v1" class="form-control" />
-				</div>
-			</div>
-			<div class="form-group row">
-				<label for="bodytf" class="col-sm-2 col-form-label"> Body: </label>
-				<div class="col-sm-10">
-					<input id="bodytf" type="text" value="username=mamu&password=passw0r1" class="form-control" />
-				</div>
-			</div>
-			<div class="form-group row">
-				<label for="methodtf" class="col-sm-2 col-form-label"> Methode: </label>
-				<div class="col-sm-10">
-					<input id="methodtf" type="text" value="POST" class="form-control" />
-				</div>
-			</div>
-			<div class="form-group row">
-				<label for="encodetf" class="col-sm-2 col-form-label" > Codierung: </label>
-				<div class="col-sm-10">
-					<input id="encodetf" type="text" value="application/x-www-form-urlencoded" class="form-control"  />
-				</div>
-			</div>
-			
-			<input id="submitbtn" type="button" value="Submit" class="btn btn-secondary btn-lg btn-block" />
-		</form>
+    <div class="row">
+      <div class="col-3" style="padding: 1em">
+        <label for="urlencodetf" class="col-sm-2 col-form-label"> URL encode </label>
+        <input id="urlencodetf" type="text" />
+        <label for="urlencodedtf" class="col-sm-2 col-form-label"> Result </label>
+        <input id="urlencodedtf" type="text" />
+      </div>
+      <div class="col-6">
+        <form>
+          <div class="form-group row">
+            <label for="uritf" class="col-sm-2 col-form-label"> URI: </label>
+            <div class="col-sm-10">
+              <input id="uritf" type="text" value="https://resttt.glitch.me/api/v1" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="bodytf" class="col-sm-2 col-form-label"> Body: </label>
+            <div class="col-sm-10">
+              <input id="bodytf" type="text" value="username=mamu&password=passw0r1" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="methodtf" class="col-sm-2 col-form-label"> Methode: </label>
+            <div class="col-sm-10">
+              <input id="methodtf" type="text" value="POST" class="form-control" />
+            </div>
+          </div>
+          <div class="form-group row">
+            <label for="encodetf" class="col-sm-2 col-form-label" > Codierung: </label>
+            <div class="col-sm-10">
+              <input id="encodetf" type="text" value="application/x-www-form-urlencoded" class="form-control"  />
+            </div>
+          </div>
+          <input id="submitbtn" type="button" value="Submit" class="btn btn-secondary btn-lg btn-block" />
+        </form>
+      </div>
+      <div class="col-3" style="padding: 1em">
+        <p>
+          Use these buttons to place teplates in the REST query form. You still have to submit!
+        </p>
+        <input id="template_reset" type="button" value="Reset DB" class="btn btn-secondary" />
+        <input id="template_loadcnf" type="button" value="Load Config" class="btn btn-secondary" />
+        <input id="template_unsetmut" type="button" value="Unset Mutex" class="btn btn-secondary" />
+      </div>
+    </div>
 		
 		<p id="out" style="margin:1%;font-size:20px">
 			Hier steht nach Knopfdruck die Serverantwort.
@@ -52,7 +69,7 @@
 	
 	</body>
 	<script>
-		async function submit() {
+    async function submit() {
 			let uri = document.getElementById("uritf").value;
 			let body = document.getElementById("bodytf").value;
 			let method = document.getElementById("methodtf").value;
@@ -86,7 +103,48 @@
         out.innerHTML = `Error ${err.message}, Status ${response.status}`;
       });
 		}
+    
+    function template_reset() {
+			let uri = document.getElementById("uritf");
+			let body = document.getElementById("bodytf");
+			let method = document.getElementById("methodtf");
+      
+      uri.value = "https://resttt.glitch.me/api/v1/dev/makedb";
+      body.value = "";
+      method.value = "GET";
+    }
+    
+    function template_loadcnf() {
+			let uri = document.getElementById("uritf");
+			let body = document.getElementById("bodytf");
+			let method = document.getElementById("methodtf");
+      
+      uri.value = "https://resttt.glitch.me/api/v1/config/parse";
+      body.value = "name=06.12.2021.log&date=2021-12-06";
+      method.value = "POST";
+    }
 		
+    function update_urlencoded() {
+      let dec = document.getElementById("urlencodetf");
+      let enc = document.getElementById("urlencodedtf");
+      enc.value = encodeURIComponent(dec.value);
+    }
+    
+    function template_unsetmut() {
+			let uri = document.getElementById("uritf");
+			let body = document.getElementById("bodytf");
+			let method = document.getElementById("methodtf");
+      
+      uri.value = "https://resttt.glitch.me/api/v1/config/unsetmutex";
+      body.value = "";
+      method.value = "GET";
+    }
+    
 		document.getElementById("submitbtn").addEventListener("click", submit);
+    document.getElementById("template_reset").addEventListener("click", template_reset);
+    document.getElementById("template_loadcnf").addEventListener("click", template_loadcnf);
+    document.getElementById("template_unsetmut").addEventListener("click", template_unsetmut);
+    
+    document.getElementById("urlencodetf").addEventListener("input", update_urlencoded);
 	</script>
 </html>

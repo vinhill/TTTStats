@@ -9,10 +9,8 @@ FROM (-- kills per player
     SELECT
         causee AS player,
         COUNT(*) AS kills,
-        sum(case when atkroles.team = vktroles.team then 1 else 0 end) AS wrong
+        SUM(teamkill) AS wrong
     FROM dies
-		JOIN role AS atkroles ON atkroles.name = dies.atkrole
-		JOIN role AS vktroles ON vktroles.name = dies.vktrole
 		WHERE causee IS NOT NULL
     GROUP BY causee
     ) a

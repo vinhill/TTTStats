@@ -22,6 +22,13 @@ As this involves two async db queries, a mutex here might be good.
 */
 var _mutex = false;
 
+router.get("/unsetmutex", function(req,res,next){
+  // manual way to unlock mutex in case the /parse route encountered an error
+  _mutex = false;
+  
+  res.status(200).end();
+});
+
 router.post("/parse", async function(req,res,next){
   // check request parameters
   let filename = req.body.name;
@@ -41,7 +48,7 @@ router.post("/parse", async function(req,res,next){
   
   // race condition with the check for presence, fetching file and declaring presence
   if (_mutex) {
-    res.status(400).json("Too many parse calls in too short time.");
+    res.status(400).json("Too many parse calls in too short time, ignoring request to prevent race conditions.");
     return
   }else {
     _mutex = true;
@@ -75,8 +82,7 @@ router.post("/parse", async function(req,res,next){
   
   // parse
   logparse.load_logfile(data.split("\n"), date);
-  db.clearCache();
-  
+    
   res.status(200).end();
 });
 

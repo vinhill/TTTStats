@@ -8,7 +8,7 @@ const path = require('path');
 const db = require("../database.js");
 
 router.get("/", function(req,res,next) {
-  res.sendFile(path.join(__dirname, '/../dev.html'));
+  res.sendFile(path.join(__dirname, '/../../dev.html'));
 })
 
 router.get("/makedb", async function(req,res,next){
