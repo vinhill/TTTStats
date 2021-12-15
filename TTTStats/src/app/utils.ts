@@ -162,12 +162,13 @@ export class ExecLimiter {
   }
 
   public requestExec() {
-    if (Date.now() - this.lastExec > this.exec_cooldown) {
+    if (Date.now() - this.lastExec >= this.exec_cooldown) {
       this.doExec();
     }else if (!this.pending) {
       this.pending = true;
       setTimeout(() => {
-        this.doExec();
+				if (this.pending && Date.now() - this.lastExec >= this.exec_cooldown)
+					this.doExec();
       }, this.exec_cooldown - (Date.now() - this.lastExec) );
     }
     // else: already pending
