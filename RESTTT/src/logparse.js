@@ -393,8 +393,14 @@ async function load_logfile(log, date) {
     onPlayerLeft
   );
   
+  // speed up if many inserts come in a short time
+  // otherwise, a flush to disk is performed after each modification
+  db.queryAdmin("SET autocommit=0");
+  
   await lp.exec(log);
   
+  db.queryAdmin("COMMIT");
+  db.queryADMIN("SET autocommit=1");
   db.clearCache();
 }
 
