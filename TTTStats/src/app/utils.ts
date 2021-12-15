@@ -180,3 +180,11 @@ export class ExecLimiter {
     this.func();
   }
 }
+
+export function strcmp(str1: string, str2: string) {
+  return str1 < str2 ? -1 : +(str1 > str2);
+}
+
+export function round(num: number, digits: number) {
+  return Math.round(num * 10 ** digits) / 10 ** digits;
+}

@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
-import { RestttService } from '../resttt.service';
+import { DataStoreService } from '../data-store.service';
 
 @Component({
   selector: 'resttt',
@@ -13,10 +13,11 @@ export class RestttComponent implements OnChanges {
 
   // REST Query
   @Input() query!: string;
+  @Input() params: any = {};
   // Display mode text or RoleTM
   @Input() display!: string;
 
-  constructor(private resttt: RestttService) { }
+  constructor(private datastore: DataStoreService) { }
 
   ngOnChanges() {
     this.load();
@@ -24,7 +25,7 @@ export class RestttComponent implements OnChanges {
 
   async load() {
     this.loaded = false;
-    this._result = await this.resttt.get(this.query, true);
+    this._result = await this.datastore.get(this.query, this.params);
     if (this.display == "RoleTM")
       this.loadRoleTreemap();
     this.loaded = true;

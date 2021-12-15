@@ -7,16 +7,27 @@
 	</card>
 	<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
 		<resttt #rrc
-			query="PlayerRoles/{{name}}"
+			query="PlayerRoleCount"
+			[params]="{player: name}"
 			display="RoleTM">
 		</resttt>
 	</card>
-	<card title="Meistgekauft" ize="large" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
+	<card title="Meistgekauft" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
 		<resttt-chart #rpp
-			query="PopularPurchases/{{name}}"
+			query="PlayerPopularPurchases"
+			[params]="{player: name}"
 			labelkey="item"
 			datakeys="amount"
 			ctype="doughnut">
 		</resttt-chart>
+	</card>
+	<card title="Siegreiche Rollen" [loaded]="rpw.loaded" [reloadCallback]="rpw.load">
+		<resttt-table #rpw
+			query="PlayerRoleWincount"
+			[params]="{player: name}"
+			datakeys="startrole,count"
+			[cnames]="{startrole: 'Anfangsrolle', count: 'Anzahl'}">
+			ctype="doughnut">
+		</resttt-table>
 	</card>
 </div>

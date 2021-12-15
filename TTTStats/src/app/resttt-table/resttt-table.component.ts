@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
-import { RestttService } from '../resttt.service';
+import { DataStoreService } from '../data-store.service';
 
 @Component({
   selector: 'resttt-table',
@@ -9,17 +9,21 @@ import { RestttService } from '../resttt.service';
 export class RestttTableComponent implements OnChanges {
   loaded: boolean = false;
   _result: any;
+  _datakeys: string[] = [];
   
   // REST Query
   @Input() query!: string;
+  @Input() params: any = {};
 
   // data key or keys to be displayed
-  @Input() datakeys: string[] = [];
+  @Input("datakeys") set datakeysetter(keys: string) {
+    this._datakeys = keys.split(",");
+  };
 
   // table column display names
   @Input() cnames: {[key: string] : string} = {};
 
-  constructor(private resttt: RestttService) { }
+  constructor(private datastore: DataStoreService) { }
 
   ngOnChanges() {
     this.load();
@@ -27,7 +31,11 @@ export class RestttTableComponent implements OnChanges {
 
   async load() {
     this.loaded = false;
-    this._result = await this.resttt.get(this.query, true);
+    let res = await this.datastore.get(this.query, this.params);
+    this._result = res.rows;
+    if (this._datakeys.length == 0) {
+      this._datakeys = Object.keys(res.cols);
+    }
     this.loaded = true;
   }
 }

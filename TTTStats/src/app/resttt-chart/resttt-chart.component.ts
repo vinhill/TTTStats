@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
-import { RestttService } from '../resttt.service';
 import { getColormap } from '../utils';
 import { ChartConfiguration } from 'chart.js';
+import { DataStoreService } from '../data-store.service';
 
 @Component({
   selector: 'resttt-chart',
@@ -16,13 +16,10 @@ export class RestttChartComponent implements OnChanges {
 
   // REST Query
   @Input() query!: string;
+  @Input() params: any = {};
   // data key or keys to be displayed
-  @Input("datakeys") set datakeysetter(keys: string | string[]) {
-    if (keys instanceof Array) {
-      this._datakeys = keys;
-    }else{
-      this._datakeys = [keys];
-    }
+  @Input("datakeys") set datakeysetter(keys: string) {
+    this._datakeys = keys.split(",");
   };
 
   // chart color key
@@ -34,7 +31,7 @@ export class RestttChartComponent implements OnChanges {
   // chart options
   @Input() coptions: ChartConfiguration["options"] | undefined;
 
-  constructor(private resttt: RestttService) { }
+  constructor(private datastore: DataStoreService) { }
 
   ngOnChanges() {
     this.load();
@@ -42,7 +39,7 @@ export class RestttChartComponent implements OnChanges {
 
   async load() {
     this.loaded = false;
-    this.result = await this.resttt.get(this.query, true);
+    this.result = await this.datastore.get(this.query, this.params);
     this.makeChartDataset();
     this.loaded = true;
   }

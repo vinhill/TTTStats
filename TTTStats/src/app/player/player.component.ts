@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { RestttService } from '../resttt.service';
 import { CardComponent } from '../card/card.component';
+import { DataStoreService } from '../data-store.service';
 import { ExecLimiter } from '../utils';
 
 declare var Masonry: any;
@@ -22,7 +22,7 @@ export class PlayerComponent implements OnInit {
   resizeObserver: ResizeObserver;
   executor: ExecLimiter;
 
-  constructor(private route: ActivatedRoute, private resttt: RestttService) {
+  constructor(private route: ActivatedRoute, private datastore: DataStoreService) {
     this.resizeObserver = new ResizeObserver((entries: any) => {
       this.executor.requestExec();
     });
@@ -57,27 +57,9 @@ export class PlayerComponent implements OnInit {
   }
 
   async load() {
-    await this.getPlayedRounds();
-    await this.getKills();
-  }
-
-  async getPlayedRounds() {
-    let playerrounds = await this.resttt.get("PlayerGameCount");
-    playerrounds = playerrounds.filter((x: any) => x.player == this.name);
-    if (playerrounds.length != 1)
-      throw new Error(`PlayerGameCount for player ${this.name} returned ${playerrounds}.`);
-    else
-      this.rounds = playerrounds[0].rounds;
-  }
-
-  async getKills() {
-    let killcounts = await this.resttt.get("PlayerKillCount");
-    killcounts = killcounts.filter((x: any) => x.player == this.name);
-    if (killcounts.length != 1)
-      throw new Error(`PlayerKillCount for player ${this.name} returned ${killcounts}.`);
-    else {
-      this.kills = killcounts[0].kills;
-      this.teamkills = killcounts[0].wrong;
-    }
+    this.rounds = await this.datastore.PlayerGameCount(this.name);
+    let killdata = await this.datastore.PlayerKillStats(this.name);
+    this.kills = killdata.kills;
+    this.teamkills = killdata.wrong;
   }
 }
