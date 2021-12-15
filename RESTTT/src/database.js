@@ -148,11 +148,15 @@ function clearCache() {
 
 async function getCache(query) {
   if(!cache.has(query)) {
-    var futureVal = queryReader(query);
+    let futureVal = queryReader(query);
     // add promise to cache in case query is queried again while futureVal hasn't been received
     cache.set(query, futureVal);
     // await futureVal and update cache
-    var res = await futureVal;
+    let res = await futureVal;
+    if (JSON.stringify(res).length > 5000) {
+      console.log(`The query '${query}' had a result that was too long to be cached.`);
+      res = "Query result too long";
+    }
     cache.update(query, res);
     return res;
   }
@@ -161,7 +165,12 @@ async function getCache(query) {
     cache.increment(query);
     // could be the query result or a Promise<query result>
     // await will work with both and return the result
-    return await cache.get(query);
+    let res = await cache.get(query);
+    if (JSON.stringify(res).length > 5000) {
+      console.log(`The query '${query}' had a result that was too long to be cached.`);
+      res = "Query result too long";
+    }
+    return res;
   }
 }
 
