@@ -13,7 +13,6 @@ export class AppComponent implements OnInit {
   
   async ngOnInit() {
 	  // TODO remove all any and type them correctly
-	  let res = await this.datastore.get("Players");
-	  this.players = res.cols.name;
+    this.players = await this.datastore.Players();
   }
 }

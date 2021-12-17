@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnChanges } from '@angular/core';
 import { DataStoreService } from '../data-store.service';
-import { range } from '../utils';
+import { range, getColormap } from '../utils';
 import { RestttResult } from '../resttt.service';
 
 @Component({
@@ -89,12 +89,16 @@ export class RestttComponent implements OnChanges {
   }
 
   async loadSankey() {
-    let players = (await this.datastore.Players()).cols.name;
+    let players = (await this.datastore.Players());
 
     let playerMap = new Map<string, number>();
     for (let player of players) {
       playerMap.set(player, playerMap.size);
     }
+
+    let nodecolors = getColormap("plotly", players.length);
+    nodecolors = [...nodecolors, ...nodecolors];
+    let nodelabels = [...players, ...players];
 
     let dataitem = {
       type: "sankey",
@@ -103,7 +107,8 @@ export class RestttComponent implements OnChanges {
         pad: 15,
         thickness: 30,
         line: {color: "black", width: 0.5},
-        label: [...players, ...players]
+        label: nodelabels,
+        color: nodecolors,
       },
       link: {
         source: this._result!.cols[this.options.source].map(k => playerMap.get(k)),
@@ -124,10 +129,8 @@ export class RestttComponent implements OnChanges {
   plotlyResizeWorkaround() {
     // workaround for plotly svm-container not taking the height of its child
     let container = this.element.nativeElement.querySelector(".svg-container");
-    console.log(container);
     if (container) {
         container.style.height = container.firstChild.clientHeight+"px";
-        console.log(container.style.height);
     }
   }
 }

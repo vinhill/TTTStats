@@ -19,6 +19,7 @@
 			labelkey="map"
 			datakeys="count"
 			ctype="doughnut"
+			cmap="plotly"
 			[coptions]="{aspectRatio: 2, plugins:{legend:{position:'right'}}}">
 		</resttt-chart>
 	</card>
@@ -53,7 +54,8 @@
 			query="PopularPurchases"
 			labelkey="item"
 			datakeys="amount"
-			ctype="doughnut">
+			ctype="doughnut"
+			cmap="plotly">
 		</resttt-chart>
 	</card>
 	<card title="Siegreiche Teams" [loaded]="rtw.loaded" [reloadCallback]="rtw.load">
@@ -61,7 +63,8 @@
 			query="TeamWincount"
 			labelkey="team"
 			datakeys="count"
-			ctype="doughnut">
+			ctype="doughnut"
+			cmap="plotly">
 		</resttt-chart>
 	</card>
 </div>

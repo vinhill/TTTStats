@@ -18,7 +18,8 @@
 			[params]="{player: name}"
 			labelkey="item"
 			datakeys="amount"
-			ctype="doughnut">
+			ctype="doughnut"
+			cmap="plotly">
 		</resttt-chart>
 	</card>
 	<card title="Siegreiche Rollen" [loaded]="rpw.loaded" [reloadCallback]="rpw.load">
@@ -36,7 +37,8 @@
 			[params]="{player: name}"
 			labelkey="weapon"
 			datakeys="count"
-			ctype="doughnut">
+			ctype="doughnut"
+			cmap="plotly">
 		</resttt-chart>
 	</card>
 	<card title="Für dich am gefährlichsten" [loaded]="rpdbw.loaded" [reloadCallback]="rpdbw.load">
@@ -45,7 +47,8 @@
 			[params]="{player: name}"
 			labelkey="weapon"
 			datakeys="count"
-			ctype="doughnut">
+			ctype="doughnut"
+			cmap="plotly">
 		</resttt-chart>
 	</card>
 </div>

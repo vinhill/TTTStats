@@ -33,8 +33,9 @@ export class DataStoreService {
 
   constructor(private resttt: RestttService) { }
 
-  async Players(): Promise<RestttResult> {
-    return this.resttt.get('Players');
+  async Players(): Promise<string[]> {
+    let res = await this.resttt.get('Players');
+    return res.cols.name.sort();
   }
 
   async GameCount(): Promise<number> {
@@ -176,8 +177,6 @@ export class DataStoreService {
 
   async get(query: string, params: any = {}): Promise<RestttResult> {
     switch(query) {
-      case "Players":
-        return this.Players();
         case "PlayerGameCounts":
           return this.PlayerGameCounts();
       case "MapCount":
