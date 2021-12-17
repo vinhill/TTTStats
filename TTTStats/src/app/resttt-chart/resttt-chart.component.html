@@ -1,7 +1,6 @@
-<div *ngIf="loaded">
-    <canvas baseChart
-      [data]="_chartData"
-      [type]="ctype"
-      [options]="coptions">
-    </canvas>
+<div>
+  <div class="chart-container">
+    <canvas #chart></canvas>
   </div>
+  <div class="chart-legend" #legend></div>
+</div>
