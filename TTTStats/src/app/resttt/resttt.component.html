@@ -7,7 +7,8 @@
   <plotly-plot *ngIf="loaded"
 		[data]="_treemap?.data"
 		[layout]="_treemap?.layout"
-		[config]="{responsive: true}">
+		[config]="{responsive: true}"
+		(afterPlot)="plotlyResizeWorkaround()">
 	</plotly-plot>
 </div>
 
@@ -15,6 +16,7 @@
 	<plotly-plot *ngIf="loaded"
 		  [data]="_sankey?.data"
 		  [layout]="_sankey?.layout"
-		  [config]="{responsive: true}">
+		  [config]="{responsive: true}"
+		  (afterPlot)="plotlyResizeWorkaround()">
 	  </plotly-plot>
   </div>

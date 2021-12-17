@@ -121,19 +121,13 @@ export class RestttComponent implements OnChanges {
     };
   }
 
-  /*plotlyResizeWorkaround() {
+  plotlyResizeWorkaround() {
     // workaround for plotly svm-container not taking the height of its child
     let container = this.element.nativeElement.querySelector(".svg-container");
-    if (!container) {
-      setTimeout(() => {
-        this.plotlyResizeWorkaround();
-      }, 100);
-    }else {
-      console.log("Added");
-      container.firstChild.addEventListener("change", () => {
-        console.log("Works");
+    console.log(container);
+    if (container) {
         container.style.height = container.firstChild.clientHeight+"px";
-      });
+        console.log(container.style.height);
     }
-  }*/
+  }
 }
