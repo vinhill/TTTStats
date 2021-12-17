@@ -5,8 +5,16 @@
 
 <div *ngIf="display == 'RoleTM'">
   <plotly-plot *ngIf="loaded"
-			[data]="_treemap?.data"
-			[layout]="_treemap?.layout"
-			[config]="{responsive: true}">
-		</plotly-plot>
+		[data]="_treemap?.data"
+		[layout]="_treemap?.layout"
+		[config]="{responsive: true}">
+	</plotly-plot>
 </div>
+
+<div *ngIf="display == 'Sankey'">
+	<plotly-plot *ngIf="loaded"
+		  [data]="_sankey?.data"
+		  [layout]="_sankey?.layout"
+		  [config]="{responsive: true}">
+	  </plotly-plot>
+  </div>

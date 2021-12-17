@@ -2,7 +2,27 @@ import { Injectable } from '@angular/core';
 
 export type RestttResult = {
 	rows: any[];
-	cols: any;
+	cols: {[key: string]: any[]};
+}
+
+export function RestttWithColumns(table: any[]): RestttResult {
+	/*
+	[{c1: 0, c2: 1}, {c1: 3, c2: 2}]
+	to
+	{c1: [0, 3], c2: [1,2]}
+	*/
+	if (table.length == 0) {
+		return {rows: table, cols: {}};
+	}
+
+	let cols: any = {};
+	for (let column of Object.keys(table[0])) {
+		cols[column] = table.map(function(row: any) {
+			  return row[column]
+		});
+	  }
+
+	return {rows: table, cols: cols};
 }
 
 @Injectable({
@@ -26,7 +46,7 @@ export class RestttService {
 		if(res.status != 200) {
 			console.log(await res.json());
 		}
-		let content = this.withColumns(await res.json());
+		let content = RestttWithColumns(await res.json());
 		return content;
 	}
 	
@@ -40,7 +60,7 @@ export class RestttService {
 		if(res.status != 200) {
 			console.log(await res.json());
 		}
-		let content = this.withColumns(await res.json());
+		let content = RestttWithColumns(await res.json());
 		return content;
 	}
 
@@ -51,25 +71,5 @@ export class RestttService {
 		}
 
 		return this.cache[key];
-	}
-
-	public withColumns(table: any[]): RestttResult {
-		/*
-		[{c1: 0, c2: 1}, {c1: 3, c2: 2}]
-		to
-		{c1: [0, 3], c2: [1,2]}
-		*/
-		if (table.length == 0) {
-			return {rows: table, cols: {}};
-		}
-
-		let cols: any = {};
-		for (let column of Object.keys(table[0])) {
-			cols[column] = table.map(function(row: any) {
-		  		return row[column]
-			});
-	  	}
-
-		return {rows: table, cols: cols};
 	}
 }

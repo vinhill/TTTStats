@@ -20,7 +20,7 @@ export class OverviewComponent {
       this.executor.requestExec();
     });
     this.executor = new ExecLimiter(() => {
-      this.masonry.layout();
+      this.relayout();
     });
   }
 
@@ -37,4 +37,8 @@ export class OverviewComponent {
       this.resizeObserver.observe(child.nativeElement.firstChild);
     }
   };
+
+  relayout() {
+    this.masonry.layout();
+  }
 }

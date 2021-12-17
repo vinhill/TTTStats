@@ -2,6 +2,7 @@
 	<card>
 		<h1 class="display-3">TTT Overview</h1>
 		Made with ❤ by Josu und Vincent
+		<button (click)="relayout()">Re-layout</button>
 	</card>
 	<card title="Spiele" [loaded]="rpgc.loaded" [reloadCallback]="rpgc.load">
 		<resttt-chart #rpgc
@@ -34,6 +35,20 @@
 			display="RoleTM">
 		</resttt>
 	</card>
+	<card title="Wer tötet wen?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
+		<resttt #wkw
+			query="WhoKilledWho"
+			display="Sankey"
+			[options]="{source:'killer', target:'victim'}">
+		</resttt>
+	</card>
+	<!--card title="Wer spielt mit wem?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
+		<resttt #wkw
+			query="WhoTeamedWho"
+			display="Sankey"
+			[options]="{source:'player', target:'mate'}">
+		</resttt>
+	</card-->
 	<card title="Meistgekauft" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
 		<resttt-chart #rpp
 			query="PopularPurchases"
@@ -47,7 +62,7 @@
 			query="TeamWincount"
 			labelkey="team"
 			datakeys="count"
-			ctype="bar">
+			ctype="doughnut">
 		</resttt-chart>
 	</card>
 </div>

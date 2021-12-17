@@ -1,5 +1,7 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges } from '@angular/core';
 import { DataStoreService } from '../data-store.service';
+import { range } from '../utils';
+import { RestttResult } from '../resttt.service';
 
 @Component({
   selector: 'resttt',
@@ -8,8 +10,9 @@ import { DataStoreService } from '../data-store.service';
 })
 export class RestttComponent implements OnChanges {
   loaded: boolean = false;
-  _result: any;
+  _result: RestttResult | undefined;
   _treemap: any;
+  _sankey: any;
 
   // REST Query
   @Input() query!: string;
@@ -17,7 +20,9 @@ export class RestttComponent implements OnChanges {
   // Display mode text or RoleTM
   @Input() display!: string;
 
-  constructor(private datastore: DataStoreService) { }
+  @Input() options: any = {};
+
+  constructor(private datastore: DataStoreService, private element: ElementRef) { }
 
   ngOnChanges() {
     this.load();
@@ -28,6 +33,8 @@ export class RestttComponent implements OnChanges {
     this._result = await this.datastore.get(this.query, this.params);
     if (this.display == "RoleTM")
       this.loadRoleTreemap();
+    if (this.display == "Sankey")
+      this.loadSankey();
     this.loaded = true;
   }
 
@@ -39,10 +46,10 @@ export class RestttComponent implements OnChanges {
     let dataitem = {
       type: "treemap",
       branchvalues: "total",
-      labels: this._result.cols.startrole,
-      parents: this._result.cols.superteam,
-      values: this._result.cols.count,
-      marker: {colors: this._result.cols.colour},
+      labels: this._result!.cols.startrole,
+      parents: this._result!.cols.superteam,
+      values: this._result!.cols.count,
+      marker: {colors: this._result!.cols.colour},
     };
 
     // aggregate group value from subgroups
@@ -80,4 +87,53 @@ export class RestttComponent implements OnChanges {
       }
     };
   }
+
+  async loadSankey() {
+    let players = (await this.datastore.Players()).cols.name;
+
+    let playerMap = new Map<string, number>();
+    for (let player of players) {
+      playerMap.set(player, playerMap.size);
+    }
+
+    let dataitem = {
+      type: "sankey",
+      orientation: "h",
+      node: {
+        pad: 15,
+        thickness: 30,
+        line: {color: "black", width: 0.5},
+        label: [...players, ...players]
+      },
+      link: {
+        source: this._result!.cols[this.options.source].map(k => playerMap.get(k)),
+        target: this._result!.cols[this.options.target].map(v => players.length+playerMap.get(v)!),
+        value: this._result!.cols.count
+      }
+    };
+
+    this._sankey = {
+      data: [dataitem],
+      layout: {
+        margin: {l: 0, r: 0, b: 0, t:0},
+        autosize: true
+      }
+    };
+  }
+
+  /*plotlyResizeWorkaround() {
+    // workaround for plotly svm-container not taking the height of its child
+    let container = this.element.nativeElement.querySelector(".svg-container");
+    if (!container) {
+      setTimeout(() => {
+        this.plotlyResizeWorkaround();
+      }, 100);
+    }else {
+      console.log("Added");
+      container.firstChild.addEventListener("change", () => {
+        console.log("Works");
+        container.style.height = container.firstChild.clientHeight+"px";
+      });
+    }
+  }*/
 }

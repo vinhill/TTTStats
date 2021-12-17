@@ -188,3 +188,11 @@ export function strcmp(str1: string, str2: string) {
 export function round(num: number, digits: number) {
   return Math.round(num * 10 ** digits) / 10 ** digits;
 }
+
+export function range(from: number, to: number, step: number = 1) : number[] {
+  var arr = [];
+  for (var i = from; i <= to; i += step) {
+    arr.push(i);
+  }
+  return arr;
+}
