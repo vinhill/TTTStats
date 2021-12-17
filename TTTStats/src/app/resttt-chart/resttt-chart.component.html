@@ -1,4 +1,4 @@
-<div class="chart-container" [class.chart-container-legend]="legend">
+<div class="chart-container" [class.chart-container-legend]="htmllegend && legend">
   <canvas #chart></canvas>
 </div>
 
@@ -6,7 +6,7 @@
   <ul class="chart-legend-list" *ngFor="let item of legenditems">
     <li class="chart-legend-item" (click)="chartToggleItem(item)">
       <span [style.background]="item.fillStyle" [style.border-color]="item.strokeStyle" [style.border-width]="item.lineWidth+'px'"></span>
-      <p [style.font-color]="item.fontColor" [style.text-decoration]="item.hidden ? 'line-through' : ''">{{item.text}}</p>
+      <p [style.font-color]="item.fontColor" [style.text-decoration]="item.hidden ? 'line-through' : ''">{{cleanTTTLabel(item.text)}}</p>
     </li>
   </ul>
 </div>

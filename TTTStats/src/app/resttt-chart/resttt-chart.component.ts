@@ -51,7 +51,7 @@ export class RestttChartComponent implements OnChanges {
   // general toggle for legend
   @Input() legend: boolean = true;
   // specific toggle between chartjs svg and custom html legend
-  @Input() htmllegend: boolean = false;
+  @Input() htmllegend: boolean = true;
 
   constructor(private datastore: DataStoreService) { }
 
@@ -127,5 +127,9 @@ export class RestttChartComponent implements OnChanges {
     if (!this.coptions.plugins.legend)
       this.coptions.plugins.legend = {};
     this.coptions.plugins.legend.display = false;
+  }
+
+  cleanTTTLabel(label: string): string {
+    return label.replace(/(ttt_?|weapon_?|item_?)/g, "");
   }
 }
