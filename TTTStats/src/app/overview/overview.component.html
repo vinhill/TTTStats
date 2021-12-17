@@ -10,7 +10,7 @@
 			datakeys="rounds"
 			ctype="bar"
 			cmap="score"
-			[coptions]="{plugins:{legend:{display: false}}}">
+			[legend]="false">
 		</resttt-chart>
 	</card>
 	<card title="Karten" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
@@ -19,8 +19,7 @@
 			labelkey="map"
 			datakeys="count"
 			ctype="doughnut"
-			cmap="plotly"
-			[coptions]="{aspectRatio: 2, plugins:{legend:{position:'right'}}}">
+			cmap="plotly">
 		</resttt-chart>
 	</card>
 	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
