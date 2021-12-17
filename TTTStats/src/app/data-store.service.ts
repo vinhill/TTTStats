@@ -35,7 +35,7 @@ export class DataStoreService {
 
   async Players(): Promise<string[]> {
     let res = await this.resttt.get('Players');
-    return res.cols.name.sort();
+    return res.cols.name.sort((a: string, b: string)=> strcmp(a.toLowerCase(), b.toLowerCase()));
   }
 
   async GameCount(): Promise<number> {
