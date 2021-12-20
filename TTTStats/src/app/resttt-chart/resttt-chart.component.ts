@@ -3,6 +3,11 @@ import { getColormap } from '../utils';
 import { ChartConfiguration, Chart, ChartType, LegendItem } from 'chart.js';
 import { DataStoreService } from '../data-store.service';
 
+/*
+ * Very simple class to get legend info from a chart
+ * it seems like a workaround, but using a plugin is
+ * actually the recommended way.
+ */
 class CustomLegend {
   id: string = "htmlLegend";
 
@@ -17,6 +22,14 @@ class CustomLegend {
     this.onReceivedItems(items);
   }
 }
+export type LegendConfiguration = {
+  disabled?: boolean,
+  use_chartjs?: boolean
+};
+type InternalLegendConfig = {
+  disabled: boolean,
+  use_chartjs: boolean
+};
 
 @Component({
   selector: 'resttt-chart',
@@ -25,9 +38,14 @@ class CustomLegend {
 })
 export class RestttChartComponent implements OnChanges {
   loaded: boolean = false;
-  private _datakeys: string[] = [];
-  private _chart: Chart | undefined;
+  private datakeys: string[] = [];
+  private chart: Chart | undefined;
   legenditems: LegendItem[] = [];
+  legendconfig: InternalLegendConfig = {
+    disabled: false,
+    use_chartjs: false
+  }
+  
 
   @ViewChild('chart') private _chartCnvs!: ElementRef;
 
@@ -37,7 +55,7 @@ export class RestttChartComponent implements OnChanges {
 
   // data key or keys to be displayed
   @Input("datakeys") set datakeysetter(keys: string) {
-    this._datakeys = keys.split(",");
+    this.datakeys = keys.split(",");
   };
 
   // chart color key
@@ -49,9 +67,10 @@ export class RestttChartComponent implements OnChanges {
   // chart options
   @Input() coptions: ChartConfiguration["options"] = {};
   // general toggle for legend
-  @Input() legend: boolean = true;
-  // specific toggle between chartjs svg and custom html legend
-  @Input() htmllegend: boolean = true;
+  @Input("legend") set setlegendconfig(config: LegendConfiguration) {
+    for (let key of Object.keys(config))
+      (this.legendconfig as any)[key] = (config as any)[key];
+  };
 
   constructor(private datastore: DataStoreService) { }
 
@@ -67,7 +86,7 @@ export class RestttChartComponent implements OnChanges {
     this.loaded = false;
     let result = await this.datastore.get(this.query, this.params);
 
-    if (!this.legend || this.htmllegend) {
+    if (!this.legendconfig.use_chartjs) {
       this.disableChartLegend();
     }
 
@@ -80,7 +99,7 @@ export class RestttChartComponent implements OnChanges {
       },
     };
 
-    for (let key of this._datakeys) {
+    for (let key of this.datakeys) {
       let data: any[] = result.cols[key];
       let colors = getColormap(this.cmap, data.length);
 
@@ -93,7 +112,7 @@ export class RestttChartComponent implements OnChanges {
       });
     }
 
-    if (this.legend && this.htmllegend) {
+    if (!this.legendconfig.disabled) {
       let legendPlugin = new CustomLegend((items: LegendItem[]) => {
         this.legenditems = items;
       });
@@ -103,20 +122,20 @@ export class RestttChartComponent implements OnChanges {
       _chartData.plugins.push(legendPlugin);
     }
 
-    this._chart = new Chart(this._chartCnvs.nativeElement, _chartData);
+    this.chart = new Chart(this._chartCnvs.nativeElement, _chartData);
 
     this.loaded = true;
   }
 
   chartToggleItem(item: any) {
-    const {type} = this._chart!.config;
+    const {type} = this.chart!.config;
     if (type === 'pie' || type === 'doughnut') {
       // Pie and doughnut charts only have a single dataset and visibility is per item
-      this._chart!.toggleDataVisibility(item.index);
+      this.chart!.toggleDataVisibility(item.index);
     } else {
-      this._chart!.setDatasetVisibility(item.datasetIndex, !this._chart!.isDatasetVisible(item.datasetIndex));
+      this.chart!.setDatasetVisibility(item.datasetIndex, !this.chart!.isDatasetVisible(item.datasetIndex));
     }
-    this._chart!.update();
+    this.chart!.update();
   }
 
   disableChartLegend() {

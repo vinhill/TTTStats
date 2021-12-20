@@ -14,3 +14,7 @@
   width: 2.5rem;
   height: 2.5rem;
 }
+/* Enable children to use position: absolute correctly */
+.card-body {
+  position: relative;
+}
