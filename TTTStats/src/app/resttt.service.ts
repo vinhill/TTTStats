@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { deepcopy } from './utils';
 
 export type RestttResult = {
 	rows: any[];
@@ -70,6 +71,6 @@ export class RestttService {
 			this.cache[key] = await this.getNoCache(key);
 		}
 
-		return this.cache[key];
+		return deepcopy(this.cache[key]);
 	}
 }

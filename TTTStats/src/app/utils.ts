@@ -218,3 +218,7 @@ export function range(from: number, to: number, step: number = 1) : number[] {
   }
   return arr;
 }
+
+export function deepcopy(obj: any) {
+  return JSON.parse(JSON.stringify(obj));
+}

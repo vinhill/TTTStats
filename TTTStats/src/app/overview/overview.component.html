@@ -22,10 +22,11 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Kills" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
+	<card title="Kill stats" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
 		<resttt-table #rpkc
 			query="KillStats"
-			datakeys="player,kills,wrong,kpg">
+			datakeys="player,kills,wrong,kpg,kd"
+			[cnames]="{wrong: 'teamkills'}">
 		</resttt-table>
 	</card>
 	<card title="Roles" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">

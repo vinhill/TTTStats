@@ -68,18 +68,31 @@ export class DataStoreService {
     return RestttWithColumns(res.rows.filter(row => row.player == player));
   }
 
+  async Kills() : Promise<RestttResult> {
+    return this.resttt.get("PlayerKillCount");
+  }
+
   async KillStats(): Promise<RestttResult> {
-    let killdata = await this.resttt.get("PlayerKillCount");
+    let killdata = await this.Kills();
     let gamecount = await this.PlayerGameCounts();
+    let deaths = await this.Deaths();
+
     let gcm = new Map<string, number>();
-    
     for (let row of gamecount.rows) {
       gcm.set(row.player, row.rounds);
     }
 
+    let dm = new Map<string, number>();
+    for (let row of deaths.rows) {
+      dm.set(row.player, row.deaths);
+    }
+
+    // we recycle killdata for also storing kd etc.
     for (let row of killdata.rows) {
       row.kpg = round(row.kills / gcm.get(row.player)!, 2);
       row.score = (row.kills - 2 * row.wrong) / gcm.get(row.player)!;
+      row.deaths = dm.get(row.player)!;
+      row.kd = round(row.kills / row.deaths, 2);
     }
 
     killdata.rows.sort((a, b) => b.score - a.score);
@@ -88,7 +101,7 @@ export class DataStoreService {
   }
 
   async PlayerKillStats(player: string): Promise<any> {
-    let res = await this.resttt.get("PlayerKillCount");
+    let res = await this.Kills();
     return res.rows.find(row => row.player == player);
   }
 
