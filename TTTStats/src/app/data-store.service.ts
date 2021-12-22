@@ -6,7 +6,7 @@ import { strcmp, round } from './utils';
 /* Group data by key and for each group, set agg to the sum over agg */
 function groupBySum(data: any[], key: string, agg: string) : any {
   // strcmp is quite general and also would work for numbers
-  data.sort((a, b) => strcmp(a.startrole, b.startrole) );
+  data.sort((a, b) => strcmp(a[key], b[key]) );
 
   let res = [];
 
@@ -112,8 +112,20 @@ export class DataStoreService {
 
   async Survived(): Promise<RestttResult> {
     let data = (await this.resttt.get("PlayerSurviveCount")).rows;
+
+    let gamecount = await this.PlayerGameCounts();
+    let gcm = new Map<string, number>();
+    for (let row of gamecount.rows) {
+      gcm.set(row.player, row.rounds);
+    }
+
     data = groupBySum(data, "player", "count");
-    data.forEach(row => delete row.startrole);
+
+    data.forEach(row => {
+      delete row.startrole;
+      row.rate = round(row.count / gcm.get(row.player)!, 2);
+    });
+
     return RestttWithColumns(data);
   }
 

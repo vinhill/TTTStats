@@ -1,15 +1,15 @@
-<div class="ranking">
-    <h3 class="display-4 ranking-header">Kills</h3>
+<div class="ranking" *ngFor="let ranking of rankings">
+    <h3 class="display-4 ranking-header">{{ranking.title}}</h3>
     <div class="rank-row row">
-        <div class="rolecard col-5 col-md-4 col-lg-3 col-xl-2" *ngFor="let killrow of kills; index as idx">
+        <div class="rolecard col-5 col-md-4 col-lg-3 col-xl-2" *ngFor="let row of ranking.rows; index as idx">
             <div class="card">
                 <h5 class="card-header" [class.podium-header]="idx < 3"
                     [class.bg-gold]="idx == 0" [class.bg-silver]="idx == 1" [class.bg-bronze]="idx == 2">
-                    {{killrow.player}}
+                    {{row.name}}
                 </h5>
                 <div class="card-body">
                     <p class="rank-value">
-                        {{killrow.kills}}
+                        {{row.value}}
                     </p>
                 </div>
             </div>
