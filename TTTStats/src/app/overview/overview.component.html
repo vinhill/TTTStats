@@ -3,7 +3,7 @@
 		<h1 class="display-3">TTT Overview</h1>
 		Made with ❤ by Josu und Vincent
 	</card>
-	<card title="Spiele" [loaded]="rpgc.loaded" [reloadCallback]="rpgc.load">
+	<card title="Games" [loaded]="rpgc.loaded" [reloadCallback]="rpgc.load">
 		<resttt-chart #rpgc
 			query="PlayerGameCounts"
 			labelkey="player"
@@ -13,7 +13,7 @@
 			[legend]="{disabled: true}">
 		</resttt-chart>
 	</card>
-	<card title="Karten" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
+	<card title="Maps" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
 		<resttt-chart #rmc
 			query="MapCount"
 			labelkey="map"
@@ -28,27 +28,27 @@
 			datakeys="player,kills,wrong,kpg">
 		</resttt-table>
 	</card>
-	<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
+	<card title="Roles" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
 		<resttt #rrc
 			query="RoleCount"
 			display="RoleTM">
 		</resttt>
 	</card>
-	<card title="Wer tötet wen?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
+	<card title="Who kills who?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
 		<resttt #wkw
 			query="WhoKilledWho"
 			display="Sankey"
 			[options]="{source:'killer', target:'victim'}">
 		</resttt>
 	</card>
-	<!--card title="Wer spielt mit wem?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
+	<!--card title="Who sides with who?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
 		<resttt #wkw
 			query="WhoTeamedWho"
 			display="Sankey"
 			[options]="{source:'player', target:'mate'}">
 		</resttt>
 	</card-->
-	<card title="Meistgekauft" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
+	<card title="Bought the most" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
 		<resttt-chart #rpp
 			query="PopularPurchases"
 			labelkey="item"
@@ -57,7 +57,7 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Siegreiche Teams" [loaded]="rtw.loaded" [reloadCallback]="rtw.load">
+	<card title="Victorious teams" [loaded]="rtw.loaded" [reloadCallback]="rtw.load">
 		<resttt-chart #rtw
 			query="TeamWincount"
 			labelkey="team"

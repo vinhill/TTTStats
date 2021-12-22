@@ -15,6 +15,7 @@ import { DocsComponent } from './docs/docs.component';
 import { NgChartsModule } from 'ng2-charts';
 
 import { PlotlyViaCDNModule } from 'angular-plotly.js';
+import { RankingComponent } from './ranking/ranking.component';
 PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
 
 @NgModule({
@@ -27,7 +28,8 @@ PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
     DelayDirective,
     DocsComponent,
     RestttTableComponent,
-    RestttChartComponent
+    RestttChartComponent,
+    RankingComponent
   ],
   imports: [
     BrowserModule,

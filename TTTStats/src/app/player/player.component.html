@@ -5,14 +5,14 @@
 		<p>Dabei erzieltest du {{kills}} kills</p>
 		<p *ngIf="teamkills">... aaaber {{teamkills}} davon waren TEAMKILLS!</p>
 	</card>
-	<card title="Rollen" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
+	<card title="Roles" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
 		<resttt #rrc
 			query="PlayerRoleCount"
 			[params]="{player: name}"
 			display="RoleTM">
 		</resttt>
 	</card>
-	<card title="Meistgekauft" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
+	<card title="Bought the most" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
 		<resttt-chart #rpp
 			query="PlayerPopularPurchases"
 			[params]="{player: name}"
@@ -22,7 +22,7 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Siegreiche Rollen" [loaded]="rpw.loaded" [reloadCallback]="rpw.load">
+	<card title="Victorious roles" [loaded]="rpw.loaded" [reloadCallback]="rpw.load">
 		<resttt-table #rpw
 			query="PlayerRoleWincount"
 			[params]="{player: name}"
@@ -31,7 +31,7 @@
 			ctype="doughnut">
 		</resttt-table>
 	</card>
-	<card title="Beste Waffe" [loaded]="rpkbw.loaded" [reloadCallback]="rpkbw.load">
+	<card title="Best weapon" [loaded]="rpkbw.loaded" [reloadCallback]="rpkbw.load">
 		<resttt-chart #rpkbw
 			query="PlayerKillsByWeapon"
 			[params]="{player: name}"
@@ -41,7 +41,7 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Für dich am gefährlichsten" [loaded]="rpdbw.loaded" [reloadCallback]="rpdbw.load">
+	<card title="Most dangerous for you" [loaded]="rpdbw.loaded" [reloadCallback]="rpdbw.load">
 		<resttt-chart #rpdbw
 			query="PlayerDeathsByWeapon"
 			[params]="{player: name}"
