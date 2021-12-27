@@ -1,15 +1,17 @@
 <div class="masonry" #masonry>
 	<card>
 		<h1 class="display-3">{{name}}</h1>
-		<p>Du hast {{rounds}} Runden gespielt!</p>
-		<p>Dabei erzieltest du {{kills}} kills</p>
-		<p *ngIf="teamkills">... aaaber {{teamkills}} davon waren TEAMKILLS!</p>
+		<p>You played {{rounds}} games!</p>
+		<p>During these, you got {{kills}} kills</p>
+		<p>That's a k/d of {{kdratio}} and an game-average of {{kgratio}}.</p>
+		<p *ngIf="teamkills">... buuut you also killed {{teamkills}} of your COLLEAGUES!</p>
 	</card>
 	<card title="Roles" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
 		<resttt #rrc
 			query="PlayerRoleCount"
 			[params]="{player: name}"
-			display="RoleTM">
+			display="Treemap"
+			[options]="{label: 'startrole', parent: 'superteam', value: 'count', color: 'colour'}">
 		</resttt>
 	</card>
 	<card title="Bought the most" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">

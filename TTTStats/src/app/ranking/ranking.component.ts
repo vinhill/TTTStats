@@ -26,6 +26,17 @@ export class RankingComponent implements OnInit {
       title: 'K/D',
       rows: killstats
     });
+    
+    let teamkills = (await this.datastore.KillStats()).rows;
+    teamkills.sort((a:any, b:any) => b.wrong - a.wrong);
+    teamkills.forEach((k:any) => {
+      k.name = k.player;
+      k.value = k.wrong;
+    });
+    this.rankings.push({
+      title: 'Teamkills',
+      rows: teamkills
+    });
 
     let games = (await this.datastore.PlayerGameCounts()).rows;
     games.sort((a:any, b:any) => b.rounds - a.rounds);

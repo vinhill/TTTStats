@@ -17,6 +17,8 @@ export class PlayerComponent implements OnInit {
   rounds: number | undefined;
   kills: number | undefined;
   teamkills: number | undefined;
+  kdratio: number | undefined;
+  kgratio: number | undefined;
 
   masonry: any;
   resizeObserver: ResizeObserver;
@@ -61,5 +63,7 @@ export class PlayerComponent implements OnInit {
     let killdata = await this.datastore.PlayerKillStats(this.name);
     this.kills = killdata.kills;
     this.teamkills = killdata.wrong;
+    this.kdratio = killdata.kd;
+    this.kgratio = killdata.kpg;
   }
 }

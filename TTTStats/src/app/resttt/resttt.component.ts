@@ -31,8 +31,8 @@ export class RestttComponent implements OnChanges {
   async load() {
     this.loaded = false;
     this._result = await this.datastore.get(this.query, this.params);
-    if (this.display == "RoleTM")
-      this.loadRoleTreemap();
+    if (this.display == "Treemap")
+      this.loadTreemap();
     if (this.display == "Sankey")
       this.loadSankey();
     this.loaded = true;
@@ -42,14 +42,17 @@ export class RestttComponent implements OnChanges {
     return JSON.stringify(obj);
   }
 
-  loadRoleTreemap() {
+  loadTreemap() {
+    /*
+    this.options = {label: string, parent: string, value: string, color: string}
+    */
     let dataitem = {
       type: "treemap",
       branchvalues: "total",
-      labels: this._result!.cols.startrole,
-      parents: this._result!.cols.superteam,
-      values: this._result!.cols.count,
-      marker: {colors: this._result!.cols.colour},
+      labels: this._result!.cols[this.options.label],
+      parents: this._result!.cols[this.options.parent],
+      values: this._result!.cols[this.options.value],
+      marker: {colors: this._result!.cols[this.options.color]},
     };
 
     // aggregate group value from subgroups
@@ -89,6 +92,11 @@ export class RestttComponent implements OnChanges {
   }
 
   async loadSankey() {
+    /*
+    this.options = {source: string, target: string}
+    where source and target are both column names
+    and these columns contain player names
+    */
     let players = (await this.datastore.Players());
 
     let playerMap = new Map<string, number>();

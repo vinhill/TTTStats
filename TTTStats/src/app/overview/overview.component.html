@@ -3,16 +3,6 @@
 		<h1 class="display-3">TTT Overview</h1>
 		Made with ❤ by Josu und Vincent
 	</card>
-	<card title="Games" [loaded]="rpgc.loaded" [reloadCallback]="rpgc.load">
-		<resttt-chart #rpgc
-			query="PlayerGameCounts"
-			labelkey="player"
-			datakeys="rounds"
-			ctype="bar"
-			cmap="score"
-			[legend]="{disabled: true}">
-		</resttt-chart>
-	</card>
 	<card title="Maps" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
 		<resttt-chart #rmc
 			query="MapCount"
@@ -25,14 +15,14 @@
 	<card title="Kill stats" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
 		<resttt-table #rpkc
 			query="KillStats"
-			datakeys="player,kills,wrong,kpg,kd"
-			[cnames]="{wrong: 'teamkills'}">
+			datakeys="player,kills,deaths">
 		</resttt-table>
 	</card>
 	<card title="Roles" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
 		<resttt #rrc
 			query="RoleCount"
-			display="RoleTM">
+			display="Treemap"
+			[options]="{label: 'startrole', parent: 'superteam', value: 'count', color: 'colour'}">
 		</resttt>
 	</card>
 	<card title="Who kills who?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
@@ -42,13 +32,6 @@
 			[options]="{source:'killer', target:'victim'}">
 		</resttt>
 	</card>
-	<!--card title="Who sides with who?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
-		<resttt #wkw
-			query="WhoTeamedWho"
-			display="Sankey"
-			[options]="{source:'player', target:'mate'}">
-		</resttt>
-	</card-->
 	<card title="Bought the most" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
 		<resttt-chart #rpp
 			query="PopularPurchases"
@@ -66,5 +49,22 @@
 			ctype="doughnut"
 			cmap="plotly">
 		</resttt-chart>
+	</card>
+	<card title="Best weapon" [loaded]="rkbw.loaded" [reloadCallback]="rkbw.load">
+		<resttt-chart #rkbw
+			query="KillsByWeaponLimited"
+			[params]="{limit: 25}"
+			labelkey="weapon"
+			datakeys="count"
+			ctype="doughnut"
+			cmap="plotly">
+		</resttt-chart>
+	</card>
+	<card title="Role winrate" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
+		<resttt #test
+			query="RoleWincount"
+			display="Treemap"
+			[options]="{label: 'startrole', parent: 'superteam', value: 'wins', color: 'colour'}">
+		</resttt>
 	</card>
 </div>

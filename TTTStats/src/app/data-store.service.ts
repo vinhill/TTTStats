@@ -56,16 +56,33 @@ export class DataStoreService {
     return this.resttt.get("MapCount");
   }
 
+  async _joinColorSuperteam(rows: any[], rolecol: string): Promise<void> {
+    let roledata = await this.resttt.get("Roles");
+    let rolemap = new Map<string, any>();
+    for (let row of roledata.rows) {
+      rolemap.set(row.name, row);
+    }
+
+    for (let row of rows) {
+      let role = rolemap.get(row[rolecol]);
+      row.colour = role.colour;
+      row.superteam = role.superteam;
+    }
+  }
+
   async RoleCount(): Promise<RestttResult> {
     let data = (await this.resttt.get("PlayerRoleCount")).rows;
     data = groupBySum(data, "startrole", "count");
     data.forEach(row => delete row.player);
+    await this._joinColorSuperteam(data, "startrole");
     return RestttWithColumns(data);
   }
 
   async PlayerRoleCount(player: string): Promise<RestttResult> {
-    let res = await this.resttt.get("PlayerRoleCount");
-    return RestttWithColumns(res.rows.filter(row => row.player == player));
+    let res = (await this.resttt.get("PlayerRoleCount")).rows;
+    res = res.filter(row => row.player == player);
+    await this._joinColorSuperteam(res, "startrole");
+    return RestttWithColumns(res);
   }
 
   async Kills() : Promise<RestttResult> {
@@ -101,7 +118,7 @@ export class DataStoreService {
   }
 
   async PlayerKillStats(player: string): Promise<any> {
-    let res = await this.Kills();
+    let res = await this.KillStats();
     return res.rows.find(row => row.player == player);
   }
 
@@ -148,14 +165,17 @@ export class DataStoreService {
   }
 
   async PlayerRoleWincount(player: string): Promise<RestttResult> {
-    let res = await this.resttt.get("PlayerRoleWincount");
-    return RestttWithColumns(res.rows.filter(row => row.player == player));
+    let res = (await this.resttt.get("PlayerRoleWincount")).rows;
+    res = res.filter(row => row.player == player);
+    await this._joinColorSuperteam(res, "startrole");
+    return RestttWithColumns(res);
   }
 
   async RoleWincount(): Promise<RestttResult> {
     let data = (await this.resttt.get("PlayerRoleWincount")).rows;
-    data = groupBySum(data, "startrole", "amount");
+    data = groupBySum(data, "startrole", "wins");
     data.forEach(row => delete row.player);
+    await this._joinColorSuperteam(data, "startrole");
     return RestttWithColumns(data);
   }
 
@@ -176,7 +196,13 @@ export class DataStoreService {
     let data = (await this.resttt.get("KillsByWeapon")).rows;
     data = groupBySum(data, "weapon", "count");
     data.forEach(row => delete row.causee);
+    data.sort((a: any, b: any) => b.count-a.count);
     return RestttWithColumns(data);
+  }
+
+  async KillsByWeaponLimited(limit: number) : Promise<RestttResult> {
+    let data = (await this.KillsByWeapon()).rows;
+    return RestttWithColumns(data.slice(0, limit));
   }
 
   async PlayerKillsByWeapon(player: string): Promise<RestttResult> {
@@ -226,7 +252,7 @@ export class DataStoreService {
         return this.TeamWincount();
       case "PlayerRoleWincount":
         return this.PlayerRoleWincount(params.player);
-      case "RoleWinCount":
+      case "RoleWincount":
         return this.RoleWincount();
       case "WhoKilledWho":
         return this.WhoKilledWho();
@@ -234,6 +260,8 @@ export class DataStoreService {
         return this.WhoTeamedWho();
       case "KillsByWeapon":
         return this.KillsByWeapon();
+      case "KillsByWeaponLimited":
+        return this.KillsByWeaponLimited(params.limit);
       case "PlayerKillsByWeapon":
         return this.PlayerKillsByWeapon(params.player);
       case "DeathsByWeapon":

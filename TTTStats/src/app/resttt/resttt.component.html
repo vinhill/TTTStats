@@ -3,7 +3,7 @@
   {{stringify(_result)}}
 </div>
 
-<div *ngIf="display == 'RoleTM'">
+<div *ngIf="display == 'Treemap'">
   <plotly-plot *ngIf="loaded"
 		[data]="_treemap?.data"
 		[layout]="_treemap?.layout"
