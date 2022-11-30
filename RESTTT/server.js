@@ -17,7 +17,10 @@ if (NODE_ENV === 'dev') {
 }
 
 app.use("/", function(req, res, next) {
-  logger.debug("Server", `Received ${req.method} request to URL '${req.originalUrl}' with body '${JSON.stringify(req.body)}'`)
+  if (NODE_ENV === 'dev')
+    logger.debug("Server", `Received ${req.method} request to URL '${req.originalUrl}' with body '${JSON.stringify(req.body)}'`)
+  else
+    logger.info("Server", `Received ${req.method} request to URL '${req.originalUrl}'`)
   next()
 })
 

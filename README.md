@@ -14,9 +14,7 @@ resttt.fly.dev. It uses a mysql database hosted at vmd76968.contaboserver.net.
 
 ### Frontend
 
-- From within the TTTStats folder containing src, angular.json etc.
-- ng build --base-href="https://vinhill.github.io/TTTStats/"
-- npx angular-cli-ghpages --dir=dist/TTTStats
+- go to TTTStats and run `npm run deploy`
 
 If some bundle is too large, do
 - add "sourceMap": true, "namedChunks": true to the development build in angular.json

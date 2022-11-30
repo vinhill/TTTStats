@@ -6,6 +6,9 @@ export type RestttResult = {
 	cols: {[key: string]: any[]};
 }
 
+const root = 'https://resttt.fly.dev/api/v1'
+//const root = 'http://localhost:3001/api/v1'
+
 export function RestttWithColumns(table: any[]): RestttResult {
 	/*
 	[{c1: 0, c2: 1}, {c1: 3, c2: 2}]
@@ -34,7 +37,7 @@ export class RestttService {
 	private cache: {[key: string]: RestttResult} = {};
 
 	async custom(query: string, password: string): Promise<RestttResult> {
-		let res = await fetch("https://resttt.glitch.me/api/v1/query/custom", {
+		let res = await fetch(root + "/query/custom", {
 			method: "POST",
 			body: JSON.stringify({
 				"query": query,
@@ -52,7 +55,7 @@ export class RestttService {
 	}
 	
 	async getNoCache(name: string): Promise<RestttResult> {
-		let res = await fetch(`https://resttt.glitch.me/api/v1/query/${name}`, {
+		let res = await fetch(`${root}/query/${name}`, {
 			method: "GET",
 			headers: {
 				'Content-Type': "application/json"
