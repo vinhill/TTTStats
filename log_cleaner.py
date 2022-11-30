@@ -8,7 +8,7 @@ keep = [
     'Client "\w+" spawned in server <.*> \(took \d+ seconds?\).',
     'ROUND_START: \w+ is \w+',
     '\w+ is now in love with \w+.',
-    'Schnitzelboy \(\d*\) hurt \w+ \(\d+\) and get',
+    '\w+ \(\d*\) hurt \w+ \(\d+\) and get',
     "Dropped \w+ from server",
     "[TTT2]:\s*The \w* has won!",
     ".* and gets (REWARDED|penalised for) \d+",

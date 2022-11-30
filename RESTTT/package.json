@@ -4,14 +4,17 @@
   "description": "A simple Node app built on fastify, instantly up and running.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "cross-env NODE_ENV=prod node server.js",
+    "dev": "cross-env NODE_ENV=dev nodemon server.js",
+    "eslint": "eslint ."
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "cross-fetch": "^3.1.4",
     "express": "^4.17.1",
     "mysql": "^2.18.1",
-    "cors": "^2.8.5",
-    "node": "^16.13.0",
-    "cross-fetch": "^3.1.4"
+    "node": "^16.13.0"
   },
   "engines": {
     "node": "16.x"
@@ -24,5 +27,9 @@
     "node",
     "glitch",
     "express"
-  ]
+  ],
+  "devDependencies": {
+    "eslint": "^8.28.0",
+    "nodemon": "^2.0.20"
+  }
 }
