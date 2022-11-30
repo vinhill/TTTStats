@@ -6,8 +6,8 @@ export type RestttResult = {
 	cols: {[key: string]: any[]};
 }
 
-const root = 'https://resttt.fly.dev/api/v1'
-//const root = 'http://localhost:3001/api/v1'
+//const root = 'https://resttt.fly.dev/api/v1'
+const root = 'http://localhost:3001/api/v1'
 
 export function RestttWithColumns(table: any[]): RestttResult {
 	/*

@@ -8,13 +8,19 @@ Primary methods to query the db are
 const mysql = require('mysql')
 const fs = require('fs')
 const { performance } = require('perf_hooks')
-const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE } = require('./config.js')
+const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE, MAX_RESULT_SIZE_KB } = require('./config.js')
 const logger = require('./logger.js')
 
 const BoundedCache = require("./structs.js").BoundedCache
 const cache = new BoundedCache(CACHE_SIZE)
 
+logger.info("Database", `Cache will use up to ${CACHE_SIZE*MAX_RESULT_SIZE_KB/1000} mb of memory.`)
+
 let connections = {}
+
+function stripstr(str) {
+  return str.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ")
+}
 
 function getConnection(name, args) {
   return new Promise((res, rej) => {
@@ -87,7 +93,7 @@ function query(con, querystr, params=[]) {
       }else {
         res(result)
 
-        logger.debug("Database", `Queries ${querystr} and got ${JSON.stringify(result)}`)
+        logger.debug("Database", `Successfully queried ${stripstr(querystr)} and got ${result.length} results.`)
       }
     })
   })
@@ -113,41 +119,47 @@ function clearCache() {
   cache.clear()
 }
 
-async function queryCached(querystr) {
-  if (!cache.has(query)) {
-    const futureVal = query(await getReadCon(), querystr)
-    // add promise to cache in case query is queried again while futureVal hasn't been received
-    cache.set(querystr, futureVal)
-    // await futureVal and update cache
-    let res = await futureVal
-    if (JSON.stringify(res).length > 5000) {
-      logger.warn("Database", `The query '${querystr}' had a result that was too long to be cached.`)
-      res = "Query result too long"
-    }
-    cache.update(querystr, res)
-    return res
-  }
-  else {
-    // increment priority of entry to keep it in cache
+async function queryCached(querystr, params) {
+  querystr = format(querystr, params)
+
+  const con = await getReadCon()
+  if (!cache.has(querystr)) {
+    const future_res = query(con, querystr)
+
+    // add promise to cache in case query is repeated while future_res is being awaited
+    const future_ret = new Promise(resolve => {
+      future_res.then(res => {
+        const size_kb = new TextEncoder().encode(JSON.stringify(res)).length / 1000
+        if (size_kb > MAX_RESULT_SIZE_KB) {
+          logger.error("Database", `The query '${stripstr(querystr)}' had a result that was too long to be cached: ${size_kb} kb.`)
+          resolve("Query result too long")
+        } else {
+          if (size_kb > MAX_RESULT_SIZE_KB / 2)
+            logger.warn("Database", `The query '${stripstr(querystr)}' has a long result: ${size_kb} kb.`)
+          resolve(res)
+        }
+      })
+    })
+    cache.set(querystr, future_ret)
+
+    future_ret.then(ret => {
+      cache.update(querystr, ret)
+    })
+  } else {
     cache.increment(querystr)
-    // could be the query result or a Promise<query result>
-    // await will work with both and return the result
-    let res = await cache.get(querystr)
-    if (JSON.stringify(res).length > 5000) {
-      logger.warn("Database", `The query '${querystr}' had a result that was too long to be cached.`)
-      res = "Query result too long"
-    }
-    return res
   }
+
+  // note: might be a promise future_ret
+  return cache.get(querystr)
 }
 
 function format(querystr, params) {
   return mysql.format(querystr, params)
 }
 
-function defaultQuery(querystr, params=[], cache=true) {
+async function defaultQuery(querystr, params=[], cache=true) {
   if (querystr.endsWith(".sql"))
-    querystr = readQueryFile(querystr)
+    querystr = await readQueryFile(querystr)
   if (cache)
     return queryCached(querystr, params)
   else

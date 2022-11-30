@@ -9,5 +9,6 @@ module.exports = {
   NODE_ENV,
   "MySQL_READ_PASSWORD": process.env.READERPW,
   "MySQL_ADMIN_PASSWORD": process.env.ADMINPW,
-  "CACHE_SIZE": 100
+  "CACHE_SIZE": 50,
+  "MAX_RESULT_SIZE_KB": 20
 }

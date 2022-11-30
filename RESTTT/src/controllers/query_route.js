@@ -40,38 +40,44 @@ router.get("/MapCount", async function(req, res, next) {
   next()
 })
 
-router.get("/RoleCount", async function(req, res, next) {
-  req.sqlquery = "SELECT startrole, COUNT(mid) as count, colour, superteam "
-              + "FROM participates "
-              + "JOIN role ON role.name = startrole "
-              + "GROUP BY startrole "
-              + "ORDER BY count DESC "
+router.get("/PlayerRoleCount", async function(req, res, next) {
+  req.sqlquery = `
+SELECT startrole, COUNT(mid) as count, player
+FROM participates
+GROUP BY startrole, player
+ORDER BY count DESC
+  `
   next()
 })
 
 router.get("/PlayerKillCount", async function(req, res, next) {
-  req.sqlquery = "PlayerKillCount.sql"
+  req.sqlquery = `
+SELECT
+    causee AS player,
+    COUNT(*) AS kills,
+    SUM(teamkill) AS wrong
+FROM dies
+WHERE causee IS NOT NULL
+GROUP BY causee
+  `
   next()
 })
 
-router.get("/PlayerRoles/:name", async function(req, res, next) {
-  let name = req.params.name
-  req.sqlquery = "SELECT startrole, COUNT(mid) as count, colour, superteam "
-              + "FROM participates "
-              + "JOIN role ON role.name = startrole "
-              + "WHERE player = ? "
-              + "GROUP BY startrole "
-              + "ORDER BY count DESC "
-  /*
-  TODO
-  SELECT startrole, COUNT(mid) as count, colour, superteam, player
-  FROM participates
-  JOIN role ON role.name = startrole
-  GROUP BY startrole, player
-  ORDER BY count DESC
-  to be more general and have fewer queries?
-  */
-  req.sqlparams = [name]
+router.get("/PlayerDeathCount", async function(req, res, next) {
+  req.sqlquery = "SELECT player, COUNT(*) AS deaths FROM dies GROUP BY player"
+  next()
+})
+
+router.get("/PlayerSurviveCount", async function(req, res, next) {
+  req.sqlquery = `
+SELECT participates.player, participates.startrole, COUNT(*) AS count
+FROM participates
+LEFT JOIN dies
+ON dies.mid = participates.mid
+AND dies.player = participates.player
+WHERE dies.player IS NULL
+GROUP BY participates.player, participates.startrole
+  `
   next()
 })
 
@@ -92,8 +98,57 @@ router.get("/TeamWincount", async function(req, res, next) {
   next()
 })
 
-router.get("/PlayerTeamWincount", async function(req, res, next) {
-  req.sqlquery = "PlayerTeamWincount.sql"
+router.get("/PlayerRoleWincount", async function(req, res, next) {
+  req.sqlquery = `
+SELECT player, participates.startrole, COUNT(*) AS wins
+FROM participates
+JOIN role ON participates.mainrole = role.name
+JOIN wins ON wins.mid = participates.mid AND wins.team = role.team
+GROUP BY player, participates.startrole
+  `
+  next()
+})
+
+router.get("/WhoKilledWho", async function(req, res, next) {
+  req.sqlquery = `
+SELECT causee AS killer, player AS victim, COUNT(*) AS count
+FROM dies
+WHERE causee IS NOT NULL
+GROUP BY player, causee
+  `
+  next()
+})
+
+router.get("/WhoTeamedWho", async function(req, res, next) {
+  req.sqlquery = `
+SELECT pa.player AS player, pb.player AS mate, COUNT(*) AS count
+FROM participates pa
+JOIN participates pb ON pa.mid = pb.mid AND pa.player != pb.player
+JOIN role ra ON pa.mainrole = ra.name
+JOIN role rb ON pb.mainrole = rb.name
+WHERE ra.team = rb.team
+GROUP BY pa.player, pb.player
+  `
+  next()
+})
+
+router.get("/DeathsByWeapon", async function(req, res, next) {
+  req.sqlquery = `
+SELECT player, weapon, COUNT(*) AS count
+FROM dies
+WHERE weapon != "null"
+GROUP BY player, weapon
+  `
+  next()
+})
+
+router.get("/KillsByWeapon", async function(req, res, next) {
+  req.sqlquery = `
+SELECT causee, weapon, COUNT(*) AS count
+FROM dies
+WHERE weapon != "null"
+GROUP BY causee, weapon
+  `
   next()
 })
 

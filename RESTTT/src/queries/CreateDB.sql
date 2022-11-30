@@ -83,7 +83,8 @@ VALUES
   ("Undecided", "Other", "#AB17AB", "Other", "Has one minute to choose their role."), -- chooses a role
   ("Revolutionary", "Innocent", "#6A4C82", "Detective", "A detective with traitor shop."),
   ("Blocker", "Traitor", "#724E4C", "Traitor", "Prevents dead bodies from being identified as long as this traitor is alive."),
-  ("Sleeper", "Traitor", "#5D524A", "Traitor", "A weird sleeper role that has to be tested"); -- TODO
+  ("Sleeper", "Traitor", "#5D524A", "Traitor", "A weird sleeper role that has to be tested"), -- TODO
+  ("Loot_goblin", "Other", "#594286", "Other", "Just try to stay alive while everyone wants to kill you for cool loot.");
 
 -- Create other tables
 CREATE TABLE game (
@@ -96,62 +97,62 @@ CREATE TABLE player (
   name VARCHAR(20) PRIMARY KEY
 );
 CREATE TABLE wins (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
+  mid INT NOT NULL,
   team VARCHAR(20) NOT NULL
 );
 CREATE TABLE buys (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  player VARCHAR(20) NOT NULL, FOREIGN KEY(player) REFERENCES player(name),
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
   item VARCHAR(40) NOT NULL,
   time VARCHAR(9) NOT NULL,
-  role VARCHAR(15) NOT NULL, FOREIGN KEY(role) REFERENCES role(name)
+  role VARCHAR(15) NOT NULL
 );
 CREATE TABLE loves (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  first VARCHAR(20) NOT NULL, FOREIGN KEY(first) REFERENCES player(name),
-  second VARCHAR(20) NOT NULL, FOREIGN KEY(second) REFERENCES player(name)
+  mid INT NOT NULL
+  first VARCHAR(20) NOT NULL
+  second VARCHAR(20) NOT NULL
 );
 CREATE TABLE participates (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  player VARCHAR(20) NOT NULL, FOREIGN KEY(player) REFERENCES player(name),
-  startrole VARCHAR(15) NOT NULL, FOREIGN KEY(startrole) REFERENCES role(name),  -- initial role
-  mainrole VARCHAR(15) NOT NULL, FOREIGN KEY(mainrole) REFERENCES role(name)  -- the role determining this players task for winning
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
+  startrole VARCHAR(15) NOT NULL,  -- initial role
+  mainrole VARCHAR(15) NOT NULL  -- the role determining this players task for winning
 );
 CREATE TABLE rolechange (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  player VARCHAR(20) NOT NULL, FOREIGN KEY(player) REFERENCES player(name),
-  -- causee VARCHAR(20), FOREIGN KEY(causee) REFERENCES player(name),  -- optional
-  -- crole VARCHAR(15), FOREIGN KEY(crole) REFERENCES role(name),  -- optional
-  fromrole VARCHAR(15) NOT NULL, FOREIGN KEY(fromrole) REFERENCES role(name),
-  torole VARCHAR(15) NOT NULL, FOREIGN KEY(torole) REFERENCES role(name),
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
+  -- causee VARCHAR(20),  -- optional
+  -- crole VARCHAR(15),  -- optional
+  fromrole VARCHAR(15) NOT NULL,
+  torole VARCHAR(15) NOT NULL,
   time VARCHAR(9) NOT NULL
 );
 CREATE TABLE damages (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  player VARCHAR(20) NOT NULL, FOREIGN KEY(player) REFERENCES player(name),
-  vktrole VARCHAR(15) NOT NULL, FOREIGN KEY(vktrole) REFERENCES role(name),
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
+  vktrole VARCHAR(15) NOT NULL,
   reason VARCHAR(20) NOT NULL,
-  causee VARCHAR(20), FOREIGN KEY(causee) REFERENCES player(name),  -- optional, if not fight
-  atkrole VARCHAR(15), FOREIGN KEY(atkrole) REFERENCES role(name),  -- optional, if not fight
+  causee VARCHAR(20),  -- optional, if not fight
+  atkrole VARCHAR(15),  -- optional, if not fight
   weapon VARCHAR(30),  -- optional, if unknown
   time VARCHAR(9) NOT NULL,
   damage INT NOT NULL,
   teamdmg BOOLEAN
 );
 CREATE TABLE revives (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  player VARCHAR(20) NOT NULL, FOREIGN KEY(player) REFERENCES player(name),
-  time VARCHAR(9) NOT NULL
-  -- causee VARCHAR(20) NOT NULL, FOREIGN KEY(causee) REFERENCES player(name),
-  -- crole VARCHAR(15) NOT NULL, FOREIGN KEY(crole) REFERENCES role(name),
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
+  time VARCHAR(9) NOT NULL,
+  -- causee VARCHAR(20) NOT NULL,
+  -- crole VARCHAR(15) NOT NULL,
   -- reason ENUM('defibrilator', 'rolemechanic', 'zombie', 'necromancer') NOT NULL
 );
 CREATE TABLE dies (
-  mid INT NOT NULL, FOREIGN KEY(mid) REFERENCES game(mid),
-  player VARCHAR(20) NOT NULL, FOREIGN KEY(player) REFERENCES player(name),
-  vktrole VARCHAR(15) NOT NULL, FOREIGN KEY(vktrole) REFERENCES role(name),
-  causee VARCHAR(20), FOREIGN KEY(causee) REFERENCES player(name),  -- optional, if not fight
-  atkrole VARCHAR(15), FOREIGN KEY(atkrole) REFERENCES role(name),  -- optional, if not fight
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
+  vktrole VARCHAR(15) NOT NULL,
+  causee VARCHAR(20),  -- optional, if not fight
+  atkrole VARCHAR(15),  -- optional, if not fight
   weapon VARCHAR(30),  -- optional, if unknown
   time VARCHAR(9) NOT NULL,
   teamkill BOOLEAN
