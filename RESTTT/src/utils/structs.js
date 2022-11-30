@@ -1,4 +1,5 @@
 const { performance } = require('perf_hooks')
+const logger = require('./logger.js')
 
 class CacheObject {
   constructor(key, value, priority, index) {
@@ -190,12 +191,11 @@ class LogParser {
   So one only has to provide the regexes and callbacks.
   */
 
-  constructor(state={}, break_on_error=true, debug=false) {
+  constructor(state={}, break_on_error=true) {
     this.state = state
     this.workers = []
     this.prepared = true
     this.break_on_error = break_on_error
-    this.debug = debug
   }
 
   /*
@@ -211,8 +211,7 @@ class LogParser {
       callback: callback,
       priority: priority
     })
-    if (this.debug)
-      console.log(`[LogParser] attached callback ${callback.name} to regex ${regex}`)
+    logger.debug("LogParser", `attached callback ${callback.name} to regex ${regex}`)
   }
 
   prepare() {
@@ -225,14 +224,12 @@ class LogParser {
     if (!this.prepared)
       throw "LogParser wasn't prepared, call prepare"
 
-    if (this.debug)
-      console.log(`[LogParser] Executing line ${line}`)
+    logger.debug("LogParser", `Executing line ${line}`)
 
     for (let worker of this.workers) {
       let match = worker.regex.exec(line)
       if (match) {
-        if (this.debug)
-          console.log(`[LogParser] callback ${worker.callback.name} matched`)
+        logger.debug("LogParser", `callback ${worker.callback.name} matched`)
 
         if (this.break_on_error) {
           let ret = await worker.callback(match.groups, this.state)
@@ -246,7 +243,7 @@ class LogParser {
             if (ret === false)
               return
           }catch(err) {
-            console.log(`Error during logparse: ${err}`)
+            logger.error("LogParser", `Error during logparse: ${err}`)
           }
         }
       }
@@ -263,7 +260,7 @@ class LogParser {
     }
     let endTime = performance.now()
 
-    console.log(`Logfile finished parsing (took ${endTime-startTime} ms).`)
+    logger.info("LogParser", `Logfile finished parsing (took ${endTime-startTime} ms).`)
   }
 }
 

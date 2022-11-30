@@ -3,6 +3,7 @@ Code for parsing a TTT logfile
 */
 const db = require("./utils/database.js")
 const LogParser = require("./utils/structs.js").LogParser
+const logger = require("./utils/logger.js")
 
 const regex = (function() {
   //build regexes without worrying about
@@ -119,7 +120,7 @@ function onRoleChange(match, state) {
     return
 
   // TODO remove
-  console.error("Note: rolechange deactivated cuz log had numbers as roles")
+  logger.error("LogParse", "Note: rolechange deactivated cuz log had numbers as roles")
   return
 
   // TODO the cause for rolechange would be interesting
@@ -271,7 +272,6 @@ async function load_logfile(log, date) {
     mid: 0,
     map: ""
   })
-  // lp.debug = true;
 
   // map selection
   lp.attach(

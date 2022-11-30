@@ -9,11 +9,11 @@ const mysql = require('mysql')
 const fs = require('fs')
 const { performance } = require('perf_hooks')
 const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE } = require('./config.js')
+const logger = require('./logger.js')
 
 const BoundedCache = require("./structs.js").BoundedCache
 const cache = new BoundedCache(CACHE_SIZE)
 
-const log_queries = false
 let connections = {}
 
 function getConnection(name, args) {
@@ -28,10 +28,10 @@ function getConnection(name, args) {
 
       con.connect((err) => {
         if (err) {
-          console.error(`Error while connecting ${name}: ${err}`)
+          logger.error("Database", `Error while connecting ${name}: ${err}`)
           rej(err)
         }else {
-          console.log(`Connected ${name}!`)
+          logger.info("Database", `Connected ${name}!`)
         }
       })
 
@@ -78,18 +78,16 @@ function query(con, querystr, params=[]) {
     con.query(querystr, params, (err, result) => {
       const endTime = performance.now()
       if (endTime - startTime > 5*1000) {
-        console.log(`Query ${querystr} took long (${endTime-startTime} ms)`)
+        logger.warn("Database", `Query ${querystr} took long (${endTime-startTime} ms)`)
       }
 
       if(err) {
-        console.error(`Error while querying db for "${querystr}, ${params}": ${err}`)
+        logger.error("Database", `Error while querying db for "${querystr}, ${params}": ${err}`)
         rej(err)
       }else {
         res(result)
 
-        if (log_queries) {
-          console.log(`Queries ${querystr} and got ${JSON.stringify(result)}`)
-        }
+        logger.debug("Database", `Queries ${querystr} and got ${JSON.stringify(result)}`)
       }
     })
   })
@@ -108,7 +106,7 @@ function shutdown() {
     con.end()
   }
   connections = {}
-  console.log("Closed all database connections.")
+  logger.info("Database", "Closed all database connections.")
 }
 
 function clearCache() {
@@ -123,7 +121,7 @@ async function queryCached(querystr) {
     // await futureVal and update cache
     let res = await futureVal
     if (JSON.stringify(res).length > 5000) {
-      console.log(`The query '${querystr}' had a result that was too long to be cached.`)
+      logger.warn("Database", `The query '${querystr}' had a result that was too long to be cached.`)
       res = "Query result too long"
     }
     cache.update(querystr, res)
@@ -136,7 +134,7 @@ async function queryCached(querystr) {
     // await will work with both and return the result
     let res = await cache.get(querystr)
     if (JSON.stringify(res).length > 5000) {
-      console.log(`The query '${querystr}' had a result that was too long to be cached.`)
+      logger.warn("Database", `The query '${querystr}' had a result that was too long to be cached.`)
       res = "Query result too long"
     }
     return res
