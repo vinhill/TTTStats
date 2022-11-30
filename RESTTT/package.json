@@ -1,12 +1,13 @@
 {
-  "name": "glitch-mvp-node",
+  "name": "resttt",
   "version": "0.0.1",
-  "description": "A simple Node app built on fastify, instantly up and running.",
+  "description": "REST Backend for TTTStats.",
   "main": "server.js",
   "scripts": {
     "start": "cross-env NODE_ENV=prod node server.js",
     "dev": "cross-env NODE_ENV=dev nodemon server.js",
-    "eslint": "eslint ."
+    "eslint": "eslint .",
+    "deploy": "flyctl deploy"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -19,13 +20,9 @@
   "engines": {
     "node": "16.x"
   },
-  "repository": {
-    "url": "https://glitch.com/edit/#!/glitch-mvp-node"
-  },
   "license": "MIT",
   "keywords": [
     "node",
-    "glitch",
     "express"
   ],
   "devDependencies": {
