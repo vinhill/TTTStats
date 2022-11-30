@@ -93,12 +93,12 @@ function query(con, querystr, params=[]) {
   })
 }
 
-function queryReader(querystr, params=[]) {
-  return query(getReadCon(), querystr, params)
+async function queryReader(querystr, params=[]) {
+  return query(await getReadCon(), querystr, params)
 }
 
-function queryAdmin(querystr, params=[]) {
-  return query(getAdminCon(), querystr, params)
+async function queryAdmin(querystr, params=[]) {
+  return query(await getAdminCon(), querystr, params)
 }
 
 function shutdown() {
@@ -115,7 +115,7 @@ function clearCache() {
 
 async function queryCached(querystr) {
   if (!cache.has(query)) {
-    const futureVal = query(getReadCon(), querystr)
+    const futureVal = query(await getReadCon(), querystr)
     // add promise to cache in case query is queried again while futureVal hasn't been received
     cache.set(querystr, futureVal)
     // await futureVal and update cache

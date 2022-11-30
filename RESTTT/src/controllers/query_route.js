@@ -4,6 +4,7 @@ Main REST routes for getting TTT statistics
 const express = require("express")
 const router = express.Router()
 const db = require("../utils/database.js")
+const logger = require("../utils/logger.js")
 
 router.post("/custom", async function(req, res, next) {
   // check request parameters
@@ -112,6 +113,7 @@ router.use("/", async function(req, res, next) {
     res.status(200).json(data)
   } catch (e) {
     res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
+    logger.error("QueryRoute", `Could not query database for ${req.sqlquery} because of an error: ${e}`)
   }
 })
 
@@ -123,6 +125,7 @@ router.get("/Roles", async function(req, res) {
     res.status(200).json(data)
   } catch (e) {
     res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
+    logger.error("QueryRoute", `Could not query database for ${req.sqlquery} because of an error: ${e}`)
   }
 })
 
