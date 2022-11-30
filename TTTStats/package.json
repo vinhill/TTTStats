@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "start": "ng serve",
-    "deploy": "ng build --base-href='https://vinhill.github.io/TTTStats/' && npx angular-cli-ghpages --dir=dist/TTTStats"
+    "deploy": "ng build --base-href='/TTTStats/' && npx angular-cli-ghpages --dir=dist/TTTStats"
   },
   "private": true,
   "dependencies": {
