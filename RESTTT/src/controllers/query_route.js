@@ -20,27 +20,27 @@ router.post("/custom", async function(req, res, next) {
   }
 
   // give query to next middleware
-  req.query = query
+  req.sqlquery = query
   next()
 })
 
 router.get("/Players", async function(req, res, next) {
-  req.query = "SELECT name FROM player ORDER BY name ASC"
+  req.sqlquery = "SELECT name FROM player ORDER BY name ASC"
   next()
 })
 
 router.get("/PlayerGameCount", async function(req, res, next) {
-  req.query = "SELECT player, COUNT(mid) as rounds FROM participates GROUP BY player ORDER BY rounds DESC"
+  req.sqlquery = "SELECT player, COUNT(mid) as rounds FROM participates GROUP BY player ORDER BY rounds DESC"
   next()
 })
 
 router.get("/MapCount", async function(req, res, next) {
-  req.query = "SELECT map, COUNT(mid) as count FROM game GROUP BY map ORDER BY count DESC"
+  req.sqlquery = "SELECT map, COUNT(mid) as count FROM game GROUP BY map ORDER BY count DESC"
   next()
 })
 
 router.get("/RoleCount", async function(req, res, next) {
-  req.query = "SELECT startrole, COUNT(mid) as count, colour, superteam "
+  req.sqlquery = "SELECT startrole, COUNT(mid) as count, colour, superteam "
               + "FROM participates "
               + "JOIN role ON role.name = startrole "
               + "GROUP BY startrole "
@@ -49,13 +49,13 @@ router.get("/RoleCount", async function(req, res, next) {
 })
 
 router.get("/PlayerKillCount", async function(req, res, next) {
-  req.query = "PlayerKillCount.sql"
+  req.sqlquery = "PlayerKillCount.sql"
   next()
 })
 
 router.get("/PlayerRoles/:name", async function(req, res, next) {
   let name = req.params.name
-  req.query = "SELECT startrole, COUNT(mid) as count, colour, superteam "
+  req.sqlquery = "SELECT startrole, COUNT(mid) as count, colour, superteam "
               + "FROM participates "
               + "JOIN role ON role.name = startrole "
               + "WHERE player = ? "
@@ -75,29 +75,29 @@ router.get("/PlayerRoles/:name", async function(req, res, next) {
 })
 
 router.get("/PopularPurchases", async function(req, res, next) {
-  req.query = "SELECT item, count(*) as amount FROM buys GROUP BY item ORDER BY amount DESC LIMIT 10"
+  req.sqlquery = "SELECT item, count(*) as amount FROM buys GROUP BY item ORDER BY amount DESC LIMIT 10"
   next()
 })
 
 router.get("/PopularPurchases/:name", async function(req, res, next) {
   let name = req.params.name
-  req.query = "SELECT item, count(*) as amount FROM buys WHERE player = ? GROUP BY item ORDER BY amount DESC LIMIT 10"
+  req.sqlquery = "SELECT item, count(*) as amount FROM buys WHERE player = ? GROUP BY item ORDER BY amount DESC LIMIT 10"
   req.sqlparams = [name]
   next()
 })
 
 router.get("/TeamWincount", async function(req, res, next) {
-  req.query = "SELECT team, COUNT(mid) AS count FROM wins GROUP BY team"
+  req.sqlquery = "SELECT team, COUNT(mid) AS count FROM wins GROUP BY team"
   next()
 })
 
 router.get("/PlayerTeamWincount", async function(req, res, next) {
-  req.query = "PlayerTeamWincount.sql"
+  req.sqlquery = "PlayerTeamWincount.sql"
   next()
 })
 
 router.use("/", async function(req, res, next) {
-  if(!req.query) {
+  if(!req.sqlquery) {
     // none of the previous query routes were activated
     // pass on to next middleware
     next()
@@ -107,23 +107,22 @@ router.use("/", async function(req, res, next) {
     req.sqlparams = []
   }
   // query database and return result
-  try{
-    let data = null
-    data = await db.query(req.query, req.sqlparams)
+  try {
+    const data = await db.query(req.sqlquery, req.sqlparams)
     res.status(200).json(data)
-  }catch(e) {
-    res.status(400).json(`Could not query database for ${req.query} because of an error: ${e}`)
+  } catch (e) {
+    res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
   }
 })
 
 router.get("/Roles", async function(req, res) {
   // query database and return result
-  try{
+  try {
     // the result will be too long to be cached
-    let data = await db.query("SELECT * FROM role", [], false)
+    const data = await db.query("SELECT * FROM role", [], false)
     res.status(200).json(data)
-  }catch(e) {
-    res.status(400).json(`Could not query database for ${req.query} because of an error: ${e}`)
+  } catch (e) {
+    res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
   }
 })
 

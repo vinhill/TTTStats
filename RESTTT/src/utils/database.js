@@ -18,7 +18,7 @@ let connections = {}
 
 function getConnection(name, args) {
   return new Promise((res, rej) => {
-    if (!connections.has(name)) {
+    if (!connections[name]) {
       const con = mysql.createConnection({
         host: "vmd76968.contaboserver.net",
         port: 3306,
