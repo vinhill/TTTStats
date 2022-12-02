@@ -6,24 +6,27 @@ const router = express.Router()
 const db = require("../utils/database.js")
 const logger = require("../utils/logger.js")
 
-router.post("/custom", async function(req, res, next) {
-  // check request parameters
-  let query = req.body.query
-  let auth = req.body.password
-  if (!query) {
-    res.status(400).json("The query/custom route requires the 'query' field in the body.")
-  }
-  if (!auth) {
-    res.status(400).json("The query/custom route requires the 'password' field in the body.")
-  }
-  if (auth !== "SuperSecretCustomQueryPassword") {
-    res.status(403).json("The provided password is incorrect.")
-  }
+const { NODE_ENV } = require("../utils/config.js")
 
-  // give query to next middleware
-  req.sqlquery = query
-  next()
-})
+if (NODE_ENV === "dev")
+  router.post("/custom", async function(req, res, next) {
+    // check request parameters
+    let query = req.body.query
+    let auth = req.body.password
+    if (!query) {
+      res.status(400).json("The query/custom route requires the 'query' field in the body.")
+    }
+    if (!auth) {
+      res.status(400).json("The query/custom route requires the 'password' field in the body.")
+    }
+    if (auth !== "SuperSecretCustomQueryPassword") {
+      res.status(403).json("The provided password is incorrect.")
+    }
+
+    // give query to next middleware
+    req.sqlquery = query
+    next()
+  })
 
 router.get("/Players", async function(req, res, next) {
   req.sqlquery = "SELECT name FROM player ORDER BY name ASC"
