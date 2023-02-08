@@ -8,7 +8,7 @@ import { OverviewComponent } from './overview/overview.component';
 import { RecentComponent } from './recent/recent.component';
 import { PlayerComponent } from './player/player.component';
 import { RestttComponent } from './resttt/resttt.component';
-import { RestttTableComponent } from './resttt-table/resttt-table.component';
+import { DataTableComponent } from './data-table/data-table.component';
 import { RestttChartComponent } from './resttt-chart/resttt-chart.component';
 import { FadeDirective } from './fade.directive';
 import { DocsComponent } from './docs/docs.component';
@@ -29,7 +29,7 @@ PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
     RestttComponent,
     FadeDirective,
     DocsComponent,
-    RestttTableComponent,
+    DataTableComponent,
     RestttChartComponent,
     RankingComponent
   ],
