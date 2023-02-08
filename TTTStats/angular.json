@@ -105,5 +105,8 @@
       }
     }
   },
-  "defaultProject": "TTTStats"
+  "defaultProject": "TTTStats",
+  "cli": {
+    "analytics": false
+  }
 }

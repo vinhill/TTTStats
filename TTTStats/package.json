@@ -2,7 +2,8 @@
   "name": "tttstats",
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve",
+    "start": "ng serve --open",
+    "eslint": "eslint .",
     "deploy": "ng build --base-href=/TTTStats/ && npx angular-cli-ghpages --dir=dist/TTTStats"
   },
   "private": true,

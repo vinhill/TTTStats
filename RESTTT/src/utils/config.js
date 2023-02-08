@@ -1,6 +1,7 @@
 require('dotenv').config()
 
 let NODE_ENV = process.env.NODE_ENV
+// for forcing dev mode in fly.io when using npm run start
 if (process.env.FORCE_DEV === 'true')
   NODE_ENV = 'dev'
 

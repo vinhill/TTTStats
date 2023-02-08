@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, isDevMode } from '@angular/core';
 import { deepcopy } from './utils';
 
 export type RestttResult = {
@@ -6,8 +6,9 @@ export type RestttResult = {
 	cols: {[key: string]: any[]};
 }
 
-const root = 'https://resttt.fly.dev/api/v1'
-//const root = 'http://localhost:3001/api/v1'
+const root = isDevMode()
+	? 'http://localhost:3001/api/v1'
+	: 'https://resttt.fly.dev/api/v1';
 
 export function RestttWithColumns(table: any[]): RestttResult {
 	/*
