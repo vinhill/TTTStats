@@ -5,11 +5,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { CardComponent } from './card/card.component';
 import { OverviewComponent } from './overview/overview.component';
+import { RecentComponent } from './recent/recent.component';
 import { PlayerComponent } from './player/player.component';
 import { RestttComponent } from './resttt/resttt.component';
 import { RestttTableComponent } from './resttt-table/resttt-table.component';
 import { RestttChartComponent } from './resttt-chart/resttt-chart.component';
-import { DelayDirective } from './delay.directive';
+import { FadeDirective } from './fade.directive';
 import { DocsComponent } from './docs/docs.component';
 
 import { NgChartsModule } from 'ng2-charts';
@@ -23,9 +24,10 @@ PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
     AppComponent,
     CardComponent,
     OverviewComponent,
+    RecentComponent,
     PlayerComponent,
     RestttComponent,
-    DelayDirective,
+    FadeDirective,
     DocsComponent,
     RestttTableComponent,
     RestttChartComponent,

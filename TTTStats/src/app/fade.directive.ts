@@ -2,18 +2,18 @@ import { Directive, Input, OnInit, ElementRef } from '@angular/core';
 
 /* Attribute for DOM Element to make it fade in / fade out after some initial delay */
 @Directive({
-  selector: '[delay]'
+  selector: '[appFade]'
 })
-export class DelayDirective implements OnInit {
+export class FadeDirective implements OnInit {
 
   constructor(private ref: ElementRef) {}
 
-  @Input() delay!: number;
+  @Input() appFade!: number;
 
   ngOnInit() {
     setTimeout(() => {
       this.invert();
-    }, this.delay);
+    }, this.appFade);
   }
 
   invert() {
