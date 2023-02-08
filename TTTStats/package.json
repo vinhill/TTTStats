@@ -4,7 +4,8 @@
   "scripts": {
     "start": "ng serve --open",
     "eslint": "eslint .",
-    "deploy": "ng build --base-href=/TTTStats/ && npx angular-cli-ghpages --dir=dist/TTTStats"
+    "deploy": "ng build --base-href=/TTTStats/ && npx angular-cli-ghpages --dir=dist/TTTStats",
+    "lint": "ng lint"
   },
   "private": true,
   "dependencies": {
@@ -28,11 +29,19 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~13.0.1",
+    "@angular-eslint/builder": "13.5.0",
+    "@angular-eslint/eslint-plugin": "13.5.0",
+    "@angular-eslint/eslint-plugin-template": "13.5.0",
+    "@angular-eslint/schematics": "13.5.0",
+    "@angular-eslint/template-parser": "13.5.0",
     "@angular/cli": "~13.0.1",
     "@angular/compiler-cli": "~13.0.1",
     "@types/jasmine": "~3.6.0",
     "@types/node": "^12.11.1",
     "@types/plotly.js-dist-min": "^2.3.0",
+    "@typescript-eslint/eslint-plugin": "5.27.1",
+    "@typescript-eslint/parser": "5.27.1",
+    "eslint": "^8.17.0",
     "karma": "~6.3.0",
     "karma-chrome-launcher": "~3.1.0",
     "karma-coverage": "~2.0.3",

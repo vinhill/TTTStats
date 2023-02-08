@@ -1,9 +1,9 @@
 <!-- Text -->
-<div *ngIf="display == 'text'">
+<div *ngIf="display === 'text'">
   {{stringify(_result)}}
 </div>
 
-<div *ngIf="display == 'Treemap'">
+<div *ngIf="display === 'Treemap'">
   <plotly-plot *ngIf="loaded"
 		[data]="_treemap?.data"
 		[layout]="_treemap?.layout"
@@ -12,7 +12,7 @@
 	</plotly-plot>
 </div>
 
-<div *ngIf="display == 'Sankey'">
+<div *ngIf="display === 'Sankey'">
 	<plotly-plot *ngIf="loaded"
 		  [data]="_sankey?.data"
 		  [layout]="_sankey?.layout"
