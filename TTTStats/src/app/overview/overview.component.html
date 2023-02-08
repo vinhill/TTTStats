@@ -43,16 +43,7 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Victorious teams" [loaded]="rtw.loaded" [reloadCallback]="rtw.load">
-		<resttt-chart #rtw
-			query="TeamWincount"
-			labelkey="team"
-			datakeys="count"
-			ctype="doughnut"
-			cmap="plotly">
-		</resttt-chart>
-	</card>
-	<card title="Best weapon" [loaded]="rkbw.loaded" [reloadCallback]="rkbw.load">
+	<card title="Kills per weapon" [loaded]="rkbw.loaded" [reloadCallback]="rkbw.load">
 		<resttt-chart #rkbw
 			query="KillsByWeaponLimited"
 			[params]="{limit: 25}"
@@ -62,11 +53,9 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Role winrate" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
-		<resttt #test
-			query="RoleWincount"
-			display="Treemap"
-			[options]="{label: 'startrole', parent: 'superteam', value: 'wins', color: 'colour'}">
-		</resttt>
-	</card>
+	<!--
+		TODO
+		Win / loss per Role and per Team
+		Smaller cards for in between
+	-->
 </div>

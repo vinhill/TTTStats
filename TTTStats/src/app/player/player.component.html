@@ -24,15 +24,6 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
-	<card title="Victorious roles" [loaded]="rpw.loaded" [reloadCallback]="rpw.load">
-		<resttt-table #rpw
-			query="PlayerRoleWincount"
-			[params]="{player: name}"
-			datakeys="startrole,count"
-			[cnames]="{startrole: 'Anfangsrolle', count: 'Anzahl'}">
-			ctype="doughnut">
-		</resttt-table>
-	</card>
 	<card title="Best weapon" [loaded]="rpkbw.loaded" [reloadCallback]="rpkbw.load">
 		<resttt-chart #rpkbw
 			query="PlayerKillsByWeapon"
@@ -53,4 +44,9 @@
 			cmap="plotly">
 		</resttt-chart>
 	</card>
+	<!--
+		TODO
+		Kills from and for other players
+		Role and team winrate
+	-->
 </div>
