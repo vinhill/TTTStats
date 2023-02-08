@@ -1,9 +1,7 @@
 <div class="masonry" #masonry>
-	<card>
+	<card size="small">
 		<h1 class="display-3">Recent Match</h1>
-		Made with ❤ by Josu und Vincent
-		<br>
-		Code available <a href="https://github.com/vinhill/TTTStats">here</a>
+		<p class="lead">{{matchdate}}</p>
 	</card>
 	<card title="Maps" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
 		<resttt-chart #rmc

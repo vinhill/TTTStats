@@ -1,13 +1,7 @@
-import { Component, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CardComponent } from '../card/card.component';
 import { DataStoreService } from '../data-store.service';
-import { PlottingService } from '../plotting.service';
-import { ExecLimiter } from '../utils';
 import { LegendType } from '../resttt-chart/resttt-chart.component';
-
-declare var Masonry: any;
-declare var ResizeObserver: any;
 
 @Component({
   selector: 'app-player',
@@ -24,32 +18,7 @@ export class PlayerComponent implements OnInit {
   kdratio: number | undefined;
   kgratio: number | undefined;
 
-  masonry: any;
-  resizeObserver: ResizeObserver;
-  executor: ExecLimiter;
-
-  constructor(private route: ActivatedRoute, private datastore: DataStoreService, private plotting: PlottingService) {
-    this.resizeObserver = new ResizeObserver(() => {
-      this.executor.requestExec();
-    });
-    this.executor = new ExecLimiter(() => {
-      this.masonry.layout();
-    });
-  }
-
-  @ViewChild('masonry')
-  set initMasonry(elem: any) {
-    this.masonry = new Masonry(elem.nativeElement, {
-      itemSelector: '.masonry-item',
-    });
-  }
-
-  @ViewChildren(CardComponent, {read: ElementRef})
-  set observeCards(cards: QueryList<ElementRef>) {
-    for (let child of cards) {
-      this.resizeObserver.observe(child.nativeElement.firstChild);
-    }
-  };
+  constructor(private route: ActivatedRoute, private datastore: DataStoreService) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
