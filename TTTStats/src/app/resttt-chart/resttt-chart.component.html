@@ -1,4 +1,4 @@
-<div class="chart-container" [class.chart-container-nolegend]="!legendconfig.disabled">
+<div class="chart-container" [class.chart-container-half]="legendconfig == LegendType.HTML">
   <canvas #chart></canvas>
 </div>
 

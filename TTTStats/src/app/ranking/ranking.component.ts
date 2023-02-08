@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DataStoreService } from '../data-store.service';
+import { PlottingService } from '../plotting.service';
 
 @Component({
   selector: 'app-ranking',

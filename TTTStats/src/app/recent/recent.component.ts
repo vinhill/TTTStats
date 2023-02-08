@@ -1,6 +1,8 @@
 import { Component, ViewChild, ViewChildren, QueryList, ElementRef } from '@angular/core';
 import { CardComponent } from '../card/card.component';
+import { PlottingService } from '../plotting.service';
 import { ExecLimiter } from '../utils';
+import { LegendType } from '../resttt-chart/resttt-chart.component';
 
 declare var Masonry: any;
 declare var ResizeObserver: any;
@@ -11,12 +13,14 @@ declare var ResizeObserver: any;
   styleUrls: ['./recent.component.css']
 })
 export class RecentComponent {
+  LegendType = LegendType;
+
   masonry: any;
   resizeObserver: ResizeObserver;
   executor: ExecLimiter;
 
-  constructor() {
-    this.resizeObserver = new ResizeObserver((entries: any) => {
+  constructor(private plotting: PlottingService) {
+    this.resizeObserver = new ResizeObserver(() => {
       this.executor.requestExec();
     });
     this.executor = new ExecLimiter(() => {

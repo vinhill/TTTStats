@@ -2,7 +2,9 @@ import { Component, OnInit, ViewChild, ViewChildren, QueryList, ElementRef } fro
 import { ActivatedRoute } from '@angular/router';
 import { CardComponent } from '../card/card.component';
 import { DataStoreService } from '../data-store.service';
+import { PlottingService } from '../plotting.service';
 import { ExecLimiter } from '../utils';
+import { LegendType } from '../resttt-chart/resttt-chart.component';
 
 declare var Masonry: any;
 declare var ResizeObserver: any;
@@ -13,6 +15,8 @@ declare var ResizeObserver: any;
   styleUrls: ['./player.component.css']
 })
 export class PlayerComponent implements OnInit {
+  LegendType = LegendType;
+  
   name: string = "";
   rounds: number | undefined;
   kills: number | undefined;
@@ -24,8 +28,8 @@ export class PlayerComponent implements OnInit {
   resizeObserver: ResizeObserver;
   executor: ExecLimiter;
 
-  constructor(private route: ActivatedRoute, private datastore: DataStoreService) {
-    this.resizeObserver = new ResizeObserver((entries: any) => {
+  constructor(private route: ActivatedRoute, private datastore: DataStoreService, private plotting: PlottingService) {
+    this.resizeObserver = new ResizeObserver(() => {
       this.executor.requestExec();
     });
     this.executor = new ExecLimiter(() => {

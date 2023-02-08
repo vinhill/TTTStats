@@ -31,7 +31,7 @@ PlotlyViaCDNModule.setPlotlyVersion('2.8.0');
     DocsComponent,
     DataTableComponent,
     RestttChartComponent,
-    RankingComponent
+    RankingComponent,
   ],
   imports: [
     BrowserModule,

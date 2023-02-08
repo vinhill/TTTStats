@@ -17,19 +17,17 @@ class CustomLegend {
     this.onReceivedItems = onReceivedItems;
   }
 
-  afterUpdate(chart: any, args: any, options: any) {
+  afterUpdate(chart: any) {
     const items = chart.options.plugins.legend.labels.generateLabels(chart);
     this.onReceivedItems(items);
   }
 }
-export type LegendConfiguration = {
-  disabled?: boolean,
-  use_chartjs?: boolean
-};
-type InternalLegendConfig = {
-  disabled: boolean,
-  use_chartjs: boolean
-};
+
+export enum LegendType {
+  ChartJS,
+  HTML,
+  None
+}
 
 @Component({
   selector: 'resttt-chart',
@@ -37,14 +35,13 @@ type InternalLegendConfig = {
   styleUrls: ['./resttt-chart.component.css']
 })
 export class RestttChartComponent implements OnChanges {
+  LegendType = LegendType;
+
   loaded: boolean = false;
   private datakeys: string[] = [];
   private chart: Chart | undefined;
   legenditems: LegendItem[] = [];
-  legendconfig: InternalLegendConfig = {
-    disabled: false,
-    use_chartjs: false
-  }
+  legendconfig: LegendType = LegendType.HTML
   
 
   @ViewChild('chart') private _chartCnvs!: ElementRef;
@@ -67,9 +64,8 @@ export class RestttChartComponent implements OnChanges {
   // chart options
   @Input() coptions: ChartConfiguration["options"] = {};
   // general toggle for legend
-  @Input("legend") set setlegendconfig(config: LegendConfiguration) {
-    for (let key of Object.keys(config))
-      (this.legendconfig as any)[key] = (config as any)[key];
+  @Input("legend") set setlegendconfig(legend: LegendType) {
+    this.legendconfig = legend;
   };
 
   constructor(private datastore: DataStoreService) { }
@@ -86,9 +82,8 @@ export class RestttChartComponent implements OnChanges {
     this.loaded = false;
     let result = await this.datastore.get(this.query, this.params);
 
-    if (!this.legendconfig.use_chartjs) {
+    if (this.legendconfig != LegendType.ChartJS)
       this.disableChartLegend();
-    }
 
     let _chartData: ChartConfiguration = {
       type: this.ctype as ChartType,
@@ -112,7 +107,7 @@ export class RestttChartComponent implements OnChanges {
       });
     }
 
-    if (!this.legendconfig.disabled) {
+    if (this.legendconfig == LegendType.HTML) {
       let legendPlugin = new CustomLegend((items: LegendItem[]) => {
         this.legenditems = items;
       });
