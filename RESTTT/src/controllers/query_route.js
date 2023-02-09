@@ -33,6 +33,12 @@ router.get("/Players", async function(req, res, next) {
   next()
 })
 
+router.get("/Dates", async function(req, res, next) {
+  // if we don't use date_format, date in nodejs is off by one hour from the one in the database
+  req.sqlquery = "SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date, count(*) as count FROM game GROUP BY date ORDER BY date DESC"
+  next()
+})
+
 router.get("/PlayerGameCount", async function(req, res, next) {
   req.sqlquery = "SELECT player, COUNT(mid) as rounds FROM participates GROUP BY player ORDER BY rounds DESC"
   next()
@@ -40,6 +46,14 @@ router.get("/PlayerGameCount", async function(req, res, next) {
 
 router.get("/MapCount", async function(req, res, next) {
   req.sqlquery = "SELECT map, COUNT(mid) as count FROM game GROUP BY map ORDER BY count DESC"
+  next()
+})
+
+// date as 2022-01-03
+router.get("/MapCount/:date", async function(req, res, next) {
+  const date = req.params.date
+  req.sqlquery = "SELECT map, COUNT(mid) as count FROM game WHERE date = ? GROUP BY map ORDER BY count DESC"
+  req.sqlparams = [date]
   next()
 })
 

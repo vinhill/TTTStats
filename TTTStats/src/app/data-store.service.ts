@@ -58,8 +58,11 @@ export class DataStoreService {
     return res.find(row => row.player == player).rounds;
   }
 
-  async MapCount(): Promise<{count: number, map: string}[]> {
-    return this.resttt.get("MapCount");
+  async MapCount(date?: string): Promise<{count: number, map: string}[]> {
+    if (date)
+      return this.resttt.get("MapCount/" + date);
+    else
+      return this.resttt.get("MapCount");
   }
 
   async _joinColorSuperteam(rows: any[], rolecol: string): Promise<void> {
@@ -236,5 +239,9 @@ export class DataStoreService {
     res = res.filter(row => row.player == player);
     res.sort((a: any, b: any) => b.count-a.count);
     return res;
+  }
+
+  async Dates(): Promise<{date: string, count: number}[]> {
+    return this.resttt.get("Dates");
   }
 }

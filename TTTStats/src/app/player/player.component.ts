@@ -31,7 +31,7 @@ export class PlayerComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.setPlayerName(params.name);
-      this.load();
+      this.loadAll();
     });
   }
 
@@ -50,17 +50,23 @@ export class PlayerComponent implements OnInit {
 	  this.name = name;
   }
 
-  async load() {
+  loadAll() {
+    return Promise.all([
+      this.loadBasics(),
+      this.loadPopularPurchases(),
+      this.loadKillsByWeapon(),
+      this.loadDeathsByWeapon(),
+      this.loadRolesTreemap()
+    ]);
+  }
+
+  async loadBasics() {
     this.rounds = await this.datastore.PlayerGameCount(this.name);
     let killdata = await this.datastore.PlayerKillStats(this.name);
     this.kills = killdata.kills;
     this.teamkills = killdata.wrong;
     this.kdratio = killdata.kd;
     this.kgratio = killdata.kpg;
-    this.loadPopularPurchases();
-    this.loadKillsByWeapon();
-    this.loadDeathsByWeapon();
-    this.loadRolesTreemap();
   }
 
   async loadPopularPurchases() {

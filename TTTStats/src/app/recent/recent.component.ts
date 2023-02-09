@@ -14,19 +14,35 @@ export class RecentComponent {
   LegendType = LegendType;
 
   cMapCount: ChartConfiguration | undefined;
-  cKillsDeaths: ChartConfiguration | undefined;
-  cPopularPurchases: ChartConfiguration | undefined;
-  cKillsPerWeapon: ChartConfiguration | undefined;
 
-  matchdate: string = "dd/mm/yyyy"
+  fillin = {
+    datestr: "dd/mm/yyyy",
+    dow: "DoW",
+    rounds: 0
+  }
+
+  date: string = "yyyy-mm-ddThh:mm:ss.sssZ";
 
   constructor(private datastore: DataStoreService) { }
 
   ngOnInit() {
-    this.loadMapCount();
-    this.loadKillsDeaths();
-    this.loadPopularPurchases();
-    this.loadKillsPerWeapon();
+    this.loadAll();
+  }
+
+  async loadAll() {
+    await this.loadDate();
+    return Promise.all([
+      this.loadMapCount()
+    ])
+  }
+
+  async loadDate() {
+    var res = await this.datastore.Dates();
+    res = res.sort((a: any, b: any) => b.date - a.date);
+    this.date = res[0].date;
+    this.fillin.datestr = new Date(res[0].date).toLocaleDateString();
+    this.fillin.dow = new Date(res[0].date).toLocaleDateString("en-US", { weekday: "long" });
+    this.fillin.rounds = res[0].count;
   }
 
   simpleDataset(tbl: Dataframe, col: string, cmap: string) {
@@ -41,7 +57,7 @@ export class RecentComponent {
   }
 
   async loadMapCount() {
-    const res = await this.datastore.MapCount();
+    const res = await this.datastore.MapCount(this.date);
     const tbl = new Dataframe(res);
 
     this.cMapCount = {
@@ -50,64 +66,6 @@ export class RecentComponent {
       data: {
         datasets: [this.simpleDataset(tbl, "count", "plotly")],
         labels: tbl.cols.map()
-      }
-    }
-  }
-
-  async loadKillsDeaths() {
-    const res = await this.datastore.KillStats();
-    const tbl = new Dataframe(res);
-
-    const ds_kills = {
-      label: "Kills",
-      data: tbl.cols.kills(),
-      backgroundColor: "#ff0000",
-      borderColor: "#ff0000"
-    }
-    const ds_deaths = {
-      label: "Deaths",
-      data: tbl.cols.deaths(),
-      backgroundColor: "#0000ff",
-      borderColor: "#0000ff"
-    }
-
-    this.cKillsDeaths = {
-      type: "bar" as ChartType,
-      options: {plugins: {legend: {position: 'bottom'}}},
-      data: {
-        datasets: [ds_kills, ds_deaths],
-        labels: tbl.cols.player()
-      }
-    }
-  }
-
-  async loadPopularPurchases() {
-    const res = await this.datastore.PopularPurchases();
-    const tbl = new Dataframe(res);
-
-    this.cPopularPurchases = {
-      type: "doughnut" as ChartType,
-      options: {},
-      data: {
-        datasets: [this.simpleDataset(tbl, "amount", "plotly")],
-        labels: tbl.cols.item()
-      }
-    }
-  }
-
-  async loadKillsPerWeapon() {
-    var res = await this.datastore.KillsByWeapon();
-    res = res.sort((a: any, b: any) => b.count-a.count);
-    res = res.splice(0, 25);
-    res.splice(0, 25);
-    const tbl = new Dataframe(res);
-
-    this.cKillsPerWeapon = {
-      type: "doughnut" as ChartType,
-      options: {},
-      data: {
-        datasets: [this.simpleDataset(tbl, "count", "plotly")],
-        labels: tbl.cols.weapon()
       }
     }
   }

@@ -1,19 +1,11 @@
 <div class="masonry" #masonry>
 	<card>
 		<h1 class="display-3">Recent Match</h1>
-		<p class="lead">{{matchdate}}</p>
+		<p class="lead">on {{fillin.dow}}, {{fillin.datestr}}</p>
+		<p>You played {{fillin.rounds}} rounds.</p>
 	</card>
 	<card title="Maps" [loaded]="cMapCount !== undefined" [reloadCallback]="loadMapCount">
 		<data-chart [data]="cMapCount!"></data-chart>
-	</card>
-	<card title="Kills / Deaths" [loaded]="cKillsDeaths !== undefined" [reloadCallback]="loadKillsDeaths">
-		<data-chart [data]="cKillsDeaths!" [legend]="LegendType.ChartJS"></data-chart>
-	</card>
-	<card title="Bought the most" [loaded]="cPopularPurchases !== undefined" [reloadCallback]="loadPopularPurchases">
-		<data-chart [data]="cPopularPurchases!"></data-chart>
-	</card>
-	<card title="Kills per weapon" [loaded]="cKillsPerWeapon !== undefined" [reloadCallback]="loadKillsPerWeapon">
-		<data-chart [data]="cKillsPerWeapon!"></data-chart>
 	</card>
 	<!--
 		TODO

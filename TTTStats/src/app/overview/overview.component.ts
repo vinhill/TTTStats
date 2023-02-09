@@ -189,7 +189,6 @@ export class OverviewComponent implements OnInit {
       }
     };
 
-    console.log(dataitem);
     this.cWhoKilledWho = [dataitem];
   }
 }
