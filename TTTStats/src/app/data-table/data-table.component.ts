@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { DataStoreService } from '../data-store.service';
+import { Dataframe } from '../dataframe';
 
 @Component({
   selector: 'data-table',
@@ -30,8 +31,7 @@ export class DataTableComponent implements OnChanges {
 
   async load() {
     this.loaded = false;
-    let res = await this.datastore.get(this.query, this.params);
-    this._result = res.rows;
+    this._result = await this.datastore.get(this.query, this.params);
     this.loaded = true;
   }
 }

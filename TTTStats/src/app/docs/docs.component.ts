@@ -27,7 +27,7 @@ export class DocsComponent implements OnInit {
     let roles = await this.resttt.get("Roles");
     // sort roles by team
     for (let group of Object.keys(this.groups)) {
-      this.groups[group] = roles.rows.filter(function(r:any) { return r.superteam == group; });
+      this.groups[group] = roles.filter(function(r:any) { return r.superteam == group; });
     }
     // sort teams by length of role descriptions
     for (let group of Object.keys(this.groups)) {

@@ -1,7 +1,8 @@
-.chart-container-half {
+.chart-container-halfwidth {
   float: left;
   width: 50%;
 }
+
 .chart-legend {
   padding: inherit;
   position: absolute;

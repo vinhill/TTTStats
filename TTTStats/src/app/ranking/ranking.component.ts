@@ -16,7 +16,7 @@ export class RankingComponent implements OnInit {
   }
 
   async load() {
-    let killstats = (await this.datastore.KillStats()).rows;
+    let killstats = (await this.datastore.KillStats());
     killstats.sort((a:any, b:any) => b.kd - a.kd);
     killstats.forEach((k:any) => {
       k.name = k.player;
@@ -27,7 +27,7 @@ export class RankingComponent implements OnInit {
       rows: killstats
     });
     
-    let teamkills = (await this.datastore.KillStats()).rows;
+    let teamkills = (await this.datastore.KillStats());
     teamkills.sort((a:any, b:any) => b.wrong - a.wrong);
     teamkills.forEach((k:any) => {
       k.name = k.player;
@@ -38,7 +38,7 @@ export class RankingComponent implements OnInit {
       rows: teamkills
     });
 
-    let games = (await this.datastore.PlayerGameCounts()).rows;
+    let games = (await this.datastore.PlayerGameCounts());
     games.sort((a:any, b:any) => b.rounds - a.rounds);
     games.forEach((k:any) => {
       k.name = k.player;
@@ -49,7 +49,7 @@ export class RankingComponent implements OnInit {
       rows: games
     });
 
-    let survived = (await this.datastore.Survived()).rows;
+    let survived = (await this.datastore.Survived());
     survived.sort((a:any, b:any) => b.rate - a.rate);
     survived.forEach((k:any) => {
       k.name = k.player;

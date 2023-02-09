@@ -1,43 +1,21 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { deepcopy } from './utils';
 
-export type RestttResult = {
-	rows: any[];
-	cols: {[key: string]: any[]};
-}
-
 const root = isDevMode()
 	? 'http://localhost:3001/api/v1'
 	: 'https://resttt.fly.dev/api/v1';
 
-export function RestttWithColumns(table: any[]): RestttResult {
-	/*
-	[{c1: 0, c2: 1}, {c1: 3, c2: 2}]
-	to
-	{c1: [0, 3], c2: [1,2]}
-	*/
-	if (table.length == 0) {
-		return {rows: table, cols: {}};
-	}
-
-	let cols: any = {};
-	for (let column of Object.keys(table[0])) {
-		cols[column] = table.map(function(row: any) {
-			  return row[column]
-		});
-	  }
-
-	return {rows: table, cols: cols};
-}
+if (isDevMode())
+	console.log("Running in dev mode, using root: " + root);
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestttService {
 	
-	private cache: {[key: string]: RestttResult} = {};
+	private cache: {[key: string]: any[]} = {};
 
-	async custom(query: string, password: string): Promise<RestttResult> {
+	async custom(query: string, password: string): Promise<any[]> {
 		let res = await fetch(root + "/query/custom", {
 			method: "POST",
 			body: JSON.stringify({
@@ -51,11 +29,11 @@ export class RestttService {
 		if(res.status != 200) {
 			console.log(await res.json());
 		}
-		let content = RestttWithColumns(await res.json());
+		let content = await res.json();
 		return content;
 	}
 	
-	async getNoCache(name: string): Promise<RestttResult> {
+	async getNoCache(name: string): Promise<any[]> {
 		let res = await fetch(`${root}/query/${name}`, {
 			method: "GET",
 			headers: {
@@ -65,11 +43,11 @@ export class RestttService {
 		if(res.status != 200) {
 			console.log(await res.json());
 		}
-		let content = RestttWithColumns(await res.json());
+		let content = await res.json();
 		return content;
 	}
 
-	async get(key: string) : Promise<RestttResult> {
+	async get(key: string) : Promise<any[]> {
 		let cached = this.cache[key];
 		if (!cached) {
 			this.cache[key] = await this.getNoCache(key);

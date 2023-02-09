@@ -1,66 +1,27 @@
-<div class="masonry" #masonry>
+<div class="masonry">
 	<card>
 		<h1 class="display-3">TTT Overview</h1>
 		Made with ❤ by Josu und Vincent
 		<br>
 		Code available <a class="link-secondary" href="https://github.com/vinhill/TTTStats">here</a>
 	</card>
-	<card title="Maps" [loaded]="rmc.loaded" [reloadCallback]="rmc.load">
-		<resttt-chart #rmc
-			query="MapCount"
-			labelkey="map"
-			datakeys="count"
-			ctype="doughnut"
-			cmap="plotly">
-		</resttt-chart>
+	<card title="Maps" [loaded]="cMapCount !== undefined" [reloadCallback]="loadMapCount">
+		<data-chart [data]="cMapCount!"></data-chart>
 	</card>
-	<card title="Kill stats" [loaded]="rpkc.loaded" [reloadCallback]="rpkc.load">
-		<!--resttt-table #rpkc
-			query="KillStats"
-			datakeys="player,kills,deaths">
-		</resttt-table-->
-		<resttt-chart #rpkc
-			query="KillStats"
-			labelkey="player"
-			datakeys="kills,deaths"
-			ctype="bar"
-			[legend]="LegendType.ChartJS"
-			[coptions]="{plugins: {legend: {position: 'bottom'}}}"
-			cmap="plotly">
-		</resttt-chart>
+	<card title="Kills / Deaths" [loaded]="cKillsDeaths !== undefined" [reloadCallback]="loadKillsDeaths">
+		<data-chart [data]="cKillsDeaths!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
-	<card title="Roles" size="large" [loaded]="rrc.loaded" [reloadCallback]="rrc.load">
-		<resttt #rrc
-			query="RoleCount"
-			display="Treemap"
-			[options]="{label: 'startrole', parent: 'superteam', value: 'count', color: 'colour'}">
-		</resttt>
+	<card title="Roles" size="large" [loaded]="cRoles !== undefined" [reloadCallback]="loadRolesTreemap">
+		<data-plotly [data]="cRoles!"></data-plotly>
 	</card>
-	<card title="Who kills who?" [loaded]="wkw.loaded" [reloadCallback]="wkw.load">
-		<resttt #wkw
-			query="WhoKilledWho"
-			display="Sankey"
-			[options]="{source:'killer', target:'victim'}">
-		</resttt>
+	<card title="Who kills who?" [loaded]="cWhoKilledWho !== undefined" [reloadCallback]="loadWhoKilledWho">
+		<data-plotly [data]="cWhoKilledWho!"></data-plotly>
 	</card>
-	<card title="Bought the most" [loaded]="rpp.loaded" [reloadCallback]="rpp.load">
-		<resttt-chart #rpp
-			query="PopularPurchases"
-			labelkey="item"
-			datakeys="amount"
-			ctype="doughnut"
-			cmap="plotly">
-		</resttt-chart>
+	<card title="Bought the most" [loaded]="cPopularPurchases !== undefined" [reloadCallback]="loadPopularPurchases">
+		<data-chart [data]="cPopularPurchases!"></data-chart>
 	</card>
-	<card title="Kills per weapon" [loaded]="rkbw.loaded" [reloadCallback]="rkbw.load">
-		<resttt-chart #rkbw
-			query="KillsByWeaponLimited"
-			[params]="{limit: 25}"
-			labelkey="weapon"
-			datakeys="count"
-			ctype="doughnut"
-			cmap="plotly">
-		</resttt-chart>
+	<card title="Top 25 weapons (kills)" [loaded]="cKillsPerWeapon !== undefined" [reloadCallback]="loadKillsPerWeapon">
+		<data-chart [data]="cKillsPerWeapon!"></data-chart>
 	</card>
 	<!--
 		TODO
