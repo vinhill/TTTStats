@@ -1,22 +1,25 @@
 import { Injectable, isDevMode } from '@angular/core';
 import { deepcopy } from './utils';
 
-const root = isDevMode()
-	? 'http://localhost:3001/api/v1'
-	: 'https://resttt.fly.dev/api/v1';
-
-if (isDevMode())
-	console.log("Running in dev mode, using root: " + root);
-
 @Injectable({
   providedIn: 'root'
 })
 export class RestttService {
+	root: string;
+
+	constructor() {
+		if (isDevMode()) {
+			this.root = 'http://localhost:3001/api/v1';
+			console.log("Running in dev mode, using root: " + this.root);
+		}else {
+			this.root = 'https://resttt.fly.dev/api/v1';
+		}
+	}
 	
 	private cache: {[key: string]: any[]} = {};
 
 	async custom(query: string, password: string): Promise<any[]> {
-		let res = await fetch(root + "/query/custom", {
+		let res = await fetch(this.root + "/query/custom", {
 			method: "POST",
 			body: JSON.stringify({
 				"query": query,
@@ -34,7 +37,7 @@ export class RestttService {
 	}
 	
 	async getNoCache(name: string): Promise<any[]> {
-		let res = await fetch(`${root}/query/${name}`, {
+		let res = await fetch(`${this.root}/query/${name}`, {
 			method: "GET",
 			headers: {
 				'Content-Type': "application/json"
