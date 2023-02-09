@@ -122,7 +122,7 @@ GROUP BY player, causee
   next()
 })
 
-router.get("/WhoTeamedWho", async function(req, res, next) {
+/*router.get("/WhoTeamedWho", async function(req, res, next) {
   req.sqlquery = `
 SELECT pa.player AS player, pb.player AS mate, COUNT(*) AS count
 FROM participates pa
@@ -133,7 +133,7 @@ WHERE ra.team = rb.team
 GROUP BY pa.player, pb.player
   `
   next()
-})
+})*/
 
 router.get("/DeathsByWeapon", async function(req, res, next) {
   req.sqlquery = `

@@ -216,11 +216,6 @@ export class DataStoreService {
     return data;
   }
 
-  async KillsByWeaponLimited(limit: number) : Promise<{weapon: string, count: number}[]> {
-    let data = (await this.KillsByWeapon());
-    return data.slice(0, limit);
-  }
-
   async PlayerKillsByWeapon(player: string): Promise<{causee: string, weapon: string, count: number}[]> {
     let res = (await this.resttt.get("KillsByWeapon"));
     res = res.filter(row => row.causee == player);

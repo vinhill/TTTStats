@@ -96,7 +96,10 @@ export class RecentComponent {
   }
 
   async loadKillsPerWeapon() {
-    const res = await this.datastore.KillsByWeaponLimited(25);
+    var res = await this.datastore.KillsByWeapon();
+    res = res.sort((a: any, b: any) => b.count-a.count);
+    res = res.splice(0, 25);
+    res.splice(0, 25);
     const tbl = new Dataframe(res);
 
     this.cKillsPerWeapon = {
