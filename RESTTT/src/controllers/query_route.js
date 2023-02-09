@@ -157,15 +157,12 @@ GROUP BY causee, weapon
 
 router.use("/", async function(req, res, next) {
   if(!req.sqlquery) {
-    // none of the previous query routes were activated
-    // pass on to next middleware
     next()
     return
   }
-  if(!req.sqlparams) {
+  if(!req.sqlparams)
     req.sqlparams = []
-  }
-  // query database and return result
+
   try {
     const data = await db.query(req.sqlquery, req.sqlparams)
     res.status(200).json(data)
@@ -176,10 +173,8 @@ router.use("/", async function(req, res, next) {
 })
 
 router.get("/Roles", async function(req, res) {
-  // query database and return result
   try {
-    // the result will be too long to be cached
-    const data = await db.query("SELECT * FROM role", [], false)
+    const data = await db.query("SELECT * FROM role", [], false /*result too long for cache*/)
     res.status(200).json(data)
   } catch (e) {
     res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
