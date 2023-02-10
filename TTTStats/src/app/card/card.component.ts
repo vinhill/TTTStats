@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'card',
@@ -8,7 +8,8 @@ import { Component, Input } from '@angular/core';
 export class CardComponent {
   @Input() title!: string;
   @Input() loaded: boolean = true;
-  @Input() reloadCallback?: () => void;
+
+  @Output() reload = new EventEmitter<void>();
 
   classes: string = "";
 
