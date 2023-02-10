@@ -1,61 +1,59 @@
 import { Injectable, isDevMode } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 import { deepcopy } from './utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RestttService {
-	root: string;
-
-	constructor() {
-		if (isDevMode()) {
-			this.root = 'http://localhost:3001/api/v1';
-			console.log("Running in dev mode, using root: " + this.root);
-		}else {
-			this.root = 'https://resttt.fly.dev/api/v1';
-		}
-	}
+	baseURL: BehaviorSubject<string>;
 	
 	private cache: {[key: string]: any[]} = {};
 
-	async custom(query: string, password: string): Promise<any[]> {
-		let res = await fetch(this.root + "/query/custom", {
-			method: "POST",
-			body: JSON.stringify({
-				"query": query,
-				"password": password
-				}),
-			headers: {
-				'Content-Type': "application/json"
-			}
-		});
-		if(res.status != 200) {
-			console.log(await res.json());
+	constructor() {
+		if (isDevMode()) {
+			this.baseURL = new BehaviorSubject<string>('http://localhost:3001/api/v1');
+			console.log("Running in dev mode, using root: " + this.baseURL.getValue());
+		} else {
+			this.baseURL = new BehaviorSubject<string>('https://resttt.fly.dev/api/v1');
 		}
-		let content = await res.json();
-		return content;
+		this.baseURL.subscribe(() => this.clearCache());
+		this.baseURL.subscribe({next: (url) => console.log("Using REST base URL: " + url)});
+	}
+
+	clearCache() {
+		this.cache = {};
 	}
 	
-	async getNoCache(name: string): Promise<any[]> {
-		let res = await fetch(`${this.root}/query/${name}`, {
+	private async getUncached(route: string): Promise<any[]> {
+		let res = await fetch(`${this.baseURL.getValue()}/query/${route}`, {
 			method: "GET",
 			headers: {
 				'Content-Type': "application/json"
 			}
 		});
+
 		if(res.status != 200) {
-			console.log(await res.json());
+			throw new Error(`HTTP Error ${res.status}: ${res.statusText}`);
+		} else {
+			return res.json();
 		}
-		let content = await res.json();
-		return content;
 	}
 
-	async get(key: string) : Promise<any[]> {
-		let cached = this.cache[key];
+	private async getCached(route: string): Promise<any[]> {
+		let cached = this.cache[route];
 		if (!cached) {
-			this.cache[key] = await this.getNoCache(key);
+			this.cache[route] = await this.getUncached(route);
 		}
 
-		return deepcopy(this.cache[key]);
+		return deepcopy(this.cache[route]);
+	}
+
+	async get(route: string, cache: boolean = true) : Promise<any[]> {
+		if (cache) {
+			return this.getCached(route);
+		} else {
+			return this.getUncached(route);
+		}
 	}
 }

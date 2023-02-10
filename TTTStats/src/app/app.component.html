@@ -31,6 +31,10 @@
 						<a class="nav-link" routerLink="/docs" routerLinkActive="active">Docs</a>
 					</li>
 				</ul>
+				<div class="d-flex" *ngIf="isDevMode">
+					<input class="form-control mr-sm-2" #restUrlInput type="RESTTT URL" placeholder="RESTTT URL" aria-label="RESTTT URL" [value]="restURL">
+					<button class="btn btn-outline-success my-2 my-sm-0" type="apply" (click)="setRestUrl()">Apply</button>
+				</div>
 			</div>
 		</div>
 	</nav>
