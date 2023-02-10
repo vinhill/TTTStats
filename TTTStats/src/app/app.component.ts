@@ -16,11 +16,22 @@ export class AppComponent implements OnInit {
 
   constructor(private datastore: DataStoreService, private resttt: RestttService) {
     this.restURL = resttt.baseURL.getValue();
-    this.resttt.baseURL.subscribe((url) => this.restURL = url);
+    this.resttt.baseURL.subscribe({next: (url) => {
+      this.restURL = url;
+      this.loadApiData();
+    }});
   }
   
-  async ngOnInit() {
-    this.players = await this.datastore.Players();
+  ngOnInit() {
+    this.loadApiData();
+  }
+
+  async loadApiData() {
+    try {
+      this.players = await this.datastore.Players();
+    } catch (e) {
+      console.error("Error loading players: " + e);
+    }
   }
 
   setRestUrl() {
