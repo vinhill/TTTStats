@@ -9,13 +9,13 @@
 			<div class="collapse navbar-collapse" id="navbarSupportedContent">
 				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
 					<li class="nav-item">
-						<a class="nav-link" routerLink="/overview" routerLinkActive="active" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">Overview</a>
+						<a class="nav-link" routerLink="/overview" routerLinkActive="active">Overview</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" routerLink="/recent" routerLinkActive="active" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">Recent</a>
+						<a class="nav-link" routerLink="/recent" routerLinkActive="active">Recent</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" routerLink="/ranking" routerLinkActive="active" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">Ranking</a>
+						<a class="nav-link" routerLink="/ranking" routerLinkActive="active">Ranking</a>
 					</li>
 					<li class="nav-item dropdown">
 						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -23,12 +23,12 @@
 						</a>
 						<ul class="dropdown-menu">
 							<li>
-								<a class="dropdown-item" routerLink="/player/{{player}}" routerLinkActive="active" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" *ngFor="let player of players">{{player}}</a>
+								<a class="dropdown-item" routerLink="/player/{{player}}" routerLinkActive="active" *ngFor="let player of players">{{player}}</a>
 							</li>
 						</ul>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" routerLink="/docs" routerLinkActive="active" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">Docs</a>
+						<a class="nav-link" routerLink="/docs" routerLinkActive="active">Docs</a>
 					</li>
 				</ul>
 				<div class="d-flex" *ngIf="isDevMode">
