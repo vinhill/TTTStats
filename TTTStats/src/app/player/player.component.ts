@@ -31,8 +31,18 @@ export class PlayerComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.setPlayerName(params.name);
-      this.loadAll();
+      this.loadApiData();
     });
+  }
+
+  loadApiData() {
+    Promise.all([
+      this.loadBasics(),
+      this.loadPopularPurchases(),
+      this.loadKillsByWeapon(),
+      this.loadDeathsByWeapon(),
+      this.loadRolesTreemap()
+    ]).catch(err => console.log(err));
   }
 
   simpleDataset(tbl: Dataframe, col: string, cmap: string) {
@@ -48,16 +58,6 @@ export class PlayerComponent implements OnInit {
 
   setPlayerName(name: string) {
 	  this.name = name;
-  }
-
-  loadAll() {
-    return Promise.all([
-      this.loadBasics(),
-      this.loadPopularPurchases(),
-      this.loadKillsByWeapon(),
-      this.loadDeathsByWeapon(),
-      this.loadRolesTreemap()
-    ]);
   }
 
   async loadBasics() {

@@ -23,12 +23,18 @@ export class OverviewComponent implements OnInit {
   constructor(private datastore: DataStoreService) { }
 
   ngOnInit() {
-    this.loadMapCount();
-    this.loadKillsDeaths();
-    this.loadPopularPurchases();
-    this.loadKillsPerWeapon();
-    this.loadRolesTreemap();
-    this.loadWhoKilledWho();
+    this.loadApiData();
+  }
+
+  loadApiData() {
+    Promise.all([
+      this.loadMapCount(),
+      this.loadKillsDeaths(),
+      this.loadPopularPurchases(),
+      this.loadKillsPerWeapon(),
+      this.loadRolesTreemap(),
+      this.loadWhoKilledWho()
+    ]).catch(err => console.log(err));
   }
 
   simpleDataset(tbl: Dataframe, col: string, cmap: string) {

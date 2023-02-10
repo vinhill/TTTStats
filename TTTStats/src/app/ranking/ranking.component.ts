@@ -8,14 +8,23 @@ import { DataStoreService } from '../data-store.service';
 })
 export class RankingComponent implements OnInit {
   rankings: {title: string, rows: any[]}[] = [];
+  loaded: boolean = false;
 
   constructor(private datastore: DataStoreService) { }
 
   ngOnInit(): void {
-    this.load();
+    this.loadApiData();
   }
 
-  async load() {
+  loadApiData() {
+    this.rankings = [];
+    this.loaded = false;
+    this.loadRankings().catch((e) => {
+      console.error("Error loading rankings: " + e);
+    });
+  }
+
+  async loadRankings() {
     let killstats = (await this.datastore.KillStats());
     killstats.sort((a:any, b:any) => b.kd - a.kd);
     killstats.forEach((k:any) => {
@@ -59,5 +68,7 @@ export class RankingComponent implements OnInit {
       title: 'Survival rate',
       rows: survived
     });
+
+    this.loaded = true;
   }
 }

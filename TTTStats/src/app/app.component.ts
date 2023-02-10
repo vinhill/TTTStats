@@ -26,12 +26,10 @@ export class AppComponent implements OnInit {
     this.loadApiData();
   }
 
-  async loadApiData() {
-    try {
-      this.players = await this.datastore.Players();
-    } catch (e) {
-      console.error("Error loading players: " + e);
-    }
+  loadApiData() {
+    this.datastore.Players()
+      .then(res => this.players = res)
+      .catch(e => console.error("Error loading players: " + e));
   }
 
   setRestUrl() {

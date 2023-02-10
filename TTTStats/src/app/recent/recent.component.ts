@@ -26,14 +26,15 @@ export class RecentComponent {
   constructor(private datastore: DataStoreService) { }
 
   ngOnInit() {
-    this.loadAll();
+    this.loadApiData();
   }
 
-  async loadAll() {
-    await this.loadDate();
-    return Promise.all([
-      this.loadMapCount()
-    ])
+  loadApiData() {
+    this.loadDate()
+      .then(() => Promise.all([
+        this.loadMapCount()
+      ]))
+      .catch(err => console.log(err));
   }
 
   async loadDate() {

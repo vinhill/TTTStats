@@ -16,3 +16,18 @@
         </div>
     </div>
 </div>
+<div *ngIf="!loaded">
+    <div class="row">
+        <div class="col-4"></div>
+        <div class="col-4">
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-secondary" role="status"></div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="d-flex flex-row-reverse">
+                <button class="btn btn-secondary btn-reload" (click)="loadApiData()" [appFade]="2500" hidden>Reload</button>
+            </div>
+        </div>
+    </div>
+</div>
