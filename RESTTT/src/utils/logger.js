@@ -2,7 +2,7 @@
 const { NODE_ENV } = require("./config.js")
 
 function debug(from, msg) {
-  if (NODE_ENV === "dev")
+  if (NODE_ENV === "dev" || NODE_ENV === "test")
     console.log(`${new Date().toISOString()} - debug - [${from}] - ${msg}`)
 }
 

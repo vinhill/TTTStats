@@ -8,7 +8,7 @@ Primary methods to query the db are
 const mysql = require('mysql')
 const fs = require('fs')
 const { performance } = require('perf_hooks')
-const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE, MAX_RESULT_SIZE_KB } = require('./config.js')
+const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE, MAX_RESULT_SIZE_KB, NODE_ENV } = require('./config.js')
 const logger = require('./logger.js')
 
 const BoundedCache = require("./structs.js").BoundedCache
@@ -18,11 +18,17 @@ logger.info("Database", `Cache will use up to ${CACHE_SIZE*MAX_RESULT_SIZE_KB/10
 
 let connections = {}
 
+let getTestConnection = () => console.warn("No test connection provider set.")
+let queryTest = () => console.warn("No test query provider set.")
+
 function stripstr(str) {
   return str.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ")
 }
 
 function getConnection(name, args) {
+  if (NODE_ENV === "test")
+    return getTestConnection(name, args)
+
   return new Promise((res, rej) => {
     if (!connections[name]) {
       const con = mysql.createConnection({
@@ -78,6 +84,9 @@ function readQueryFile(queryFileName) {
 }
 
 function query(con, querystr, params=[]) {
+  if (NODE_ENV === "test")
+    return queryTest(con, querystr, params)
+
   return new Promise((res, rej) => {
     const startTime = performance.now()
 
@@ -99,30 +108,9 @@ function query(con, querystr, params=[]) {
   })
 }
 
-async function queryReader(querystr, params=[]) {
-  return query(await getReadCon(), querystr, params)
-}
-
-async function queryAdmin(querystr, params=[]) {
-  return query(await getAdminCon(), querystr, params)
-}
-
-function shutdown() {
-  for (let con of connections) {
-    con.end()
-  }
-  connections = {}
-  logger.info("Database", "Closed all database connections.")
-}
-
-function clearCache() {
-  cache.clear()
-}
-
-async function queryCached(querystr, params) {
+function queryCached(con, querystr, params=[]) {
   querystr = format(querystr, params)
 
-  const con = await getReadCon()
   if (!cache.has(querystr)) {
     const future_res = query(con, querystr)
 
@@ -153,6 +141,26 @@ async function queryCached(querystr, params) {
   return cache.get(querystr)
 }
 
+async function queryReader(querystr, params=[]) {
+  return query(await getReadCon(), querystr, params)
+}
+
+async function queryAdmin(querystr, params=[]) {
+  return query(await getAdminCon(), querystr, params)
+}
+
+function shutdown() {
+  for (let con of connections) {
+    con.end()
+  }
+  connections = {}
+  logger.info("Database", "Closed all database connections.")
+}
+
+function clearCache() {
+  cache.clear()
+}
+
 function format(querystr, params) {
   return mysql.format(querystr, params)
 }
@@ -161,9 +169,15 @@ async function defaultQuery(querystr, params=[], cache=true) {
   if (querystr.endsWith(".sql"))
     querystr = await readQueryFile(querystr)
   if (cache)
-    return queryCached(querystr, params)
+    return queryCached(await getReadCon(), querystr, params)
   else
     return queryReader(querystr, params)
+}
+
+function setTestFunctions(onQuery, onConnect=() => {}) {
+  logger.info("Database", "Enabling test mode for database.js")
+  queryTest = onQuery
+  getTestConnection = onConnect
 }
 
 module.exports = {
@@ -173,4 +187,5 @@ module.exports = {
   query: defaultQuery,
   queryAdmin,
   readQueryFile: readQueryFile,
+  setTestFunctions
 }

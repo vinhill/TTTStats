@@ -139,7 +139,7 @@ function onBuy(match, state) {
   // not critical so no await
   db.queryAdmin(
     "INSERT INTO buys (mid, player, item, time, role) VALUES (?, ?, ?, ?, ?)",
-    [state.mid, match.name, match.equipment, match.time, match.role]
+    [state.mid, match.name, match.equipment, match.time, capitalizeFirstLetter(match.role)]
   )
 }
 
@@ -395,12 +395,12 @@ async function load_logfile(log, date) {
 
   // speed up if many inserts come in a short time
   // otherwise, a flush to disk is performed after each modification
-  db.queryAdmin("SET autocommit=0")
+  await db.queryAdmin("SET autocommit=0")
 
   await lp.exec(log)
 
-  db.queryAdmin("COMMIT")
-  db.queryAdmin("SET autocommit=1")
+  await db.queryAdmin("COMMIT")
+  await db.queryAdmin("SET autocommit=1")
   db.clearCache()
 }
 
