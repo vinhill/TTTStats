@@ -1,7 +1,6 @@
 const db = require('../src/utils/database.js');
 const logparse = require('../src/logparse.js');
 const logger = require('../src/utils/logger.js');
-const { describe } = require('node:test');
 
 describe('logparse', () => {
     var queries = [];
@@ -163,5 +162,74 @@ describe('logparse', () => {
             expect(queries.shift()).toBe(
                 "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', '02:58.71', 'GhastM4n', 'Glutton', 'w1', true)");
         });
-    })
+    });
+
+    describe("handles damage", () => {
+        test("for PvP", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 85",
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
+        });
+
+        test("for PvE", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 00:52.92 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged p2 [r2, t2] for 85",
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)");
+        });
+
+        test("for non-weapon kill", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 00:52.92 - CP_DMG EXPL: p1 [r1, t1] <[NULL Entity]>, (Entity [3][w1], ) damaged p2 [r2, t2] for 85",
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)");
+        });
+
+        test("for selfkill", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p1 [r1, t1] for 85",
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
+        })
+
+        test("for teamkill", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t1] for 85",
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', true, 85)");
+        });
+
+        test("through aggregation", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 10",
+                "ServerLog: 01:54.93 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 12",
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)");
+        });
+    });
 })

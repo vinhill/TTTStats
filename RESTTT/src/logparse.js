@@ -4,6 +4,7 @@ Code for parsing a TTT logfile
 const db = require("./utils/database.js")
 const LogParser = require("./utils/structs.js").LogParser
 const logger = require("./utils/logger.js")
+const groupBy = require("./group_by.js").groupBy
 
 const regex = (function() {
   //build regexes without worrying about
@@ -182,10 +183,7 @@ function onPvPDmg(match, state) {
   if (inflictor.class !== "Player")
     weapon = inflictor.entity
 
-  db.queryAdmin(
-    "INSERT INTO damages (mid, player, vktrole, reason, damage, time, causee, atkrole, weapon, teamdmg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [state.mid, match.victim, vktrole, match.type, damage, match.time, match.attacker, atkrole, weapon, teamdmg]
-  )
+  state.MatchPvPDmg.push([state.mid, match.victim, vktrole, match.type, match.attacker, atkrole, weapon, teamdmg, damage])
   // TODO track specific rolechanges, like zombie and cursed here?
 }
 
@@ -195,10 +193,29 @@ function onPvEDmg(match, state) {
   let damage = Math.min(match.damage, 2147483647)
   // TODO use the inflictor somehow?
 
-  db.queryAdmin(
-    "INSERT INTO damages (mid, player, vktrole, reason, damage, time) VALUES (?, ?, ?, ?, ?, ?)",
-    [state.mid, match.victim, vktrole, match.type, damage, match.time]
-  )
+  state.MatchPvEDmg.push([state.mid, match.victim, vktrole, match.type, damage])
+}
+
+function performDmgQuery(match, state) {
+  const sum = (vals) => vals.reduce((prev, v) => prev + Number(v), 0)
+
+  const PvPDmgArgs = groupBy(state.MatchPvPDmg, [0, 1, 2, 3, 4, 5, 6, 7], sum)
+  for (let args of PvPDmgArgs) {
+    db.queryAdmin(
+      "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      args
+    )
+  }
+  state.MatchPvPDmg = []
+
+  const PvEDmgArgs = groupBy(state.MatchPvEDmg, [0, 1, 2, 3], sum)
+  for (let args of PvEDmgArgs) {
+    db.queryAdmin(
+      "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (?, ?, ?, ?, ?)",
+      args
+    )
+  }
+  state.MatchPvEDmg = []
 }
 
 async function onPvPKill(match, state) {
@@ -271,7 +288,9 @@ async function load_logfile(log, date) {
     roles: new Map(),
     date: date,
     mid: 0,
-    map: ""
+    map: "",
+    MatchPvPDmg: [],
+    MatchPvEDmg: []
   })
 
   // map selection
@@ -306,7 +325,7 @@ async function load_logfile(log, date) {
 
   // equipment buy
   lp.attach(
-    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\] {2}ordered (?<equipment>\w*)/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
     onBuy
   )
 
@@ -386,6 +405,10 @@ async function load_logfile(log, date) {
   lp.attach(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_ENDED at given time/,
     onGameEnd
+  )
+  lp.attach(
+    /ServerLog: [0-9:.]* - ROUND_ENDED at given time/,
+    performDmgQuery  
   )
 
   // leave
