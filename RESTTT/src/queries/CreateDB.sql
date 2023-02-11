@@ -90,21 +90,17 @@ VALUES
 CREATE TABLE game (
   mid INT PRIMARY KEY AUTO_INCREMENT,
   map VARCHAR(50) NOT NULL,
-  duration VARCHAR(9) NOT NULL,
+  duration FLOAT NOT NULL,
   date DATE NOT NULL
 );
 CREATE TABLE player (
   name VARCHAR(20) PRIMARY KEY
 );
-CREATE TABLE wins (
-  mid INT NOT NULL,
-  team VARCHAR(20) NOT NULL
-);
 CREATE TABLE buys (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   item VARCHAR(40) NOT NULL,
-  time VARCHAR(9) NOT NULL,
+  time FLOAT NOT NULL,
   role VARCHAR(15) NOT NULL
 );
 CREATE TABLE loves (
@@ -116,7 +112,7 @@ CREATE TABLE participates (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   startrole VARCHAR(15) NOT NULL,  -- initial role
-  mainrole VARCHAR(15) NOT NULL  -- the role determining this players task for winning
+  won BOOLEAN
 );
 CREATE TABLE rolechange (
   mid INT NOT NULL,
@@ -125,7 +121,7 @@ CREATE TABLE rolechange (
   -- crole VARCHAR(15),  -- optional
   fromrole VARCHAR(15) NOT NULL,
   torole VARCHAR(15) NOT NULL,
-  time VARCHAR(9) NOT NULL
+  time FLOAT NOT NULL
 );
 CREATE TABLE damages (
   mid INT NOT NULL,
@@ -135,14 +131,13 @@ CREATE TABLE damages (
   causee VARCHAR(20),  -- optional, if not fight
   atkrole VARCHAR(15),  -- optional, if not fight
   weapon VARCHAR(30),  -- optional, if unknown
-  time VARCHAR(9) NOT NULL,
   damage INT NOT NULL,
   teamdmg BOOLEAN
 );
 CREATE TABLE revives (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
-  time VARCHAR(9) NOT NULL,
+  time FLOAT NOT NULL,
   -- causee VARCHAR(20) NOT NULL,
   -- crole VARCHAR(15) NOT NULL,
   -- reason ENUM('defibrilator', 'rolemechanic', 'zombie', 'necromancer') NOT NULL
@@ -154,7 +149,7 @@ CREATE TABLE dies (
   causee VARCHAR(20),  -- optional, if not fight
   atkrole VARCHAR(15),  -- optional, if not fight
   weapon VARCHAR(30),  -- optional, if unknown
-  time VARCHAR(9) NOT NULL,
+  time FLOAT NOT NULL,
   teamkill BOOLEAN
 );
 

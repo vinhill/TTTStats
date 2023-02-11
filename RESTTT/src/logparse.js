@@ -25,6 +25,12 @@ const regex = (function() {
   )
 })()
 
+function timeToSeconds(duration) {
+  //04:02.01 to 242.01
+  let [minutes, seconds] = duration.split(":")
+  return parseInt(minutes) * 60 + parseFloat(seconds)
+}
+
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
@@ -79,6 +85,7 @@ async function onPlayerJoined(match, state) {
 function onRoleAssigned(match, state) {
   // captures: time, name, role
   state.roles.set(match.name, capitalizeFirstLetter(match.role))
+  // TODO set team
 }
 
 async function onGameStart(match, state) {
@@ -91,19 +98,19 @@ async function onGameStart(match, state) {
   let res = await db.query("SELECT mid FROM game ORDER BY mid DESC LIMIT 1", [], false)
   state.mid = res[0].mid
   for (let [k, v] of state.roles.entries()) {
-    // init mainrole as startrole, even for e.g. amnesiac in case he doesn't switch
     await db.queryAdmin(
-      "INSERT INTO participates (mid, player, startrole, mainrole) VALUES (?, ?, ?, ?)",
-      [state.mid, k, v, v]
+      "INSERT INTO participates (mid, player, startrole) VALUES (?, ?, ?)",
+      [state.mid, k, v]
     )
   }
 }
 
 function onRoleChange(match, state) {
   // captures: time, name, oldrole, newrole
-  let player = match.name
-  let fromrole = capitalizeFirstLetter(match.oldrole)
-  let torole = capitalizeFirstLetter(match.newrole)
+  const player = match.name
+  const fromrole = capitalizeFirstLetter(match.oldrole)
+  const torole = capitalizeFirstLetter(match.newrole)
+  const time = timeToSeconds(match.time)
 
   // happens for spectators
   // TODO does it happen elsewhere?
@@ -114,18 +121,23 @@ function onRoleChange(match, state) {
 
   db.queryAdmin(
     "INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (?, ?, ?, ?, ?)",
-    [state.mid, match.name, fromrole, torole, match.time]
+    [state.mid, match.name, fromrole, torole, time]
   )
   state.roles[player] = torole
+}
+
+function onTeamChange(match, state) {
+  state.teams[match.name] = translateWinner(match.newteam)
 }
 
 function onBuy(match, state) {
   // captures: time, name, role, equipment
   // not critical so no await
-  let role = capitalizeFirstLetter(match.role)
+  const role = capitalizeFirstLetter(match.role)
+  const time = timeToSeconds(match.time)
   db.queryAdmin(
     "INSERT INTO buys (mid, player, item, time, role) VALUES (?, ?, ?, ?, ?)",
-    [state.mid, match.name, match.equipment, match.time, role]
+    [state.mid, match.name, match.equipment, time, role]
   )
 }
 
@@ -142,21 +154,22 @@ function onLove(match, state) {
 function onRespawn(match, state) {
   // captures: time, name
   // not critical so no await
+  const time = timeToSeconds(match.time)
   db.queryAdmin(
     "INSERT INTO revives (mid, player, time) VALUES (?, ?, ?)",
-    [state.mid, match.name, match.time]
+    [state.mid, match.name, time]
   )
   // TODO reason i.e. defibrillator would be interesting
 }
 
 function onPvPDmg(match, state) {
   // captures: time, type, dmgtype, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam, damage
-  let atkrole = capitalizeFirstLetter(match.atkrole)
-  let vktrole = capitalizeFirstLetter(match.vktrole)
+  const atkrole = capitalizeFirstLetter(match.atkrole)
+  const vktrole = capitalizeFirstLetter(match.vktrole)
   let weapon = parseEntity(match.weapon).entity
-  let inflictor = parseEntity(match.inflictor)
-  let teamdmg = match.atkteam === match.vktteam && match.attacker !== match.victim
-  let damage = Math.min(match.damage, 2147483647)
+  const inflictor = parseEntity(match.inflictor)
+  const teamdmg = match.atkteam === match.vktteam && match.attacker !== match.victim
+  const damage = Math.min(match.damage, 2147483647)
 
   // TODO check if this always holds
   /*
@@ -204,11 +217,12 @@ function performDmgQuery(match, state) {
 
 async function onPvPKill(match, state) {
   // captures: time, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam
-  let atkrole = capitalizeFirstLetter(match.atkrole)
-  let vktrole = capitalizeFirstLetter(match.vktrole)
+  const atkrole = capitalizeFirstLetter(match.atkrole)
+  const vktrole = capitalizeFirstLetter(match.vktrole)
   let weapon = parseEntity(match.weapon).entity
-  let inflictor = parseEntity(match.inflictor)
-  let teamkill = match.atkteam === match.vktteam && match.attacker !== match.victim
+  const inflictor = parseEntity(match.inflictor)
+  const time = timeToSeconds(match.time)
+  const teamkill = match.atkteam === match.vktteam && match.attacker !== match.victim
 
   // see onPvPDmg
   if (inflictor.class !== "Player")
@@ -216,17 +230,18 @@ async function onPvPKill(match, state) {
 
   db.queryAdmin(
     "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [state.mid, match.victim, vktrole, match.time, match.attacker, atkrole, weapon, teamkill]
+    [state.mid, match.victim, vktrole, time, match.attacker, atkrole, weapon, teamkill]
   )
 }
 
 async function onPvEKill(match, state) {
   // captures: time, inflictor, victim, vktrole, vktteam
-  let vktrole = capitalizeFirstLetter(match.vktrole)
+  const vktrole = capitalizeFirstLetter(match.vktrole)
+  const time = timeToSeconds(match.time)
 
   db.queryAdmin(
     "INSERT INTO dies (mid, player, vktrole, time) VALUES (?, ?, ?, ?)",
-    [state.mid, match.victim, vktrole, match.time]
+    [state.mid, match.victim, vktrole, time]
   )
 }
 
@@ -236,7 +251,7 @@ function onGameEnd(match, state) {
   if (match.team)
     state.winner = translateWinner(match.team)
   if (match.time)
-    state.roundtime = match.time
+    state.roundtime = timeToSeconds(match.time)
   if (match.timeout)
     state.winner = "Innocent"
 
@@ -245,15 +260,19 @@ function onGameEnd(match, state) {
       "UPDATE game SET duration = ? WHERE mid = ?",
       [state.roundtime, state.mid]
     )
-    db.queryAdmin(
-      "INSERT INTO wins (mid, team) VALUES (?, ?)",
-      [state.mid, state.winner]
-    )
+    for (let player of state.clients) {
+      const won = state.winner === state.teams.get(player)
+      db.queryAdmin(
+        "UPDATE participates SET won = ? WHERE mid = ? AND player = ?",
+        [won, state.mid, player]
+      )
+    }
     // TODO add bodyguard, sidekick etc. as winner, if needed
 
     state.winner = undefined
     state.roundtime = undefined
     state.roles.clear()
+    state.teams.clear()
   }
 }
 
@@ -270,6 +289,7 @@ async function load_logfile(log, date) {
   var lp = new LogParser({
     clients: new Set(),
     roles: new Map(),
+    teams: new Map(),
     date: date,
     mid: 0,
     map: "",
@@ -305,6 +325,12 @@ async function load_logfile(log, date) {
   lp.attach(
     /ServerLog: (?<time>[0-9:.]*) - CP_RC: (?<name>\w+) changed Role from (?<oldrole>\w*) to (?<newrole>\w*)/,
     onRoleChange
+  )
+
+  // team change
+  lp.attach(
+    /ServerLog: (?<time>[0-9:.]*) - CP_TC: (?<name>\w+) \[(?<role>\w+)\] changed Team from (?<oldteam>\w*) to (?<newteam>\w*)/,
+    onTeamChange
   )
 
   // equipment buy

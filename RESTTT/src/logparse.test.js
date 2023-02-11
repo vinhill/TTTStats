@@ -26,7 +26,7 @@ describe('logparse', () => {
     });
 
     describe('for one game', () => {
-        test('creates a game, stores duration and winner.', async () => {
+        test('creates a game and stores duration.', async () => {
             results = {
                 "SELECT mid FROM game ORDER BY mid DESC LIMIT 1": [{mid: 1}]
             }
@@ -41,8 +41,7 @@ describe('logparse', () => {
             expect(queries.shift()).toBe('SET autocommit=0');
             expect(queries.shift()).toBe("INSERT INTO game (map, date, duration) VALUES ('ttt_rooftops_2016_v1', '2021-01-01', 'ongoing')");
             expect(queries.shift()).toBe('SELECT mid FROM game ORDER BY mid DESC LIMIT 1');
-            expect(queries.shift()).toBe("UPDATE game SET duration = '04:02.01' WHERE mid = 1");
-            expect(queries.shift()).toBe("INSERT INTO wins (mid, team) VALUES (1, 'Innocent')");
+            expect(queries.shift()).toBe("UPDATE game SET duration = 242.01 WHERE mid = 1");
         });
 
         test('stores a players role', async () => {
@@ -60,18 +59,21 @@ describe('logparse', () => {
             expect(queries.shift()).toBe("INSERT IGNORE INTO player (name) VALUES ('GhastM4n')")
             expect(queries.shift()).toBe("INSERT INTO game (map, date, duration) VALUES ('', '', 'ongoing')");
             expect(queries.shift()).toBe('SELECT mid FROM game ORDER BY mid DESC LIMIT 1');
-            expect(queries.shift()).toBe("INSERT INTO participates (mid, player, startrole, mainrole) VALUES (1, 'GhastM4n', 'Necromancer', 'Necromancer')");
+            expect(queries.shift()).toBe("INSERT INTO participates (mid, player, startrole) VALUES (1, 'GhastM4n', 'Necromancer')");
         });
 
         test('handles timelimit reached', async () => {
             await logparse.load_logfile([
+                'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+                'ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent',
                 "ServerLog: Result: timelimit reached, traitors lose.",
                 "ServerLog: 04:02.01 - ROUND_ENDED at given time"
             ], '2021-01-01');
 
             expect(queries.shift()).toBe('SET autocommit=0');
-            expect(queries.shift()).toBe("UPDATE game SET duration = '04:02.01' WHERE mid = 0");
-            expect(queries.shift()).toBe("INSERT INTO wins (mid, team) VALUES (0, 'Innocent')");
+            expect(queries.shift()).toBe("INSERT IGNORE INTO player (name) VALUES ('GhastM4n')")
+            expect(queries.shift()).toBe("UPDATE game SET duration = 242.01 WHERE mid = 0");
+            expect(queries.shift()).toBe("UPDATE participates SET won = true WHERE mid = 0 AND player = 'GhastM4n'");
         });
     });
 
@@ -90,7 +92,7 @@ describe('logparse', () => {
         ], "");
 
         expect(queries.shift()).toBe('SET autocommit=0');
-        expect(queries.shift()).toBe("INSERT INTO buys (mid, player, item, time, role) VALUES (0, 'Zumoari', 'weapon_ttt_sandwich', '01:05.55', 'Survivalist')");
+        expect(queries.shift()).toBe("INSERT INTO buys (mid, player, item, time, role) VALUES (0, 'Zumoari', 'weapon_ttt_sandwich', 65.55, 'Survivalist')");
     });
 
     test('captures loved ones', async () => {
@@ -116,11 +118,11 @@ describe('logparse', () => {
     describe('handles kills', () => {
         test("for PvE", async () => {
             await logparse.load_logfile([
-                "ServerLog: 02:57.17 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]",
+                "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]",
             ], "");
 
             expect(queries.shift()).toBe('SET autocommit=0');
-            expect(queries.shift()).toBe("INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', '02:57.17')");
+            expect(queries.shift()).toBe("INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', 177.16)");
         });
 
         test("for PvP", async () => {
@@ -130,7 +132,7 @@ describe('logparse', () => {
 
             expect(queries.shift()).toBe('SET autocommit=0');
             expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', '02:58.71', 'GhastM4n', 'Glutton', 'w1', false)");
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 178.71, 'GhastM4n', 'Glutton', 'w1', false)");
         });
 
         test("for non-weapon kill", async () => {
@@ -140,7 +142,7 @@ describe('logparse', () => {
 
             expect(queries.shift()).toBe('SET autocommit=0');
             expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', '04:28.22', 'vinno', 'Traitor', 'env_explosion', false)");
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 268.22, 'vinno', 'Traitor', 'env_explosion', false)");
         });
 
         test("for selfkill", async () => {
@@ -150,7 +152,7 @@ describe('logparse', () => {
 
             expect(queries.shift()).toBe('SET autocommit=0');
             expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', '04:28.22', 'vinno', 'Traitor', 'env_explosion', false)");
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', 268.22, 'vinno', 'Traitor', 'env_explosion', false)");
         })
 
         test("for teamkill", async () => {
@@ -160,7 +162,7 @@ describe('logparse', () => {
 
             expect(queries.shift()).toBe('SET autocommit=0');
             expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', '02:58.71', 'GhastM4n', 'Glutton', 'w1', true)");
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', 178.71, 'GhastM4n', 'Glutton', 'w1', true)");
         });
     });
 
@@ -239,7 +241,7 @@ describe('logparse', () => {
         ], "");
 
         expect(queries.shift()).toBe('SET autocommit=0');
-        expect(queries.shift()).toBe("INSERT INTO revives (mid, player, time) VALUES (0, 'Schnitzelboy', '00:48.56')");
+        expect(queries.shift()).toBe("INSERT INTO revives (mid, player, time) VALUES (0, 'Schnitzelboy', 48.56)");
     });
 
     test("handles rolechange", async () => {
@@ -248,6 +250,6 @@ describe('logparse', () => {
         ], "");
 
         expect(queries.shift()).toBe('SET autocommit=0');
-        expect(queries.shift()).toBe("INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (0, 'GhastM4n', 'Survivalist', 'Traitor', '03:35.91')");
+        expect(queries.shift()).toBe("INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (0, 'GhastM4n', 'Survivalist', 'Traitor', 215.91)");
     });
 })
