@@ -1,6 +1,7 @@
 const db = require('../src/utils/database.js');
 const logparse = require('../src/logparse.js');
 const logger = require('../src/utils/logger.js');
+const { describe } = require('node:test');
 
 describe('logparse', () => {
     var queries = [];
@@ -101,4 +102,66 @@ describe('logparse', () => {
         expect(queries.shift()).toBe('SET autocommit=0');
         expect(queries.shift()).toBe("INSERT INTO loves (mid, first, second) VALUES (0, 'P1', 'P2')");
     });
+
+    describe('handles role special cases', () => {
+        test('ignore vampire world damage', async () => {
+            await logparse.load_logfile([
+                "ServerLog: 01:00.02 - CP_DMG OTHER<0>: nonplayer (Entity [0][worldspawn]) damaged GhastM4n [vampire, traitors] for 1"
+            ]);
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe("COMMIT");
+        })
+    });
+
+    describe('handles kills', () => {
+        test("for PvE", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 02:57.17 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]",
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe("INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', '02:57.17')");
+        });
+
+        test("for PvP", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [amnesiac, nones]"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', '02:58.71', 'GhastM4n', 'Glutton', 'w1', false)");
+        });
+
+        test("for non-weapon kill", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed Poci [amnesiac, nones]"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', '04:28.22', 'vinno', 'Traitor', 'env_explosion', false)");
+        });
+
+        test("for selfkill", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed vinno [traitor, traitors]"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', '04:28.22', 'vinno', 'Traitor', 'env_explosion', false)");
+        })
+
+        test("for teamkill", async () => {
+            await logparse.load_logfile([
+                "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [glutton, traitors]"
+            ], "");
+
+            expect(queries.shift()).toBe('SET autocommit=0');
+            expect(queries.shift()).toBe(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', '02:58.71', 'GhastM4n', 'Glutton', 'w1', true)");
+        });
+    })
 })

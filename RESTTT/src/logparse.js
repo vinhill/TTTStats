@@ -30,7 +30,7 @@ function capitalizeFirstLetter(string) {
 
 function makeSingular(string) {
   // trim away any trailing s
-  if (string.at(-1))
+  if (string.at(-1) === "s")
     return string.substr(0, string.length-1)
   else
     return string
@@ -137,9 +137,10 @@ function onRoleChange(match, state) {
 function onBuy(match, state) {
   // captures: time, name, role, equipment
   // not critical so no await
+  let role = capitalizeFirstLetter(match.role)
   db.queryAdmin(
     "INSERT INTO buys (mid, player, item, time, role) VALUES (?, ?, ?, ?, ?)",
-    [state.mid, match.name, match.equipment, match.time, capitalizeFirstLetter(match.role)]
+    [state.mid, match.name, match.equipment, match.time, role]
   )
 }
 
@@ -348,7 +349,7 @@ async function load_logfile(log, date) {
   )
   // catch and ignore vampire world damage
   lp.attach(
-    /ServerLog: (?<time>[0-9:.]*) - CP_DMG OTHER<0>: nonplayer (Entity [0][worldspawn]) damaged \w+ [vampire, traitors] for 1/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_DMG OTHER<0>: nonplayer \(Entity \[0\]\[worldspawn\]\) damaged \w+ \[vampire, traitors\] for 1/,
     () => false,
     999
   )
@@ -366,7 +367,7 @@ async function load_logfile(log, date) {
   lp.attach(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
-      \s nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
+      nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s killed \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
     `,
