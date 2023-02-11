@@ -61,16 +61,6 @@ function parseEntity(entitystr) {
     return /(?<class>\w*) \[\d*\]\[(?<entity>\w*)\]/.exec(entitystr).groups
 }
 
-function maybeUpdateMainRole(state, player, fromrole, torole) {
-  let switchers = ["Amnesiac", "Drunk", "Mimic", "Undecided", "Unknown", "Cursed"]
-  if (switchers.includes(fromrole) || torole === "Cursed")
-    db.queryAdmin(
-      "UPDATE participates SET mainrole = ? WHERE mid = ? AND player = ?",
-      [torole, state.mid, player]
-    )
-  // TODO doppelganger updates team, but stays killer
-}
-
 function onSelectMap(match, state) {
   // captures: map
   state.map = match.map
@@ -120,19 +110,13 @@ function onRoleChange(match, state) {
   if (torole === "None" || fromrole === "None")
     return
 
-  // TODO remove
-  logger.error("LogParse", "Note: rolechange deactivated cuz log had numbers as roles")
-  return
-
   // TODO the cause for rolechange would be interesting
 
-  // eslint-disable-next-line no-unreachable
   db.queryAdmin(
     "INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (?, ?, ?, ?, ?)",
     [state.mid, match.name, fromrole, torole, match.time]
   )
   state.roles[player] = torole
-  maybeUpdateMainRole(state, player, fromrole, torole)
 }
 
 function onBuy(match, state) {

@@ -232,4 +232,22 @@ describe('logparse', () => {
                 "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)");
         });
     });
+
+    test("captures respawn", async () => {
+        await logparse.load_logfile([
+            "ServerLog: 00:48.56 - TTT2Revive: Schnitzelboy has been respawned."
+        ], "");
+
+        expect(queries.shift()).toBe('SET autocommit=0');
+        expect(queries.shift()).toBe("INSERT INTO revives (mid, player, time) VALUES (0, 'Schnitzelboy', '00:48.56')");
+    });
+
+    test("handles rolechange", async () => {
+        await logparse.load_logfile([
+            "ServerLog: 03:35.91 - CP_RC: GhastM4n changed Role from survivalist to traitor"
+        ], "");
+
+        expect(queries.shift()).toBe('SET autocommit=0');
+        expect(queries.shift()).toBe("INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (0, 'GhastM4n', 'Survivalist', 'Traitor', '03:35.91')");
+    });
 })
