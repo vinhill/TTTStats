@@ -1,10 +1,12 @@
 # TTTStats
 
+Live at [GitHub Pages](https://vinhill.github.io/TTTStats).
+
 TTTStats is an Angular SPA that shows several statistics about our Trouble in
 Terrorist Town game rounds.
 
-The backend is implemented in the form of a Node.js REST API hosted at
-resttt.fly.dev. It uses a mysql database hosted at vmd76968.contaboserver.net.
+The backend is implemented in the form of a Node.js REST API hosted at [resttt.fly.io](resttt.fly.dev).
+It uses a mysql database hosted at [Contabo](vmd76968.contaboserver.net).
 
 ## Build & Deploy
 
