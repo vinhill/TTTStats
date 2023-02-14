@@ -6,32 +6,36 @@ from tqdm import tqdm
 keep = [
     'Map: \w+',
     'Client "\w+" spawned in server <.*> \(took \d+ seconds?\).',
-    'ROUND_START: \w+ is \w+',
     '\w+ is now in love with \w+.',
-    '\w+ \(\d*\) hurt \w+ \(\d+\) and get',
     "Dropped \w+ from server",
     "[TTT2]:\s*The \w* has won!",
     ".* and gets (REWARDED|penalised for) \d+",
-    '^ServerLog: ',
     'ServerLog: ..:..... - TTT2Revive:',
     'ServerLog: Result: \w+ wins/.',
-    'ServerLog: Round proper has begun...',
     'ServerLog: ..:..... - CP_RC',
     'ServerLog: ..:..... - CP_OE',
     'ServerLog: ..:..... - CP_DMG',
     'ServerLog: ..:..... - CP_KILL',
-    'ServerLog: ..:..... - CP_RC',
-    'ServerLog: ..:..... - ROUND_START',
     'ServerLog: ..:..... - ROUND_END:',
+    'ServerLog: ..:..... - ROUND_START',
     'ServerLog: ..:..... - ROUND_ENDED at given time',
-    'ServerLog: ..:..... - DMG:',
-    'ServerLog: ..:..... - KILL:',
+    'Round state',
     "ServerLog: \w+ took \d+ credits? from the body of",
     "\w+ confirmed the death of \w+",
-    "The round has begun!"
+    '^ServerLog: ',
+    '[TTT2 Medium Role] Noisified chat'
 ]
 
-remove = [
+not_needed = [
+    'ServerLog: ..:..... - DMG:',
+    'ServerLog: ..:..... - KILL:',
+    'ServerLog: Round proper has begun...',
+    "The round has begun!",
+    '\w+ \(\d*\) hurt \w+ \(\d+\) and get',
+    'ServerLog: Round ended.',
+]
+
+irrelevant = [
     '^\[DLib\]',
     '^\s*$',
     '^env_cubemap',
@@ -76,6 +80,8 @@ remove = [
     "MDLCache: Failed load of"
 ]
 
+remove = not_needed + irrelevant
+
 def match(line, regexes):
     for regex in regexes:
         if re.search(re.compile(regex), line):
@@ -89,7 +95,7 @@ def removematch(line):
     return match(line, remove)
 
 if __name__ == "__main__":
-    datestr = input("Enter datestring for log (dd.mm.yyyy): ")
+    datestr = input("Enter datestring for log (yyyy.mm.dd): ")
     
     fin = open("console.log", "r", encoding="utf-8")
     ferr = open("unknown.log", "w", encoding="utf-8")
@@ -117,8 +123,9 @@ if __name__ == "__main__":
     fin.close()
     fout.close()
     ferr.close()
-    print("cleaned log finished, copying raw log...")
-    
-    os.rename("console.log", f"logs/{datestr} ({foutidx}).raw.log")
+    print("cleaning log finished")
+
+    if (input("Move raw log? (Y/n)") != "n"):
+        os.rename("console.log", f"logs/{datestr} ({foutidx}).raw.log")
     
     print("Finished!")
