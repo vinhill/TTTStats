@@ -18,11 +18,11 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE role (
 	name VARCHAR(15) PRIMARY KEY, -- explicit role
   team VARCHAR(20) NOT NULL,  -- team this role wins with
-  superteam VARCHAR(10) NOT NULL, -- more general group this role belongs to
+  group VARCHAR(10) NOT NULL, -- more general group this role belongs to
 	colour VARCHAR(8) NOT NULL,
   descr TEXT NOT NULL
 );
-INSERT INTO role (name, team, colour, superteam, descr)
+INSERT INTO role (name, team, colour, group, descr)
 VALUES
 	("Detective", "Innocent", "#1440a4", "Detective", "Has a DNA scanner to gain information on dead bodies."),
   ("Sheriff", "Innocent", "#5978a7", "Detective", "Can turn someone into a deputy."),
@@ -117,8 +117,6 @@ CREATE TABLE participates (
 CREATE TABLE rolechange (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
-  -- causee VARCHAR(20),  -- optional
-  -- crole VARCHAR(15),  -- optional
   fromrole VARCHAR(15) NOT NULL,
   torole VARCHAR(15) NOT NULL,
   time FLOAT NOT NULL
@@ -152,6 +150,18 @@ CREATE TABLE dies (
   time FLOAT NOT NULL,
   teamkill BOOLEAN
 );
+
+CREATE TABLE karma {
+  mid INT NOT NULL,
+  player VARCHAR(20) NOT NULL,
+  karma INT NOT NULL,
+  time FLOAT NOT NULL
+};
+
+CREATE TABLE mediumchat {
+  mid INT NOT NULL,
+  msg VARCHAR(100) NOT NULL
+}
 
 CREATE TABLE configs (
   filename VARCHAR(30) NOT NULL
