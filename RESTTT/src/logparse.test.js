@@ -39,7 +39,8 @@ describe('logparse', () => {
                 "Map: ttt_rooftops_2016_v1",
                 "Round state: 3",
                 "ServerLog: Result: innocents wins.",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time",
+                "Round state: 4"
             ], '2021-01-01');
     
             expectInitialQueries();
@@ -71,7 +72,8 @@ describe('logparse', () => {
                 'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 'ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent',
                 "ServerLog: Result: timelimit reached, traitors lose.",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "ServerLog: 04:02.01 - ROUND_ENDED at given time",
+                "Round state: 4"
             ], '2021-01-01');
 
             expectInitialQueries();
@@ -174,7 +176,7 @@ describe('logparse', () => {
         test("for PvP", async () => {
             await logparse.load_logfile([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 85",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "Round state: 4"
             ], "");
 
             expectInitialQueries();
@@ -185,7 +187,7 @@ describe('logparse', () => {
         test("for PvE", async () => {
             await logparse.load_logfile([
                 "ServerLog: 00:52.92 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged p2 [r2, t2] for 85",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "Round state: 4"
             ], "");
 
             expectInitialQueries();
@@ -196,7 +198,7 @@ describe('logparse', () => {
         test("for non-weapon kill", async () => {
             await logparse.load_logfile([
                 "ServerLog: 00:52.92 - CP_DMG EXPL: p1 [r1, t1] <[NULL Entity]>, (Entity [3][w1], ) damaged p2 [r2, t2] for 85",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "Round state: 4"
             ], "");
 
             expectInitialQueries();
@@ -207,7 +209,7 @@ describe('logparse', () => {
         test("for selfkill", async () => {
             await logparse.load_logfile([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p1 [r1, t1] for 85",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "Round state: 4"
             ], "");
 
             expectInitialQueries();
@@ -218,7 +220,7 @@ describe('logparse', () => {
         test("for teamkill", async () => {
             await logparse.load_logfile([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t1] for 85",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "Round state: 4"
             ], "");
 
             expectInitialQueries();
@@ -230,7 +232,7 @@ describe('logparse', () => {
             await logparse.load_logfile([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 10",
                 "ServerLog: 01:54.93 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 12",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time"
+                "Round state: 4"
             ], "");
 
             expectInitialQueries();
@@ -262,6 +264,7 @@ describe('logparse', () => {
     describe("handles karma", () => {
         test("by storing the current sub 1000 karma with time", async () => {
             await logparse.load_logfile([
+                'Round state: 2',
                 'Client "V8Block" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 'ServerLog: 00:05.50 - CP_DMG BULLET: V8Block [r, t] <Weapon [735][w]>, (Player [7][V8Block], V8Block) damaged p2 [r2, t2] for 10',
                 "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000"
@@ -274,6 +277,7 @@ describe('logparse', () => {
 
         test("when getting back to 1000 karma", async () => {
             await logparse.load_logfile([
+                'Round state: 2',
                 'Client "V8Block" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000",
                 "V8Block (1000) hurt Schnitzelboy (1000.000000) and gets REWARDED for 10.450000"
@@ -287,6 +291,7 @@ describe('logparse', () => {
 
         test("by not storing continuous 1000 karma", async () => {
             await logparse.load_logfile([
+                'Round state: 2',
                 'Client "V8Block" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "V8Block (1000) hurt Schnitzelboy (1000.000000) and gets REWARDED for 10.450000"
             ], "");

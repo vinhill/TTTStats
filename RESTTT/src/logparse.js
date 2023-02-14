@@ -232,35 +232,34 @@ async function onPvEKill(match, state) {
   )
 }
 
-function onGameEnd(match, state) {
-  // captures: team or time
-  // consists of two regex for result and time
-  if (match.team)
-    state.winner = unifyTeamname(match.team)
-  if (match.time)
-    state.roundtime = timeToSeconds(match.time)
-  if (match.timeout)
-    state.winner = "Innocent"
-
-  if (state.winner && state.roundtime) {
+const gameEndListener = {
+  "init": () => {
+    this.winner = undefined
+    this.duration = undefined
+  },
+  "onResult": match => this.winner = unifyTeamname(match.team),
+  "onTimeout": () => this.winner = "Innocent",
+  "onGameDuration": match => this.duration = timeToSeconds(match.time),
+  "onGameEnd": (match, state) => {
     db.queryAdmin(
       "UPDATE game SET duration = ? WHERE mid = ?",
-      [state.roundtime, state.mid]
+      [this.duration, state.mid]
     )
+
     for (let [name, client] of state.clients) {
-      const won = state.winner === client.team
+      const won = this.winner === client.team
       db.queryAdmin(
         "UPDATE participates SET won = ? WHERE mid = ? AND player = ?",
         [won, state.mid, name]
       )
     }
+  }
+}
 
-    state.winner = undefined
-    state.roundtime = undefined
-    for (let [_, client] of state.clients) {
-      client.role = undefined
-      client.team = undefined
-    }
+function resetTeamRoles(match, state) {
+  for (let [_, client] of state.clients) {
+    client.role = undefined
+    client.team = undefined
   }
 }
 
@@ -274,16 +273,29 @@ function onMediumMsg(match, state) {
   db.queryAdmin("INSERT INTO mediumchat (mid, msg) VALUES (?, ?)", [state.mid, match.msg])
 }
 
-function onKarmaChange(match, state) {
-  // captures: name, karma
-  const client = state.clients.get(match.name)
-  if (client.karma < 1000 || match.karma < 1000) {
-    client.karma = Number(match.karma)
-    db.queryAdmin(
-      "INSERT INTO karma (mid, player, karma, time) VALUES (?, ?, ?, ?)",
-      [state.mid, match.name, client.karma, state.lastdmgtime]
-    )
+const karmaTracker = {
+  "init": () => this.last_dmg_time = 0,
+  "onPvPDmg": (match, state) => {
+    this.last_dmg_time = timeToSeconds(match.time)
+  },
+  "onKarma": (match, state) => {
+    // captures: name, karma
+    const client = state.clients.get(match.name)
+    if (client.karma < 1000 || match.karma < 1000) {
+      client.karma = Number(match.karma)
+      db.queryAdmin(
+        "INSERT INTO karma (mid, player, karma, time) VALUES (?, ?, ?, ?)",
+        [state.mid, match.name, client.karma, this.last_dmg_time]
+      )
+    }
   }
+}
+
+function captureVampireDmg(match, state) {
+  // catch and ignore vampire world damage
+  if (match.dmgtype == 0 && match.damage == 1 && match.vktrole == "vampire" && parseEntity(match.inflictor).name == "worldspawn")
+    return false
+  return true
 }
 
 class Client {
@@ -322,6 +334,13 @@ async function load_logfile(log, date) {
     "client_joined"
   )
   lp.listen("client_joined", onPlayerJoined)
+
+  lp.register(
+    /Round state: 2/,
+    "init_round"
+  )
+  lp.listen("init_round", karmaTracker.init)
+  lp.listen("init_round", gameEndListener.init)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
@@ -369,7 +388,7 @@ async function load_logfile(log, date) {
     /(?<name>\w*) \((?<karma>[0-9.]*)\) hurt \w* \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
     "karma"
   )
-  lp.listen("karma", onKarmaChange)
+  lp.listen("karma", karmaTracker.onKarma)
 
   lp.register(
     regex`
@@ -397,13 +416,8 @@ async function load_logfile(log, date) {
     "pve_dmg"
   )
   lp.listen("pve_dmg", onPvEDmg)
-  lp.listen("pve_dmg", (match, state) => {
-    // catch and ignore vampire world damage
-    if (match.dmgtype == 0 && match.damage == 1 && match.vktrole == "vampire" && parseEntity(match.inflictor).name == "worldspawn")
-      return false
-    return true
-  }, 999)
-  lp.listen("pvp_dmg", (match, state) => state.lastdmgtime = timeToSeconds(match.time))
+  lp.listen("pve_dmg", captureVampireDmg, 999)
+  lp.listen("pvp_dmg", karmaTracker.onPvPDmg)
 
   lp.register(
     regex`
@@ -430,18 +444,24 @@ async function load_logfile(log, date) {
     /ServerLog: Result: (?<team>\w+) wins?/,
     "result"
   )
-  lp.listen("result", onGameEnd)
+  lp.listen("result", gameEndListener.onResult)
   lp.register(
     /ServerLog: Result: (?<timeout>timelimit) reached, traitors lose./,
     "timeout"
   )
-  lp.listen("timeout", onGameEnd)
+  lp.listen("timeout", gameEndListener.onTimeout)
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_ENDED at given time/,
+    "game_duration"
+  )
+  lp.listen("game_duration", gameEndListener.onGameDuration)
+  lp.register(
+    /Round state: 4/,
     "game_end"
   )
-  lp.listen("game_end", onGameEnd)
   lp.listen("game_end", performDmgQuery)
+  lp.listen("game_end", gameEndListener.onGameEnd)
+  lp.listen("game_end", resetTeamRoles, -999)
 
   lp.register(
     /Dropped (?<name>\w*) from server/,
