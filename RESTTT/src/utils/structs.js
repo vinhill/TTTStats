@@ -187,76 +187,70 @@ class LogParser {
   /*
   Class to make parsing logfiles easier.
 
-  It handles iterating the lines and testing the regexes.
+  It handles iterating lines and testing regexes.
   So one only has to provide the regexes and callbacks.
   */
 
-  constructor(state={}, break_on_error=true) {
+  constructor(state={}) {
     this.state = state
-    this.workers = []
+    this.events = []
     this.prepared = true
-    this.break_on_error = break_on_error
   }
 
-  /*
-  Attach a callback(match, state) to the parser
-  that is executed whenever the regex matches a line (without \n)
-  Callback can return false, if the remaining callbacks shouldn't be executed
-  */
-  attach(regex, callback, priority=0) {
-    // if regex then callback(match, state)
-    this.prepared = false
-    this.workers.push({
+  register(regex, eventname) {
+    if (this.events.filter(e => e.name === eventname).length > 0)
+      throw `Event ${eventname} already registered`
+    this.events.push({
       regex: regex,
-      callback: callback,
-      priority: priority
+      name: eventname,
+      listeners: []
     })
-    logger.debug("LogParser", `attached callback ${callback.name} to regex ${regex}`)
+    logger.debug("LogParser", `registered event '${eventname}' to regex ${regex}`)
+  }
+
+  listen(event, callback, priority=0) {
+    this.prepared = false
+    const e = this.events.find(e => e.name === event)
+    if (e === undefined)
+      throw `Event ${event} not found`
+    e.listeners.push({callback: callback, priority: priority})
+    logger.debug("LogParser", `attached callback ${callback.name} to event ${e.name}`)
   }
 
   prepare() {
-    // sort workers by priorities descending
-    this.workers.sort((a, b) => b.priority - a.priority)
+    for (let event of this.events)
+      event.listeners.sort((a, b) => b.priority - a.priority)
     this.prepared = true
   }
 
-  async exec_line(line) {
+  async read_line(line) {
     if (!this.prepared)
       throw "LogParser wasn't prepared, call prepare"
 
     logger.debug("LogParser", `Executing line ${line}`)
 
-    for (let worker of this.workers) {
-      let match = worker.regex.exec(line)
-      if (match) {
-        logger.debug("LogParser", `callback ${worker.callback.name} matched`)
+    for (let event of this.events) {
+      const match = event.regex.exec(line)
+      if (match === null)
+        continue
+      
+      logger.debug("LogParser", `emitting event ${event.name}`)
 
-        if (this.break_on_error) {
-          let ret = await worker.callback(match.groups, this.state)
-
-          if (ret === false)
-            return
-        }else {
-          try {
-            let ret = await worker.callback(match.groups, this.state)
-
-            if (ret === false)
-              return
-          }catch(err) {
-            logger.error("LogParser", `Error during logparse: ${err}`)
-          }
+      for (let listener of event.listeners) {
+        if (await listener.callback(match.groups, this.state) === false) {
+          return
         }
       }
     }
   }
 
-  async exec(lines) {
+  async read(lines) {
     if(!this.prepared)
       this.prepare()
 
     let startTime = performance.now()
     for(let line of lines) {
-      await this.exec_line(line)
+      await this.read_line(line)
     }
     let endTime = performance.now()
 

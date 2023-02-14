@@ -152,16 +152,6 @@ function onLove(match, state) {
   )
 }
 
-function onRespawn(match, state) {
-  // captures: time, name
-  // not critical so no await
-  const time = timeToSeconds(match.time)
-  db.queryAdmin(
-    "INSERT INTO revives (mid, player, time) VALUES (?, ?, ?)",
-    [state.mid, match.name, time]
-  )
-}
-
 function onPvPDmg(match, state) {
   // captures: time, type, dmgtype, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam, damage
   const atkrole = capitalizeFirstLetter(match.atkrole)
@@ -321,74 +311,67 @@ async function load_logfile(log, date) {
     lastdmgtime: 0
   })
 
-  // map selection
-  lp.attach(
+  lp.register(
     /Map: (?<map>\w+)/,
-    onSelectMap
+    "mapname"
   )
+  lp.listen("mapname", onSelectMap)
 
-  // join
-  lp.attach(
+  lp.register(
     /Client "(?<name>\w+)" spawned in server <STEAM_[0-9:]+>/,
-    onPlayerJoined
+    "client_joined"
   )
+  lp.listen("client_joined", onPlayerJoined)
 
-  // role assignment
-  lp.attach(
+  lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
-    onRoleAssigned
+    "initial_role"
   )
+  lp.listen("initial_role", onRoleAssigned)
 
-  // game start
-  lp.attach(
+  lp.register(
     /Round state: 3/,
-    onGameStart
+    "game_start"
   )
+  lp.listen("game_start", onGameStart)
 
-  // role change
-  lp.attach(
+  lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_RC: (?<name>\w+) changed Role from (?<oldrole>\w*) to (?<newrole>\w*)/,
-    onRoleChange
+    "role_change"
   )
+  lp.listen("role_change", onRoleChange)
 
-  // team change
-  lp.attach(
+  lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_TC: (?<name>\w+) \[(?<role>\w+)\] changed Team from (?<oldteam>\w*) to (?<newteam>\w*)/,
-    onTeamChange
+    "team_change"
   )
+  lp.listen("team_change", onTeamChange)
 
-  // equipment buy
-  lp.attach(
+  lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
-    onBuy
+    "buy"
   )
+  lp.listen("buy", onBuy)
 
-  // cupid love
-  lp.attach(
+  lp.register(
     /(?<firstname>\w+) is now in love with (?<secondname>\w+)/,
-    onLove
+    "love"
   )
+  lp.listen("love", onLove)
 
-  // revive
-  lp.attach(
-    /ServerLog: (?<time>[0-9:.]*) - TTT2Revive: (?<name>\w+) has been respawned/,
-    onRespawn
-  )
-
-  // medium msg
-  lp.attach(
+  lp.register(
     /\[TTT2 Medium Role\] Noisified chat: (?<msg>.*)/,
-    onMediumMsg
+    "medium_msg"
   )
+  lp.listen("medium_msg", onMediumMsg)
 
-  // karma change
-  lp.attach(
+  lp.register(
     /(?<name>\w*) \((?<karma>[0-9.]*)\) hurt \w* \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
-    onKarmaChange
+    "karma"
   )
+  lp.listen("karma", onKarmaChange)
 
-  // damage
-  lp.attach(
+  lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_DMG \s
       (?<type>FALL|BULLET|EXPL|OTHER\< (?<dmgtype>\d+) \>): \s
@@ -398,9 +381,10 @@ async function load_logfile(log, date) {
       \s for \s
       (?<damage>\d*)
     `,
-    onPvPDmg
+    "pvp_dmg"
   )
-  lp.attach(
+  lp.listen("pvp_dmg", onPvPDmg)
+  lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_DMG \s
       (?<type>FALL|BULLET|EXPL|OTHER\< (?<dmgtype>\d+) \>):
@@ -410,70 +394,66 @@ async function load_logfile(log, date) {
       \s for \s
       (?<damage>\d*)
     `,
-    onPvEDmg
+    "pve_dmg"
   )
-  // catch and ignore vampire world damage
-  lp.attach(
-    /ServerLog: (?<time>[0-9:.]*) - CP_DMG OTHER<0>: nonplayer \(Entity \[0\]\[worldspawn\]\) damaged \w+ \[vampire, traitors\] for 1/,
-    () => false,
-    999
-  )
-  lp.attach(
-    /ServerLog: (?<time>[0-9:.]*) - CP_DMG/,
-    (match, state) => {
-      state.lastdmgtime = timeToSeconds(match.time)
-    }
-  )
+  lp.listen("pve_dmg", onPvEDmg)
+  lp.listen("pve_dmg", (match, state) => {
+    // catch and ignore vampire world damage
+    if (match.dmgtype == 0 && match.damage == 1 && match.vktrole == "vampire" && parseEntity(match.inflictor).name == "worldspawn")
+      return false
+    return true
+  }, 999)
+  lp.listen("pvp_dmg", (match, state) => state.lastdmgtime = timeToSeconds(match.time))
 
-  // death
-  lp.attach(
+  lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
       (?<attacker>\w*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s killed \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
     `,
-    onPvPKill
+    "pvp_kill"
   )
-  lp.attach(
+  lp.listen("pvp_kill", onPvPKill)
+  lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
       nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s killed \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
     `,
-    onPvEKill
+    "pve_kill"
   )
+  lp.listen("pve_kill", onPvEKill)
 
-  // game result
-  lp.attach(
+  lp.register(
     /ServerLog: Result: (?<team>\w+) wins?/,
-    onGameEnd
+    "result"
   )
-  lp.attach(
+  lp.listen("result", onGameEnd)
+  lp.register(
     /ServerLog: Result: (?<timeout>timelimit) reached, traitors lose./,
-    onGameEnd
+    "timeout"
   )
-  lp.attach(
+  lp.listen("timeout", onGameEnd)
+  lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_ENDED at given time/,
-    onGameEnd
+    "game_end"
   )
-  lp.attach(
-    /ServerLog: [0-9:.]* - ROUND_ENDED at given time/,
-    performDmgQuery  
-  )
+  lp.listen("game_end", onGameEnd)
+  lp.listen("game_end", performDmgQuery)
 
-  // leave
-  lp.attach(
+  lp.register(
     /Dropped (?<name>\w*) from server/,
-    onPlayerLeft
+    "leave"
   )
+  lp.listen("leave", onPlayerLeft)
 
   // speed up if many inserts come in a short time
   // otherwise, a flush to disk is performed after each modification
   await db.queryAdmin("SET autocommit=0")
 
-  await lp.exec(log)
+  await lp.read(log)
 
   await db.queryAdmin("COMMIT")
   await db.queryAdmin("SET autocommit=1")

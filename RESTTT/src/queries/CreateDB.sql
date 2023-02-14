@@ -132,11 +132,6 @@ CREATE TABLE damages (
   damage INT NOT NULL,
   teamdmg BOOLEAN
 );
-CREATE TABLE revives (
-  mid INT NOT NULL,
-  player VARCHAR(20) NOT NULL,
-  time FLOAT NOT NULL,
-);
 CREATE TABLE dies (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
@@ -147,19 +142,16 @@ CREATE TABLE dies (
   time FLOAT NOT NULL,
   teamkill BOOLEAN
 );
-
 CREATE TABLE karma {
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   karma FLOAT NOT NULL,
   time FLOAT NOT NULL
 };
-
 CREATE TABLE mediumchat {
   mid INT NOT NULL,
   msg VARCHAR(100) NOT NULL
 }
-
 CREATE TABLE configs (
   filename VARCHAR(30) NOT NULL
 );

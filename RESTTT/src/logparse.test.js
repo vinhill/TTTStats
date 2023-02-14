@@ -239,15 +239,6 @@ describe('logparse', () => {
         });
     });
 
-    test("captures respawn", async () => {
-        await logparse.load_logfile([
-            "ServerLog: 00:48.56 - TTT2Revive: Schnitzelboy has been respawned."
-        ], "");
-
-        expectInitialQueries();
-        expect(queries.shift()).toBe("INSERT INTO revives (mid, player, time) VALUES (0, 'Schnitzelboy', 48.56)");
-    });
-
     test("handles rolechange", async () => {
         await logparse.load_logfile([
             'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',

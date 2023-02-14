@@ -60,12 +60,6 @@ Table damages {
   teamdmg boolean
 }
 
-TABLE revives {
-  mid int [ref: > game.mid]
-  player varchar [ref: > player.name]
-  time time
-}
-
 Table dies {
   mid int [ref: > game.mid]
   player varchar [ref: > player.name]
