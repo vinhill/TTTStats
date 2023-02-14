@@ -60,31 +60,31 @@ VALUES
   ("Necromancer", "Necromancer", "#843454", "Killer", "Can revive dead bodies into zombies and has a shop."),
   ("Infected", "Infected", "#763f54", "Killer", "Victims become zombies that die with you."),
   ("Hidden", "Hidden", "#171717", "Killer", "Once you press R, you gain permanent invisibility and a knife. Everyone will be alerted."),
-  ("Amnesiac", "Other", "#7f6fda", "Other", "Inspect a uninspected, dead body to take their role. Everyone will be alerted."), -- Changes Role -> wins with that team
-  ("Pirate_captain", "Pirates", "#613721", "Other", "Has a contract. Giving it to a player puts you and all pirates onto their team."), -- Wins with a team
-  ("Pirate", "Pirates", "#d09542", "Other", "Wins with the team that holds the pirate captains contract."), -- Wins with a team
-  ("Bodyguard", "Bodyguard", "#dc8f19", "Other", "Has to protect another person, win when they win."), -- ?
-  ("Drunk", "Other", "#d7a018", "Other", "Has the change to take the role of a player after they die."), -- Changes Role -> wins with that team
-  ("Jester", "Jester", "#d73e90", "Other", "Wins when killed, cannot deal damage."), -- Wins on Kill
-  ("Unknown", "Other", "#a7b5b6", "Other", "Come back as your killers role when killed."), -- Dies -> comes back and changes role -> wins with that team
-  ("Medic", "Other", "#189f81", "Other", "Cannot win, but has a defibrilator and medigun. Everyone is alerted and your killer would be revealed."), -- cant win
-  ("Mimic", "Other", "#983fab", "Other", "Can copy someones role and win the same way they would."),  -- Changes Role -> wins with that team
-  ("Marker", "Marker", "#7d5383", "Other", "Has to mark enough players with a paintball gun, cannot deal damage."), -- wins alone
-  ("Cupid", "Other", "#e22e8f", "Other", "Can make two peoples fall in love and share a health bar. Might be innocent or same team as the couple."), -- cant win
-  ("Sidekick", "Sidekick", "#aaa8a9", "Other", "Works with someone together and wins when they win."), -- Wins with whoever he is sidekicked to
+  ("Amnesiac", "None", "#7f6fda", "None", "Inspect a uninspected, dead body to take their role. Everyone will be alerted."), -- Changes Role -> wins with that team
+  ("Pirate_captain", "Pirates", "#613721", "None", "Has a contract. Giving it to a player puts you and all pirates onto their team."), -- Wins with a team
+  ("Pirate", "Pirates", "#d09542", "None", "Wins with the team that holds the pirate captains contract."), -- Wins with a team
+  ("Bodyguard", "Innocent", "#dc8f19", "None", "Has to protect another person, win when they win."), -- ?
+  ("Drunk", "None", "#d7a018", "None", "Has the change to take the role of a player after they die."), -- Changes Role -> wins with that team
+  ("Jester", "Jester", "#d73e90", "None", "Wins when killed, cannot deal damage."), -- Wins on Kill
+  ("Unknown", "None", "#a7b5b6", "None", "Come back as your killers role when killed."), -- Dies -> comes back and changes role -> wins with that team
+  ("Medic", "None", "#189f81", "None", "Cannot win, but has a defibrilator and medigun. Everyone is alerted and your killer would be revealed."), -- cant win
+  ("Mimic", "None", "#983fab", "None", "Can copy someones role and win the same way they would."),  -- Changes Role -> wins with that team
+  ("Marker", "Marker", "#7d5383", "None", "Has to mark enough players with a paintball gun, cannot deal damage."), -- wins alone
+  ("Cupid", "None", "#e22e8f", "None", "Can make two peoples fall in love and share a health bar. Might be innocent or same team as the couple."), -- cant win
+  ("Sidekick", "Sidekick", "#aaa8a9", "None", "Works with someone together and wins when they win."), -- Wins with whoever he is sidekicked to
   ("Deputy", "Innocent", "#45679d", "Detective", "Plays like a detective and dies with the Sheriff."), -- Is an inno/detective (maybe change role to innocent/detective?)
   ("Thrall", "Traitor", "#ff1919", "Traitor", "Someone that became traitor through a mesmerist."), -- Is a traitor (maybe change role to traitor?)
   ("Ravenous", "Ravenous", "#aa2e0d", "Killer", "A glutton that hasn''t eaten in some time."), -- Wins alone
   ("Graverobber", "Traitor", "#b65a33", "Traitor", "A traitor with the additional goal to destroy the pharaohs ankh."), -- Is a traitor (maybe change role to traitor?)
-  ("Zombie", "Zombie", "#3b1223", "Other", "A zombie that can only punch and is in a team with the necromancer / infected."), -- Wins with Necromancer / Infected
-  ("InLove", "InLove", "#e22e8f", "Other", "You are in love with someone. If you weren''t from the same team, kill everyone else."),
-  ("Cursed", "Other", "#39283B", "Other", "Cannot win, but pass on the role by swapping with someone."), -- swaps roles, other player becomes cursed then
+  ("Zombie", "Zombie", "#3b1223", "None", "A zombie that can only punch and is in a team with the necromancer / infected."), -- Wins with Necromancer / Infected
+  ("InLove", "InLove", "#e22e8f", "None", "You are in love with someone. If you weren''t from the same team, kill everyone else."),
+  ("Cursed", "None", "#39283B", "None", "Cannot win, but pass on the role by swapping with someone."), -- swaps roles, other player becomes cursed then
   ("Liar", "Innocent", "#A2A681", "Innocent", "You don''t know you are one. Your corpse shows up as traitor and has one credit."),
-  ("Undecided", "Other", "#AB17AB", "Other", "Has one minute to choose their role."), -- chooses a role
+  ("Undecided", "None", "#AB17AB", "None", "Has one minute to choose their role."), -- chooses a role
   ("Revolutionary", "Innocent", "#6A4C82", "Detective", "A detective with traitor shop."),
   ("Blocker", "Traitor", "#724E4C", "Traitor", "Prevents dead bodies from being identified as long as this traitor is alive."),
   ("Sleeper", "Traitor", "#5D524A", "Traitor", "A weird sleeper role that has to be tested"), -- TODO
-  ("Loot_goblin", "Other", "#594286", "Other", "Just try to stay alive while everyone wants to kill you for cool loot.");
+  ("Loot_goblin", "None", "#594286", "None", "Just try to stay alive while everyone wants to kill you for cool loot.");
 
 -- Create other tables
 CREATE TABLE game (
@@ -117,8 +117,8 @@ CREATE TABLE participates (
 CREATE TABLE rolechange (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
-  fromrole VARCHAR(15) NOT NULL,
-  torole VARCHAR(15) NOT NULL,
+  from VARCHAR(15) NOT NULL,
+  to VARCHAR(15) NOT NULL,
   time FLOAT NOT NULL
 );
 CREATE TABLE damages (
@@ -136,9 +136,6 @@ CREATE TABLE revives (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   time FLOAT NOT NULL,
-  -- causee VARCHAR(20) NOT NULL,
-  -- crole VARCHAR(15) NOT NULL,
-  -- reason ENUM('defibrilator', 'rolemechanic', 'zombie', 'necromancer') NOT NULL
 );
 CREATE TABLE dies (
   mid INT NOT NULL,
@@ -154,7 +151,7 @@ CREATE TABLE dies (
 CREATE TABLE karma {
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
-  karma INT NOT NULL,
+  karma FLOAT NOT NULL,
   time FLOAT NOT NULL
 };
 

@@ -12,6 +12,7 @@ keep = [
     ".* and gets (REWARDED|penalised for) \d+",
     'ServerLog: [0-9.:]+ - TTT2Revive:',
     'ServerLog: Result: \w+ wins?.',
+    'ServerLog: Result: timelimit reached',
     'ServerLog: [0-9.:]+ - CP_RC',
     'ServerLog: [0-9.:]+ - CP_TC',
     'ServerLog: [0-9.:]+ - CP_OE',

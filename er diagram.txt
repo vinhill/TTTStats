@@ -3,83 +3,92 @@
 Table role {
   name varchar
   team varchar
-  superteam varchar
+  group varchar
   color varchar
+  descr varchar
+}
+
+Table game {
+  mid int
+  map varchar
+  duration float
+  date date
 }
 
 Table player {
   name varchar
 }
 
-Table match {
-  mid int
-  map varchar
-}
-
 Table buys {
-  mid int [ref: > match.mid]
-  name varcher [ref: > player.name]
+  mid int [ref: > game.mid]
+  player varcher [ref: > player.name]
   item varchar
   time time
+  role varchar
+}
+
+Table loves {
+  mid int [ref: > game.mid]
+  first varchar [ref: > player.name]
+  second varchar [ref: > player.name]
 }
 
 Table participates {
-  mid int [ref: > match.mid]
+  mid int [ref: > game.mid]
   player varchar [ref: > player.name]
   startrole varchar [ref: > role.name]
-  mainrole varchar [ref: > role.name]
-}
-
-Table dies {
-  mid int [ref: > match.mid]
-  player varchar [ref: > player.name]
-  vktrole varchar [ref: > role.name]
-  reason enum
-  causee varchar [ref: > player.name]
-  atkrole varchar [ref: > role.name]
-  weapon optional[varchar]
-  time time
-}
-
-Table damages {
-  mid int [ref: > match.mid]
-  player varchar [ref: > player.name]
-  vktrole varchar [ref: > role.name]
-  reason enum
-  causee varchar [ref: > player.name]
-  atkrole varchar [ref: > role.name]
-  weapon optional[varchar]
-  time time
-  damage int
+  won boolean
 }
 
 Table rolechange {
-  mid int [ref: > match.mid]
+  mid int [ref: > game.mid]
   player varchar [ref: > player.name]
-  causee varchar [ref: > player.name]
   fromrole varchar [ref: > role.name]
   torole varchar [ref: > role.name]
   time time
 }
 
-Table configs {
-  filename varchar
-}
-
-Table wins {
-  mid int [ref: > match.mid]
-  team varchar [ref: > role.team]
-}
-
-Table loves {
-  mid int [ref: > match.mid]
-  first varchar [ref: > player.name]
-  second varchar [ref: > player.name]
+Table damages {
+  mid int [ref: > game.mid]
+  player varchar [ref: > player.name]
+  vktrole varchar [ref: > role.name]
+  reason enum
+  causee varchar [ref: > player.name]
+  atkrole varchar [ref: > role.name]
+  weapon optional[varchar]
+  damage int
+  teamdmg boolean
 }
 
 TABLE revives {
-  mid int [ref: > match.mid]
+  mid int [ref: > game.mid]
   player varchar [ref: > player.name]
-  causee varchar [ref: > player.name]
+  time time
+}
+
+Table dies {
+  mid int [ref: > game.mid]
+  player varchar [ref: > player.name]
+  vktrole varchar [ref: > role.name]
   reason enum
+  causee varchar [ref: > player.name]
+  atkrole varchar [ref: > role.name]
+  weapon optional[varchar]
+  time time
+}
+
+TABLE karma {
+  mid int [ref: > game.mid]
+  player varchar [ref: > player.name]
+  karma int
+  time time
+}
+
+TABLE mediumchat {
+  mid int [ref: > game.mid]
+  msg varchar
+}
+
+Table configs {
+  filename varchar
 }

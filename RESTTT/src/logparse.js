@@ -3,7 +3,6 @@ Code for parsing a TTT logfile
 */
 const db = require("./utils/database.js")
 const LogParser = require("./utils/structs.js").LogParser
-const logger = require("./utils/logger.js")
 const groupBy = require("./group_by.js").groupBy
 
 const regex = (function() {
@@ -25,6 +24,8 @@ const regex = (function() {
   )
 })()
 
+let defaultTeams = new Map();
+
 function timeToSeconds(duration) {
   //04:02.01 to 242.01
   let [minutes, seconds] = duration.split(":")
@@ -44,7 +45,7 @@ function makeSingular(string) {
 }
 
 // maps from what is logged to the team names
-function translateWinner(group) {
+function unifyTeamname(group) {
   if (group === "Innos")
     return "Innocent"
   if (group === "Traitors")
@@ -74,7 +75,7 @@ function onSelectMap(match, state) {
 
 async function onPlayerJoined(match, state) {
   // captures: name
-  state.clients.add(match.name)
+  state.clients.set(match.name, new Client(match.name))
   // add player to player table, if it doesn't exist
   await db.queryAdmin(
     "INSERT IGNORE INTO player (name) VALUES (?)",
@@ -82,10 +83,12 @@ async function onPlayerJoined(match, state) {
   )
 }
 
-function onRoleAssigned(match, state) {
+async function onRoleAssigned(match, state) {
   // captures: time, name, role
-  state.roles.set(match.name, capitalizeFirstLetter(match.role))
-  // TODO set team
+  const role = capitalizeFirstLetter(match.role)
+  state.clients.get(match.name).role = role
+  // initialize team per role, bodyguard will directly emit CP_RC
+  state.clients.get(match.name).team = defaultTeams.get(role)
 }
 
 async function onGameStart(match, state) {
@@ -97,10 +100,10 @@ async function onGameStart(match, state) {
   // get the mid of the just inserted round
   let res = await db.query("SELECT mid FROM game ORDER BY mid DESC LIMIT 1", [], false)
   state.mid = res[0].mid
-  for (let [k, v] of state.roles.entries()) {
+  for (let [name, client] of state.clients) {
     await db.queryAdmin(
       "INSERT INTO participates (mid, player, startrole) VALUES (?, ?, ?)",
-      [state.mid, k, v]
+      [state.mid, name, client.role]
     )
   }
 }
@@ -113,7 +116,6 @@ function onRoleChange(match, state) {
   const time = timeToSeconds(match.time)
 
   // happens for spectators
-  // TODO does it happen elsewhere?
   if (torole === "None" || fromrole === "None")
     return
 
@@ -123,11 +125,11 @@ function onRoleChange(match, state) {
     "INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (?, ?, ?, ?, ?)",
     [state.mid, match.name, fromrole, torole, time]
   )
-  state.roles[player] = torole
+  state.clients.get(player).role = torole
 }
 
 function onTeamChange(match, state) {
-  state.teams[match.name] = translateWinner(match.newteam)
+  state.clients.get(match.name).team = unifyTeamname(match.newteam)
 }
 
 function onBuy(match, state) {
@@ -148,7 +150,6 @@ function onLove(match, state) {
     "INSERT INTO loves (mid, first, second) VALUES (?, ?, ?)",
     [state.mid, match.firstname, match.secondname]
   )
-  // TODO not tested, as currently no message is logged
 }
 
 function onRespawn(match, state) {
@@ -159,7 +160,6 @@ function onRespawn(match, state) {
     "INSERT INTO revives (mid, player, time) VALUES (?, ?, ?)",
     [state.mid, match.name, time]
   )
-  // TODO reason i.e. defibrillator would be interesting
 }
 
 function onPvPDmg(match, state) {
@@ -171,7 +171,6 @@ function onPvPDmg(match, state) {
   const teamdmg = match.atkteam === match.vktteam && match.attacker !== match.victim
   const damage = Math.min(match.damage, 2147483647)
 
-  // TODO check if this always holds
   /*
   If the inflictor isn't the player itself, it might be a projectile or things like a mine.
   That means the weapon in the attackers hand isn't necessarily what caused the kill.
@@ -181,14 +180,12 @@ function onPvPDmg(match, state) {
     weapon = inflictor.entity
 
   state.MatchPvPDmg.push([state.mid, match.victim, vktrole, match.type, match.attacker, atkrole, weapon, teamdmg, damage])
-  // TODO track specific rolechanges, like zombie and cursed here?
 }
 
 function onPvEDmg(match, state) {
   // captures: time, type, dmgtype, weapon, inflictor, victim, vktrole, vktteam, damage
   let vktrole = capitalizeFirstLetter(match.vktrole)
   let damage = Math.min(match.damage, 2147483647)
-  // TODO use the inflictor somehow?
 
   state.MatchPvEDmg.push([state.mid, match.victim, vktrole, match.type, damage])
 }
@@ -249,7 +246,7 @@ function onGameEnd(match, state) {
   // captures: team or time
   // consists of two regex for result and time
   if (match.team)
-    state.winner = translateWinner(match.team)
+    state.winner = unifyTeamname(match.team)
   if (match.time)
     state.roundtime = timeToSeconds(match.time)
   if (match.timeout)
@@ -260,41 +257,68 @@ function onGameEnd(match, state) {
       "UPDATE game SET duration = ? WHERE mid = ?",
       [state.roundtime, state.mid]
     )
-    for (let player of state.clients) {
-      const won = state.winner === state.teams.get(player)
+    for (let [name, client] of state.clients) {
+      const won = state.winner === client.team
       db.queryAdmin(
         "UPDATE participates SET won = ? WHERE mid = ? AND player = ?",
-        [won, state.mid, player]
+        [won, state.mid, name]
       )
     }
-    // TODO add bodyguard, sidekick etc. as winner, if needed
 
     state.winner = undefined
     state.roundtime = undefined
-    state.roles.clear()
-    state.teams.clear()
+    for (let [_, client] of state.clients) {
+      client.role = undefined
+      client.team = undefined
+    }
   }
 }
 
 function onPlayerLeft(match, state) {
   // captures: name
   state.clients.delete(match.name)
-  state.roles.delete(match.name)
+}
+
+function onMediumMsg(match, state) {
+  // captures: msg
+  db.queryAdmin("INSERT INTO mediumchat (mid, msg) VALUES (?, ?)", [state.mid, match.msg])
+}
+
+function onKarmaChange(match, state) {
+  // captures: name, karma
+  const client = state.clients.get(match.name)
+  if (client.karma < 1000 || match.karma < 1000) {
+    client.karma = Number(match.karma)
+    db.queryAdmin(
+      "INSERT INTO karma (mid, player, karma, time) VALUES (?, ?, ?, ?)",
+      [state.mid, match.name, client.karma, state.lastdmgtime]
+    )
+  }
+}
+
+class Client {
+  constructor(name) {
+    this.name = name
+    this.role = undefined
+    this.team = undefined
+    this.karma = 1000
+  }
 }
 
 async function load_logfile(log, date) {
-  // TODO inserting is slow, maybe start a transaction or check the primary key increment?
-
+  const res = await db.query("SELECT name, team FROM roles")
+  for (let { name, team } of res)
+    defaultTeams.set(name, team)
+  
   // initial state
   var lp = new LogParser({
-    clients: new Set(),
-    roles: new Map(),
-    teams: new Map(),
+    clients: new Map(),
     date: date,
     mid: 0,
     map: "",
     MatchPvPDmg: [],
-    MatchPvEDmg: []
+    MatchPvEDmg: [],
+    lastdmgtime: 0
   })
 
   // map selection
@@ -317,7 +341,7 @@ async function load_logfile(log, date) {
 
   // game start
   lp.attach(
-    /\[TTT2\]:\s*The round has begun!/,
+    /Round state: 3/,
     onGameStart
   )
 
@@ -351,6 +375,18 @@ async function load_logfile(log, date) {
     onRespawn
   )
 
+  // medium msg
+  lp.attach(
+    /\[TTT2 Medium Role\] Noisified chat: (?<msg>.*)/,
+    onMediumMsg
+  )
+
+  // karma change
+  lp.attach(
+    /(?<name>\w*) \((?<karma>[0-9.]*)\) hurt \w* \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
+    onKarmaChange
+  )
+
   // damage
   lp.attach(
     regex`
@@ -381,6 +417,12 @@ async function load_logfile(log, date) {
     /ServerLog: (?<time>[0-9:.]*) - CP_DMG OTHER<0>: nonplayer \(Entity \[0\]\[worldspawn\]\) damaged \w+ \[vampire, traitors\] for 1/,
     () => false,
     999
+  )
+  lp.attach(
+    /ServerLog: (?<time>[0-9:.]*) - CP_DMG/,
+    (match, state) => {
+      state.lastdmgtime = timeToSeconds(match.time)
+    }
   )
 
   // death
