@@ -7,7 +7,6 @@ describe('logparse', () => {
     var results = [];
 
     function expectInitialQueries() {
-        expect(queries.shift()).toBe('SELECT name, team FROM roles');
         expect(queries.shift()).toBe('SET autocommit=0');
     }
 
@@ -24,7 +23,6 @@ describe('logparse', () => {
     test('uses a transaction', async() => {
         await logparse.load_logfile('', '2021-01-01');
 
-        expect(queries.shift()).toBe('SELECT name, team FROM roles');
         expect(queries.shift()).toBe('SET autocommit=0');
         expect(queries.shift()).toBe('COMMIT');
         expect(queries.shift()).toBe("SET autocommit=1");
@@ -37,6 +35,7 @@ describe('logparse', () => {
     
             await logparse.load_logfile([
                 "Map: ttt_rooftops_2016_v1",
+                "Round state: 2",
                 "Round state: 3",
                 "ServerLog: Result: innocents wins.",
                 "ServerLog: 04:02.01 - ROUND_ENDED at given time",
@@ -44,6 +43,7 @@ describe('logparse', () => {
             ], '2021-01-01');
     
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe("INSERT INTO game (map, date, duration) VALUES ('ttt_rooftops_2016_v1', '2021-01-01', 'ongoing')");
             expect(queries.shift()).toBe('SELECT mid FROM game ORDER BY mid DESC LIMIT 1');
             expect(queries.shift()).toBe("UPDATE game SET duration = 242.01 WHERE mid = 1");
@@ -70,6 +70,7 @@ describe('logparse', () => {
 
             await logparse.load_logfile([
                 'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+                'Round state: 2',
                 'ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent',
                 "ServerLog: Result: timelimit reached, traitors lose.",
                 "ServerLog: 04:02.01 - ROUND_ENDED at given time",
@@ -78,6 +79,7 @@ describe('logparse', () => {
 
             expectInitialQueries();
             expect(queries.shift()).toBe("INSERT IGNORE INTO player (name) VALUES ('GhastM4n')")
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe("UPDATE game SET duration = 242.01 WHERE mid = 0");
             expect(queries.shift()).toBe("UPDATE participates SET won = true WHERE mid = 0 AND player = 'GhastM4n'");
         });
@@ -175,67 +177,79 @@ describe('logparse', () => {
     describe("handles damage", () => {
         test("for PvP", async () => {
             await logparse.load_logfile([
+                "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 85",
                 "Round state: 4"
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe(
                 "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
         });
 
         test("for PvE", async () => {
             await logparse.load_logfile([
+                "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged p2 [r2, t2] for 85",
                 "Round state: 4"
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe(
                 "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)");
         });
 
         test("for non-weapon kill", async () => {
             await logparse.load_logfile([
+                "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG EXPL: p1 [r1, t1] <[NULL Entity]>, (Entity [3][w1], ) damaged p2 [r2, t2] for 85",
                 "Round state: 4"
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe(
                 "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)");
         });
 
         test("for selfkill", async () => {
             await logparse.load_logfile([
+                "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p1 [r1, t1] for 85",
                 "Round state: 4"
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe(
                 "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
         })
 
         test("for teamkill", async () => {
             await logparse.load_logfile([
+                "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t1] for 85",
                 "Round state: 4"
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe(
                 "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', true, 85)");
         });
 
         test("through aggregation", async () => {
             await logparse.load_logfile([
+                "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 10",
                 "ServerLog: 01:54.93 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 12",
                 "Round state: 4"
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe("SELECT name, team FROM roles");
             expect(queries.shift()).toBe(
                 "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)");
         });
@@ -271,6 +285,7 @@ describe('logparse', () => {
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe('SELECT name, team FROM roles');
             expect(queries.shift()).toBe("INSERT IGNORE INTO player (name) VALUES ('V8Block')");
             expect(queries.shift()).toBe("INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 5.5)");
         });
@@ -284,6 +299,7 @@ describe('logparse', () => {
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe('SELECT name, team FROM roles');
             expect(queries.shift()).toBe("INSERT IGNORE INTO player (name) VALUES ('V8Block')");
             expect(queries.shift()).toBe("INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 0)");
             expect(queries.shift()).toBe("INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 1000, 0)");
@@ -297,6 +313,7 @@ describe('logparse', () => {
             ], "");
 
             expectInitialQueries();
+            expect(queries.shift()).toBe('SELECT name, team FROM roles');
             expect(queries.shift()).toBe("INSERT IGNORE INTO player (name) VALUES ('V8Block')");
             expect(queries.shift()).toBe("COMMIT");
         })

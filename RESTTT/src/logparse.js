@@ -24,8 +24,6 @@ const regex = (function() {
   )
 })()
 
-let defaultTeams = new Map();
-
 function timeToSeconds(duration) {
   //04:02.01 to 242.01
   let [minutes, seconds] = duration.split(":")
@@ -83,12 +81,20 @@ async function onPlayerJoined(match, state) {
   )
 }
 
-async function onRoleAssigned(match, state) {
-  // captures: time, name, role
-  const role = capitalizeFirstLetter(match.role)
-  state.clients.get(match.name).role = role
-  // initialize team per role, bodyguard will directly emit CP_RC
-  state.clients.get(match.name).team = defaultTeams.get(role)
+const RoleAssigner = {
+  "init": async () => {
+    this.defaultTeams = new Map()
+    const res = await db.query("SELECT name, team FROM roles")
+    for (let { name, team } of res)
+      this.defaultTeams.set(name, team)
+  },
+  "onRoleAssigned": (match, state) => {
+    // captures: time, name, role
+    const role = capitalizeFirstLetter(match.role)
+    state.clients.get(match.name).role = role
+    // initialize team per role, bodyguard will directly emit CP_RC
+    state.clients.get(match.name).team = this.defaultTeams.get(role)
+  }
 }
 
 async function onGameStart(match, state) {
@@ -152,54 +158,56 @@ function onLove(match, state) {
   )
 }
 
-function onPvPDmg(match, state) {
-  // captures: time, type, dmgtype, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam, damage
-  const atkrole = capitalizeFirstLetter(match.atkrole)
-  const vktrole = capitalizeFirstLetter(match.vktrole)
-  let weapon = parseEntity(match.weapon).entity
-  const inflictor = parseEntity(match.inflictor)
-  const teamdmg = match.atkteam === match.vktteam && match.attacker !== match.victim
-  const damage = Math.min(match.damage, 2147483647)
+const DamageHandler = {
+  "init": () => {
+    this.pvp_dmg = []
+    this.pve_dmg = []
+  },
+  "pvp": (match, state) => {
+    // captures: time, type, dmgtype, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam, damage
+    const atkrole = capitalizeFirstLetter(match.atkrole)
+    const vktrole = capitalizeFirstLetter(match.vktrole)
+    let weapon = parseEntity(match.weapon).entity
+    const inflictor = parseEntity(match.inflictor)
+    const teamdmg = match.atkteam === match.vktteam && match.attacker !== match.victim
+    const damage = Math.min(match.damage, 2147483647)
 
-  /*
-  If the inflictor isn't the player itself, it might be a projectile or things like a mine.
-  That means the weapon in the attackers hand isn't necessarily what caused the kill.
-  The same in onPvPKill
-  */
-  if (inflictor.class !== "Player")
-    weapon = inflictor.entity
+    /*
+    If the inflictor isn't the player itself, it might be a projectile or things like a mine.
+    That means the weapon in the attackers hand isn't necessarily what caused the kill.
+    The same in onPvPKill
+    */
+    if (inflictor.class !== "Player")
+      weapon = inflictor.entity
 
-  state.MatchPvPDmg.push([state.mid, match.victim, vktrole, match.type, match.attacker, atkrole, weapon, teamdmg, damage])
-}
+    this.pvp_dmg.push([state.mid, match.victim, vktrole, match.type, match.attacker, atkrole, weapon, teamdmg, damage])
+  },
+  "pve": (match, state) => {
+    // captures: time, type, dmgtype, weapon, inflictor, victim, vktrole, vktteam, damage
+    let vktrole = capitalizeFirstLetter(match.vktrole)
+    let damage = Math.min(match.damage, 2147483647)
 
-function onPvEDmg(match, state) {
-  // captures: time, type, dmgtype, weapon, inflictor, victim, vktrole, vktteam, damage
-  let vktrole = capitalizeFirstLetter(match.vktrole)
-  let damage = Math.min(match.damage, 2147483647)
+    this.pve_dmg.push([state.mid, match.victim, vktrole, match.type, damage])
+  },
+  "insert": () => {
+    const sum = (vals) => vals.reduce((prev, v) => prev + Number(v), 0)
 
-  state.MatchPvEDmg.push([state.mid, match.victim, vktrole, match.type, damage])
-}
+    const PvPDmgArgs = groupBy(this.pvp_dmg, [0, 1, 2, 3, 4, 5, 6, 7], sum)
+    for (let args of PvPDmgArgs) {
+      db.queryAdmin(
+        "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        args
+      )
+    }
 
-function performDmgQuery(match, state) {
-  const sum = (vals) => vals.reduce((prev, v) => prev + Number(v), 0)
-
-  const PvPDmgArgs = groupBy(state.MatchPvPDmg, [0, 1, 2, 3, 4, 5, 6, 7], sum)
-  for (let args of PvPDmgArgs) {
-    db.queryAdmin(
-      "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      args
-    )
+    const PvEDmgArgs = groupBy(this.pve_dmg, [0, 1, 2, 3], sum)
+    for (let args of PvEDmgArgs) {
+      db.queryAdmin(
+        "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (?, ?, ?, ?, ?)",
+        args
+      )
+    }
   }
-  state.MatchPvPDmg = []
-
-  const PvEDmgArgs = groupBy(state.MatchPvEDmg, [0, 1, 2, 3], sum)
-  for (let args of PvEDmgArgs) {
-    db.queryAdmin(
-      "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (?, ?, ?, ?, ?)",
-      args
-    )
-  }
-  state.MatchPvEDmg = []
 }
 
 async function onPvPKill(match, state) {
@@ -308,19 +316,13 @@ class Client {
 }
 
 async function load_logfile(log, date) {
-  const res = await db.query("SELECT name, team FROM roles")
-  for (let { name, team } of res)
-    defaultTeams.set(name, team)
   
   // initial state
   var lp = new LogParser({
     clients: new Map(),
     date: date,
     mid: 0,
-    map: "",
-    MatchPvPDmg: [],
-    MatchPvEDmg: [],
-    lastdmgtime: 0
+    map: ""
   })
 
   lp.register(
@@ -341,12 +343,15 @@ async function load_logfile(log, date) {
   )
   lp.listen("init_round", karmaTracker.init)
   lp.listen("init_round", gameEndListener.init)
+  lp.listen("init_round", RoleAssigner.init)
+  lp.listen("init_round", resetTeamRoles)
+  lp.listen("init_round", DamageHandler.init)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
     "initial_role"
   )
-  lp.listen("initial_role", onRoleAssigned)
+  lp.listen("initial_role", RoleAssigner.onRoleAssigned)
 
   lp.register(
     /Round state: 3/,
@@ -402,7 +407,6 @@ async function load_logfile(log, date) {
     `,
     "pvp_dmg"
   )
-  lp.listen("pvp_dmg", onPvPDmg)
   lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_DMG \s
@@ -415,8 +419,9 @@ async function load_logfile(log, date) {
     `,
     "pve_dmg"
   )
-  lp.listen("pve_dmg", onPvEDmg)
   lp.listen("pve_dmg", captureVampireDmg, 999)
+  lp.listen("pvp_dmg", DamageHandler.pvp)
+  lp.listen("pve_dmg", DamageHandler.pve)
   lp.listen("pvp_dmg", karmaTracker.onPvPDmg)
 
   lp.register(
@@ -459,9 +464,8 @@ async function load_logfile(log, date) {
     /Round state: 4/,
     "game_end"
   )
-  lp.listen("game_end", performDmgQuery)
+  lp.listen("game_end", DamageHandler.insert)
   lp.listen("game_end", gameEndListener.onGameEnd)
-  lp.listen("game_end", resetTeamRoles, -999)
 
   lp.register(
     /Dropped (?<name>\w*) from server/,
