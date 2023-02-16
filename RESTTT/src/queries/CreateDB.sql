@@ -103,10 +103,11 @@ CREATE TABLE buys (
   time FLOAT NOT NULL,
   role VARCHAR(15) NOT NULL
 );
-CREATE TABLE loves (
-  mid INT NOT NULL
-  first VARCHAR(20) NOT NULL
-  second VARCHAR(20) NOT NULL
+CREATE TABLE teamup (
+  mid INT NOT NULL,
+  first VARCHAR(20) NOT NULL,
+  second VARCHAR(20) NOT NULL,
+  reason VARCHAR(10) NOT NULL -- love, jackal, sheriff, mesmerist, necromancer, pirate
 );
 CREATE TABLE participates (
   mid INT NOT NULL,
@@ -151,7 +152,7 @@ CREATE TABLE karma {
 CREATE TABLE mediumchat {
   mid INT NOT NULL,
   msg VARCHAR(100) NOT NULL
-}
+};
 CREATE TABLE configs (
   filename VARCHAR(30) NOT NULL
 );

@@ -153,7 +153,7 @@ function onLove(match, state) {
   // captures: firstname, secondname
   // not critical so no await
   db.queryAdmin(
-    "INSERT INTO loves (mid, first, second) VALUES (?, ?, ?)",
+    "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'love')",
     [state.mid, match.firstname, match.secondname]
   )
 }
@@ -301,9 +301,29 @@ const karmaTracker = {
 
 function captureVampireDmg(match, state) {
   // catch and ignore vampire world damage
-  if (match.dmgtype == 0 && match.damage == 1 && match.vktrole == "vampire" && parseEntity(match.inflictor).name == "worldspawn")
+  if (match.dmgtype == 0
+      && match.damage == 1
+      && match.vktrole == "vampire"
+      && parseEntity(match.inflictor).entity == "worldspawn")
     return false
   return true
+}
+
+class DuplicateFilter {
+  constructor(andfilter = undefined) {
+    this.last = undefined
+    this.andfilter = andfilter
+  }
+
+  filter(match) {
+    if (this.andfilter !== undefined && !this.andfilter(match))
+      return false
+    const current = JSON.stringify(match)
+    if (current === this.last)
+      return false
+    this.last = current
+    return true
+  }
 }
 
 class Client {
@@ -370,6 +390,8 @@ async function load_logfile(log, date) {
     "team_change"
   )
   lp.listen("team_change", onTeamChange)
+  // CP_TC is called twice, before and after CP_RC
+  lp.listen("team_change", new DuplicateFilter().filter, 999)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
@@ -423,6 +445,10 @@ async function load_logfile(log, date) {
   lp.listen("pvp_dmg", DamageHandler.pvp)
   lp.listen("pve_dmg", DamageHandler.pve)
   lp.listen("pvp_dmg", karmaTracker.onPvPDmg)
+  // sidekick deagle for some reason fires twice
+  lp.listen("pvp_dmg", new DuplicateFilter(
+    (match) => match.weapon === "weapon_ttt2_sidekickdeagle"
+  ).filter, 999)
 
   lp.register(
     regex`

@@ -237,6 +237,7 @@ class LogParser {
       logger.debug("LogParser", `emitting event ${event.name}`)
 
       for (let listener of event.listeners) {
+        logger.debug("LogParser", `executing callback ${listener.callback.name}`)
         if (await listener.callback(match.groups, this.state) === false) {
           return
         }
