@@ -3,6 +3,7 @@ const app = express()
 
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const path = require('path')
 const logger = require("./src/utils/logger.js")
 
 const { NODE_ENV, PORT } = require("./src/utils/config.js")
@@ -25,8 +26,18 @@ app.use("/", function(req, res, next) {
 })
 
 app.get("/", function(req, res) {
-  res.sendFile(path.join(__dirname, '/../../index.html'))
+  res.sendFile(path.join(__dirname, './index.html'))
 })
+app.get("/index.html", function(req, res) {
+  res.sendFile(path.join(__dirname, './index.html'))
+})
+app.get("/index.css", function(req, res) {
+  res.sendFile(path.join(__dirname, './index.css'))
+})
+app.get("/index.js", function(req, res) {
+  res.sendFile(path.join(__dirname, './index.js'))
+})
+
 app.use("/api/v1/data", require("./src/controllers/data_route.js"))
 app.use("/api/v1/admin", require("./src/controllers/admin_route.js"))
 if (NODE_ENV === 'dev') {

@@ -23,8 +23,7 @@ As this involves two async db queries, a mutex here might be good.
 */
 var _mutex = false
 
-router.get("/unsetmutex", function(req, res) {
-  // manual way to unlock mutex in case the /parse route encountered an error
+router.post("/unsetmutex", function(req, res) {
   _mutex = false
 
   res.status(200).end()

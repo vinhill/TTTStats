@@ -4,147 +4,112 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 	
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-		
-		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-	</head>
+    <link rel="stylesheet" href="index.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </head>
 	<body>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<div class="navbar-brand">
-				Temporary Testpage for REST calls
-			</div>
-		</nav>
-		
-    <div class="row">
-      <div class="col-3" style="padding: 1em">
-        <label for="urlencodetf" class="col-sm-2 col-form-label"> URL encode </label>
-        <input id="urlencodetf" type="text" />
-        <label for="urlencodedtf" class="col-sm-2 col-form-label"> Result </label>
-        <input id="urlencodedtf" type="text" />
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">REST API - Admin Panel</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#url-encoder">URL Encoder</a>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="col-6">
-        <form>
-          <div class="form-group row">
+		</nav>
+    <!-- URL Encoder modal -->
+    <div class="modal fade" id="url-encoder" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="url-encoder-title">URL Encoder</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <div class="row">
+                <label for="urlencodetf" class="col-form-label col-sm-2"> Input </label>
+                <div class="col-sm-10">
+                  <input id="urlencodetf" class="form-control" type="text" />
+                </div>
+              </div>
+              <div class="form-group row">
+                <label for="urlencodedtf" class="col-form-label col-sm-2"> Result </label>
+                <div class="col-sm-10" style="position: relative">
+                  <input class="form-control-plaintext" id="urlencodedtf" type="text" />
+                  <button class="btn-clipboard" id="btn-clip-urlencoded">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+		<!-- Main HTTP form -->
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-sm-8 col-10">
+        <form onsubmit="return false;">
+          <div class="row mb-3">
+            <label class="col-form-label col-sm-2"> Templates: </label>
+            <div class="col-sm-10" id="template-buttons">
+              <!-- placeholder -->
+            </div>
+          </div>
+          <div class="row mb-3">
             <label for="uritf" class="col-sm-2 col-form-label"> URI: </label>
             <div class="col-sm-10">
               <input id="uritf" type="text" value="/api/v1" class="form-control" />
             </div>
           </div>
-          <div class="form-group row">
+          <div class="row mb-3">
             <label for="bodytf" class="col-sm-2 col-form-label"> Body: </label>
             <div class="col-sm-10">
               <input id="bodytf" type="text" value="username=mamu&password=passw0r1" class="form-control" />
             </div>
           </div>
-          <div class="form-group row">
-            <label for="methodtf" class="col-sm-2 col-form-label"> Methode: </label>
+          <div class="row mb-3">
+            <label for="method" class="col-sm-2 col-form-label"> Method: </label>
             <div class="col-sm-10">
-              <input id="methodtf" type="text" value="POST" class="form-control" />
+              <select name="method" id="method" class="form-control">
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+              </select>
             </div>
           </div>
-          <div class="form-group row">
-            <label for="encodetf" class="col-sm-2 col-form-label" > Codierung: </label>
+          <div class="row mb-3">
+            <label for="encode" class="col-sm-2 col-form-label" > Encoding: </label>
             <div class="col-sm-10">
-              <input id="encodetf" type="text" value="application/x-www-form-urlencoded" class="form-control"  />
+              <select name="encode" id="encode" class="form-control">
+                <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+                <option value="application/json">application/json</option>
+              </select>
             </div>
           </div>
-          <input id="submitbtn" type="button" value="Submit" class="btn btn-secondary btn-lg btn-block" />
+          <input id="submitbtn" type="button" value="Submit" class="btn btn-primary" />
         </form>
-      </div>
-      <div class="col-3" style="padding: 1em">
-        <p>
-          Use these buttons to place teplates in the REST query form. You still have to submit!
-        </p>
-        <input id="template_reset" type="button" value="Reset DB" class="btn btn-secondary" />
-        <input id="template_loadcnf" type="button" value="Load Config" class="btn btn-secondary" />
-        <input id="template_unsetmut" type="button" value="Unset Mutex" class="btn btn-secondary" />
+
+        <textarea id="output" class="form-control" disabled>
+          No result yet.
+        </textarea>
       </div>
     </div>
-		
-		<p id="out" style="margin:1%;font-size:20px">
-			Hier steht nach Knopfdruck die Serverantwort.
-		</p>
-	
+
 	</body>
-	<script>
-    async function submit() {
-			let uri = document.getElementById("uritf").value;
-			let body = document.getElementById("bodytf").value;
-			let method = document.getElementById("methodtf").value;
-			let encode = document.getElementById("encodetf").value;
-			
-			let response;
-			if (method === 'GET') {
-				response = await fetch(uri, {
-					method: method,
-					body: null,
-					headers: {
-						'Content-Type': encode
-					}
-				});
-			} else {
-				response = await fetch(uri, {
-					method: method,
-					body: body,
-					headers: {
-						'Content-Type': encode
-					}
-				});
-			}
-			console.log(response);
-			response.json().then(function(data) {
-				console.log(data);
-				let out = document.getElementById("out");
-				out.innerHTML = JSON.stringify(data);
-			}).catch(function(err) {
-        console.log(err);
-        out.innerHTML = `Error ${err.message}, Status ${response.status}`;
-      });
-		}
-    
-    function template_reset() {
-			let uri = document.getElementById("uritf");
-			let body = document.getElementById("bodytf");
-			let method = document.getElementById("methodtf");
-      
-      uri.value = "/api/v1/dev/makedb";
-      body.value = "";
-      method.value = "GET";
-    }
-    
-    function template_loadcnf() {
-			let uri = document.getElementById("uritf");
-			let body = document.getElementById("bodytf");
-			let method = document.getElementById("methodtf");
-      
-      uri.value = "/api/v1/admin/parselog";
-      body.value = "name=2023.02.06.log&date=2023-02-06";
-      method.value = "POST";
-    }
-		
-    function update_urlencoded() {
-      let dec = document.getElementById("urlencodetf");
-      let enc = document.getElementById("urlencodedtf");
-      enc.value = encodeURIComponent(dec.value);
-    }
-    
-    function template_unsetmut() {
-			let uri = document.getElementById("uritf");
-			let body = document.getElementById("bodytf");
-			let method = document.getElementById("methodtf");
-      
-      uri.value = "/api/v1/admin/unsetmutex";
-      body.value = "";
-      method.value = "GET";
-    }
-    
-		document.getElementById("submitbtn").addEventListener("click", submit);
-    document.getElementById("template_reset").addEventListener("click", template_reset);
-    document.getElementById("template_loadcnf").addEventListener("click", template_loadcnf);
-    document.getElementById("template_unsetmut").addEventListener("click", template_unsetmut);
-    
-    document.getElementById("urlencodetf").addEventListener("input", update_urlencoded);
-	</script>
+  <script src="index.js"></script>
 </html>
