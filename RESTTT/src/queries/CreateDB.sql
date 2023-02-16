@@ -3,14 +3,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS role;
 DROP TABLE IF EXISTS game;
 DROP TABLE IF EXISTS player;
-DROP TABLE IF EXISTS wins;
 DROP TABLE IF EXISTS buys;
-DROP TABLE IF EXISTS loves;
+DROP TABLE IF EXISTS teamup;
 DROP TABLE IF EXISTS participates;
 DROP TABLE IF EXISTS rolechange;
 DROP TABLE IF EXISTS damages;
-DROP TABLE IF EXISTS revives;
 DROP TABLE IF EXISTS dies;
+DROP TABLE IF EXISTS karma;
+DROP TABLE IF EXISTS mediumchat;
 DROP TABLE IF EXISTS configs;
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -18,11 +18,11 @@ SET FOREIGN_KEY_CHECKS = 1;
 CREATE TABLE role (
 	name VARCHAR(15) PRIMARY KEY, -- explicit role
   team VARCHAR(20) NOT NULL,  -- team this role wins with
-  group VARCHAR(10) NOT NULL, -- more general group this role belongs to
+  category VARCHAR(10) NOT NULL, -- more general category this role belongs to
 	colour VARCHAR(8) NOT NULL,
   descr TEXT NOT NULL
 );
-INSERT INTO role (name, team, colour, group, descr)
+INSERT INTO role (name, team, colour, category, descr)
 VALUES
 	("Detective", "Innocent", "#1440a4", "Detective", "Has a DNA scanner to gain information on dead bodies."),
   ("Sheriff", "Innocent", "#5978a7", "Detective", "Can turn someone into a deputy."),
@@ -118,8 +118,8 @@ CREATE TABLE participates (
 CREATE TABLE rolechange (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
-  from VARCHAR(15) NOT NULL,
-  to VARCHAR(15) NOT NULL,
+  orig VARCHAR(15) NOT NULL,
+  dest VARCHAR(15) NOT NULL,
   time FLOAT NOT NULL
 );
 CREATE TABLE damages (
@@ -143,16 +143,16 @@ CREATE TABLE dies (
   time FLOAT NOT NULL,
   teamkill BOOLEAN
 );
-CREATE TABLE karma {
+CREATE TABLE karma (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   karma FLOAT NOT NULL,
   time FLOAT NOT NULL
-};
-CREATE TABLE mediumchat {
+);
+CREATE TABLE mediumchat (
   mid INT NOT NULL,
   msg VARCHAR(100) NOT NULL
-};
+);
 CREATE TABLE configs (
   filename VARCHAR(30) NOT NULL
 );

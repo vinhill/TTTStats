@@ -12,7 +12,7 @@ router.get("/", function(req, res) {
 })
 
 router.get("/makedb", async function(req, res) {
-  db.queryAdmin(await db.readQueryFile("CreateDB"))
+  db.queryAdmin(await db.readQueryFile("CreateDB.sql"))
   res.status(200).end()
 })
 

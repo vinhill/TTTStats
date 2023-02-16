@@ -317,7 +317,7 @@ describe('logparse', () => {
         ], "");
 
         expect(queries.includes(
-            "INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (0, 'GhastM4n', 'Survivalist', 'Traitor', 215.91)"
+            "INSERT INTO rolechange (mid, player, orig, dest, time) VALUES (0, 'GhastM4n', 'Survivalist', 'Traitor', 215.91)"
         )).toBe(true);
     });
 

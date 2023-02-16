@@ -128,7 +128,7 @@ function onRoleChange(match, state) {
   // TODO the cause for rolechange would be interesting
 
   db.queryAdmin(
-    "INSERT INTO rolechange (mid, player, fromrole, torole, time) VALUES (?, ?, ?, ?, ?)",
+    "INSERT INTO rolechange (mid, player, orig, dest, time) VALUES (?, ?, ?, ?, ?)",
     [state.mid, match.name, fromrole, torole, time]
   )
   state.clients.get(player).role = torole
