@@ -84,7 +84,7 @@ async function onPlayerJoined(match, state) {
 const RoleAssigner = {
   "init": async () => {
     this.defaultTeams = new Map()
-    const res = await db.query("SELECT name, team FROM roles")
+    const res = await db.query("SELECT name, team FROM role")
     for (let { name, team } of res)
       this.defaultTeams.set(name, team)
   },
@@ -101,9 +101,10 @@ async function onGameStart(match, state) {
   // captures: nothing
   await db.queryAdmin(
     "INSERT INTO game (map, date, duration) VALUES (?, ?, ?)",
-    [state.map, state.date, "ongoing"]
+    [state.map, state.date, 0]
   )
   // get the mid of the just inserted round
+  await db.queryAdmin("COMMIT")
   let res = await db.query("SELECT mid FROM game ORDER BY mid DESC LIMIT 1", [], false)
   state.mid = res[0].mid
   for (let [name, client] of state.clients) {
@@ -157,6 +158,19 @@ function onLove(match, state) {
     [state.mid, match.firstname, match.secondname]
   )
 }
+
+function jackalTeamup(match, state) {
+  let weapon = parseEntity(match.weapon).entity
+  if (weapon !== "weapon_ttt2_sidekickdeagle")
+    return
+
+  db.queryAdmin(
+    "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'jackal')",
+    [state.mid, match.attacker, match.victim]
+  )
+}
+
+// TODO deputy teamup
 
 const DamageHandler = {
   "init": () => {
@@ -256,7 +270,6 @@ const gameEndListener = {
 
     for (let [name, client] of state.clients) {
       const won = this.winner === client.team
-      console.log(this.winner, client.team)
       db.queryAdmin(
         "UPDATE participates SET won = ? WHERE mid = ? AND player = ?",
         [won, state.mid, name]
@@ -318,12 +331,15 @@ class DuplicateFilter {
 
   filter(match) {
     if (this.andfilter !== undefined && !this.andfilter(match))
-      return false
+      return true
+
     const current = JSON.stringify(match)
-    if (current === this.last)
+    if (current !== this.last) {
+      this.last = current
+      return true
+    } else {
       return false
-    this.last = current
-    return true
+    }
   }
 }
 
@@ -392,7 +408,7 @@ async function load_logfile(log, date) {
   )
   lp.listen("team_change", onTeamChange)
   // CP_TC is called twice, before and after CP_RC
-  lp.listen("team_change", new DuplicateFilter().filter, 999)
+  lp.subscribe("team_change", new DuplicateFilter(), 'filter', 999)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
@@ -446,10 +462,11 @@ async function load_logfile(log, date) {
   lp.listen("pvp_dmg", DamageHandler.pvp)
   lp.listen("pve_dmg", DamageHandler.pve)
   lp.listen("pvp_dmg", karmaTracker.onPvPDmg)
+  lp.listen("pvp_dmg", jackalTeamup)
   // sidekick deagle for some reason fires twice
-  lp.listen("pvp_dmg", new DuplicateFilter(
-    (match) => match.weapon === "weapon_ttt2_sidekickdeagle"
-  ).filter, 999)
+  lp.subscribe("pvp_dmg", new DuplicateFilter(
+    (match) => parseEntity(match.weapon).entity === "weapon_ttt2_sidekickdeagle"
+  ), 'filter', 999)
 
   lp.register(
     regex`

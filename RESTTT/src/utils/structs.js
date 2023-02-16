@@ -208,6 +208,11 @@ class LogParser {
     logger.debug("LogParser", `registered event '${eventname}' to regex ${regex}`)
   }
 
+  subscribe(event, object, method, priority=0) {
+    const callback = object[method].bind(object)
+    return this.listen(event, callback, priority)
+  }
+
   listen(event, callback, priority=0) {
     this.prepared = false
     const e = this.events.find(e => e.name === event)

@@ -103,6 +103,7 @@ function query(con, querystr, params=[]) {
         res(result)
 
         logger.debug("Database", `Successfully queried ${stripstr(querystr)} and got ${result.length} results.`)
+        logger.debug("Database", `Received ${JSON.stringify(result)}`)
       }
     })
   })
