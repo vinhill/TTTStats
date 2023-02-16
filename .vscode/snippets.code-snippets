@@ -1,0 +1,19 @@
+{
+	"JS Expect Include": {
+		"scope": "javascript",
+		"prefix": "expectincludes",
+		"body": [
+			"expect(queries.includes(\n\t\"${1:query}\"\n)).toBe(true);"
+		],
+		"description": "jest expect query array to enclude blank"
+	},
+	"JS Expect Some": {
+		"scope": "javascript",
+		"prefix": "expectsomeregex",
+		"body": [
+			"expect(queries.some(\n\t/${1:regex}/.exec\n)).toBe(${2:true});"
+		],
+		"description": "jest expect query array to match regex somewhere"
+	},
+	}
+}
