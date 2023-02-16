@@ -84,7 +84,7 @@ VALUES
   ("Revolutionary", "Innocent", "#6A4C82", "Detective", "A detective with traitor shop."),
   ("Blocker", "Traitor", "#724E4C", "Traitor", "Prevents dead bodies from being identified as long as this traitor is alive."),
   ("Sleeper", "Traitor", "#5D524A", "Traitor", "A weird sleeper role that has to be tested"), -- TODO
-  ("Loot_goblin", "None", "#594286", "None", "Just try to stay alive while everyone wants to kill you for cool loot.");
+  ("Lootgoblin", "None", "#594286", "None", "Just try to stay alive while everyone wants to kill you for cool loot.");
 
 -- Create other tables
 CREATE TABLE game (

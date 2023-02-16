@@ -30,7 +30,24 @@ router.get("/unsetmutex", function(req, res) {
   res.status(200).end()
 })
 
-router.post("/parse", async function(req, res) {
+router.get("/health", async function(req, res) {
+  const configs = await db.query("SELECT * FROM configs", [], false)
+  const missing_roles = await db.query(`
+    SELECT DISTINCT *
+    FROM (
+      SELECT dest AS role FROM rolechange
+      UNION
+      SELECT startrole AS role FROM participates
+      ) AS sub
+    WHERE role NOT IN (SELECT name FROM role)
+  `, [], false);
+  res.status(200).json({
+    "configs": configs,
+    "missing_roles": missing_roles
+  })
+})
+
+router.post("/parselog", async function(req, res) {
   // check request parameters
   let filename = req.body.name
   let date = req.body.date

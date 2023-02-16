@@ -7,10 +7,6 @@ const router = express.Router()
 const path = require('path')
 const db = require("../utils/database.js")
 
-router.get("/", function(req, res) {
-  res.sendFile(path.join(__dirname, '/../../dev.html'))
-})
-
 router.get("/makedb", async function(req, res) {
   db.queryAdmin(await db.readQueryFile("CreateDB.sql"))
   res.status(200).end()

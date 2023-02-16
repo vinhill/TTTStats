@@ -24,8 +24,11 @@ app.use("/", function(req, res, next) {
   next()
 })
 
-app.use("/api/v1/query", require("./src/controllers/query_route.js"))
-app.use("/api/v1/config", require("./src/controllers/config_route.js"))
+app.get("/", function(req, res) {
+  res.sendFile(path.join(__dirname, '/../../index.html'))
+})
+app.use("/api/v1/data", require("./src/controllers/data_route.js"))
+app.use("/api/v1/admin", require("./src/controllers/admin_route.js"))
 if (NODE_ENV === 'dev') {
   app.use("/api/v1/dev", require("./src/controllers/dev_route.js"))
 }
