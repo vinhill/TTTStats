@@ -47,7 +47,7 @@ VALUES
   ("Executioner", "Traitor", "#5f4230", "Traitor", "Has a target, on whom he deals double damage. On others, the damage is halved."),
   ("Hitman", "Traitor", "#d96856", "Traitor", "Has a target and gains credits by killing them."),
   ("Glutton", "Traitor", "#b53824", "Traitor", "Eats bodies for HP and becomes ravenous, if hasn''t eaten in a long time."),
-  ("Blight", "Traitor", "#ca3c2b", "Traitor", "Infects their killer causing them to lose health over time."),
+  ("Blight", "Traitor", "#ca3c2b", "Traitor", "Infects their killer causing them to lose health over time."), -- can deal damage after his death
   ("Vampire", "Traitor", "#962720", "Traitor", "Can turn into a bat and has lifesteal, but loses health over time."),
   ("Mesmerist", "Traitor", "#c12e4b", "Traitor", "Can revive dead bodies into thralls."),
   ("Accomplice", "Traitor", "#660c16", "Traitor", "The accomplice and traitors don''t know about each other."),

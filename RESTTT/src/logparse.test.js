@@ -131,7 +131,7 @@ describe('logparse', () => {
         });
 
         test('multiple bodyguard win mechanic', async () => {
-            results["SELECT name, role FROM roles"] = [{name: 'Bodyguard', role: 'Innocent'}];
+            results["SELECT name, team FROM roles"] = [{name: 'Bodyguard', team: 'Innocent'}];
 
             await logparse.load_logfile([
                 'Client "V8Block" spawned in server <STEAM_0:1:202841564> (took 40 seconds).',
@@ -149,6 +149,31 @@ describe('logparse', () => {
             )).toBe(true);
             expect(queries.includes(
                 "UPDATE participates SET won = false WHERE mid = 0 AND player = 'Poci'"
+            )).toBe(true);
+        });
+
+        test("doppelganger may stay killer", async () => {
+            results["SELECT name, team FROM roles"] = [{name: 'Doppelganger', team: 'Doppelganger'}];
+
+            await logparse.load_logfile([
+                'Client "Zumoari" spawned in server <STEAM_0:1:113401183> (took 15 seconds).',
+                'Round state: 2',
+                'ServerLog: 00:00.00 - ROUND_START: Zumoari is doppelganger',
+                'ServerLog: 00:07.35 - CP_RC: Zumoari changed Role from doppelganger to innocent',
+                'ServerLog: Result: doppelganger wins.',
+                'Round state: 4',
+                'ServerLog: 00:00.00 - ROUND_START: Zumoari is doppelganger',
+                'ServerLog: 00:08.39 - CP_TC: Zumoari [cursed] changed Team from doppelgangers to nones',
+                'ServerLog: 00:08.39 - CP_RC: Zumoari changed Role from innocent to cursed',
+                'ServerLog: Result: doppelganger wins.',
+                'Round state: 4',
+            ], "");
+
+            expect(queries.includes(
+                "UPDATE participates SET won = true WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);
+            expect(queries.includes(
+                "UPDATE participates SET won = false WHERE mid = 0 AND player = 'Zumoari'"
             )).toBe(true);
         })
     });
