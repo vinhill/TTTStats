@@ -152,10 +152,9 @@ function onBuy(match, state) {
 
 function onLove(match, state) {
   // captures: firstname, secondname
-  // not critical so no await
   db.queryAdmin(
     "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'love')",
-    [state.mid, match.firstname, match.secondname]
+    [state.mid, ...([match.firstname, match.secondname]).sort()]
   )
 }
 
