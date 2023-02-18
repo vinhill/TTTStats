@@ -28,7 +28,7 @@ export class RestttService {
 	private async getUncached(route: string): Promise<any[]> {
 		let res = await fetch(`${this.baseURL.getValue()}/data/${route}`, {
 			method: "GET",
-			headers: {
+			headers: { // TODO do we need this?
 				'Content-Type': "application/json"
 			}
 		});
@@ -49,11 +49,179 @@ export class RestttService {
 		return deepcopy(this.cache[route]);
 	}
 
-	async get(route: string, cache: boolean = true) : Promise<any[]> {
+	async get(route: string, cache: boolean = true): Promise<any[]> {
 		if (cache) {
 			return this.getCached(route);
 		} else {
 			return this.getUncached(route);
 		}
+	}
+
+	private urlencode(path: string, params: {[key: string]: any}): string {
+		let url = path + "?";
+		for (const key in params) {
+			if (params[key] !== undefined) {
+				url += encodeURIComponent(key)
+				url += "=";
+				url += encodeURIComponent(params[key]);
+				url += "&";
+			}
+		}
+		return url;
+	}
+
+	async Players()
+		: Promise<{
+			name: string
+		}[]>
+	{
+		return this.get("Players");
+	}
+
+	async Maps(since: number | undefined)
+		: Promise<{
+			name: string, count: number
+		}[]> 
+	{
+		return this.get(this.urlencode("Maps", {since: since}));
+	}
+
+	async Roles(since: number | undefined, player: string | undefined)
+		: Promise<{
+			name: string, team: string, category: string,
+			participated: number, won: number, survived: number
+		}[]>
+	{
+		return this.get(this.urlencode("Roles", {since: since, player: player}));
+	}
+
+	async Teams(since: number | undefined, player: string | undefined)
+		: Promise<{
+			name: string, category: string,
+			participated: number, won: number, survived: number
+		}[]>
+	{
+		return this.get(this.urlencode("Teams", {since: since, player: player}));
+	}
+
+	async KDStat(since: number | undefined, player: string | undefined)
+		: Promise<{
+			player: string, kills: number, deaths: number, teamkills: number
+		}[]>
+	{
+		return this.get(this.urlencode("KDStat", {since: since, player: player}));
+	}
+
+	async Weapons(since: number | undefined, player: string | undefined)
+		: Promise<{
+			weapon: string, kills: number
+		}[]>
+	{
+		return this.get(this.urlencode("Weapons", {since: since, player: player}));
+	}
+
+	async Items(since: number | undefined, player: string | undefined)
+		: Promise<{
+			item: string, count: number
+		}[]>
+	{
+		return this.get(this.urlencode("Items", {since: since, player: player}));
+	}
+
+	async ParticipateStats(since: number | undefined, player: string | undefined)
+		: Promise<{
+			player: string, games: number, survived: number, won: number
+		}[]>
+	{
+		return this.get(this.urlencode("ParticipateStats",
+			{since: since, player: player}));
+	}
+
+	async Games(since: number | undefined, player: string | undefined)
+		: Promise<{
+			date: string, rounds: number, participants: number
+		}[]>
+	{
+		return this.get(this.urlencode("Games", {since: since, player: player}));
+	}
+
+	async MediumTexts(since: number | undefined)
+		: Promise<{
+			msg: string
+		}[]>
+	{
+		return this.get(this.urlencode("MediumTexts", {since: since}));
+	}
+
+	async WhoKilledWho()
+		: Promise<{
+			killer: string, victim: string, count: number
+		}[]>
+	{
+		return this.get("WhoKilledWho");
+	}
+
+	async JesterKills()
+		: Promise<{
+			name: string, count: number
+		}[]>
+	{
+		return this.get("JesterKills");
+	}
+
+	async MIDs(date: string)
+		: Promise<{
+			mid: number
+		}[]>
+	{
+		return this.get("MIDs" + date);
+	}
+
+	async Teamup(since: number | undefined, player: string | undefined)
+		: Promise<{
+			first: string, second: string, reason: string, count: number
+		}[]>
+	{
+		return this.get(this.urlencode("Teamup", {since: since, player: player}));
+	}
+
+	async KarmaTS(since: number | undefined, player: string | undefined)
+		: Promise<{
+			mid: number, player: string, karma: number, time: number
+		}[]>
+	{
+		return this.get(this.urlencode("KarmaTS", {since: since, player: player}));
+	}
+
+	async Karma(since: number | undefined)
+		: Promise<{
+			player: string, date: string, min: number
+		}[]>
+	{
+		return this.get(this.urlencode("Karma", {since: since}));
+	}
+
+	async KDTS(player: string)
+		: Promise<{
+			date: string, kills: number, deaths: number
+		}[]>
+	{
+		return this.get("KDTS/" + player);
+	}
+
+	async ParticipateTS(player: string)
+		: Promise<{
+			date: string, won: number, survived: number, participated: number
+		}[]>
+	{
+		return this.get("ParticipateTS/" + player);
+	}
+
+	async Deaths(player: string)
+		: Promise<{
+			weapon: string, count: number
+		}[]>
+	{
+		return this.get("Deaths/" + player);
 	}
 }

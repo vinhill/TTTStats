@@ -116,7 +116,7 @@ router.get("/Items", function(req, res, next) {
   next()
 })
 
-router.get("/ParticipateStat", function(req, res, next) {
+router.get("/ParticipateStata", function(req, res, next) {
   const since = req.params.since
   const player = req.params.player
   req.sqlquery = `
@@ -191,6 +191,9 @@ router.get("/Teamup", function(req, res, next) {
 router.get("/KarmaTS", function(req, res, next) {
   const since = req.params.since
   const player = req.params.player
+  if (!since && !player)
+    return res.status(400).json("You need to specify either player or a recent, minimum mid (since)")
+
   req.sqlquery = `
     SELECT mid, player, karma, time
     FROM karma
@@ -201,8 +204,10 @@ router.get("/KarmaTS", function(req, res, next) {
 router.get("/Karma", function(req, res, next) {
   const since = req.params.since
   req.sqlquery = `
-    SELECT player, MIN(karma) AS min
+    SELECT player, DATE_FORMAT(s1.date, '%Y-%m-%d') AS date, MIN(karma) AS min
     FROM karma
+    JOIN game ON karma.mid = game.mid
+    GROUP BY player, date
     ${since ? 'WHERE mid >= :since' : ''}`
   next()
 })
