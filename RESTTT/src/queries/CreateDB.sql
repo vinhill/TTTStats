@@ -19,10 +19,10 @@ CREATE TABLE role (
 	name VARCHAR(15) PRIMARY KEY, -- explicit role
   team VARCHAR(20) NOT NULL,  -- team this role wins with
   category VARCHAR(10) NOT NULL, -- more general category this role belongs to
-	colour VARCHAR(8) NOT NULL,
+	color VARCHAR(8) NOT NULL,
   descr TEXT NOT NULL
 );
-INSERT INTO role (name, team, colour, category, descr)
+INSERT INTO role (name, team, color, category, descr)
 VALUES
 	("Detective", "Innocent", "#1440a4", "Detective", "Has a DNA scanner to gain information on dead bodies."),
   ("Sheriff", "Innocent", "#5978a7", "Detective", "Can turn someone into a deputy."),

@@ -47,6 +47,8 @@ function getConnection(name, args) {
         }
       })
 
+      con.config.queryFormat = format
+
       connections[name] = con
     }
 
@@ -162,8 +164,18 @@ function clearCache() {
   cache.clear()
 }
 
-function format(querystr, params) {
-  return mysql.format(querystr, params)
+function format(query, values) {
+  if (!values)
+    return query;
+  else if (Array.isArray(values))
+    return mysql.format(query, values)
+  else
+    return querystr.replace(/\:(\w+)/g, (txt, key) => {
+      if (params.hasOwnProperty(key)) {
+        return mysql.escape(params[key]);
+      }
+      return txt;
+    });
 }
 
 async function defaultQuery(querystr, params=[], cache=true) {
