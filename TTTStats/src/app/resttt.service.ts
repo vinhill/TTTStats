@@ -217,11 +217,11 @@ export class RestttService {
 		return this.get("ParticipateTS/" + player);
 	}
 
-	async Deaths(player: string)
+	async DeathsByWeapon(player: string)
 		: Promise<{
 			weapon: string, count: number
 		}[]>
 	{
-		return this.get("Deaths/" + player);
+		return this.get("DeathsByWeapon/" + player);
 	}
 }

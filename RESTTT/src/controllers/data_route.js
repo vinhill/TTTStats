@@ -244,7 +244,7 @@ router.get("/ParticipateTS/:player", function(req, res, next) {
   next()
 })
 
-router.get("/Deaths/:player", function(req, res, next) {
+router.get("/DeathsByWeapon/:player", function(req, res, next) {
   req.sqlquery = `
     SELECT weapon, COUNT(*) AS count
     FROM dies
