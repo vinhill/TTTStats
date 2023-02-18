@@ -208,7 +208,7 @@ const DamageHandler = {
     const PvPDmgArgs = groupBy(this.pvp_dmg, [0, 1, 2, 3, 4, 5, 6, 7], sum)
     for (let args of PvPDmgArgs) {
       db.queryAdmin(
-        "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args
       )
     }
@@ -216,7 +216,7 @@ const DamageHandler = {
     const PvEDmgArgs = groupBy(this.pve_dmg, [0, 1, 2, 3], sum)
     for (let args of PvEDmgArgs) {
       db.queryAdmin(
-        "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (?, ?, ?, ?, ?)",
         args
       )
     }

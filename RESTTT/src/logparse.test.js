@@ -116,7 +116,7 @@ describe('logparse', () => {
             ]);
 
             expect(queries.includes(
-                "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (0, 'GhastM4n', 'Vampire', 'OTHER<0>', 2)"
+                "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (0, 'GhastM4n', 'Vampire', 'OTHER<0>', 2)"
             )).toBe(true);
         });
 
@@ -253,7 +253,7 @@ describe('logparse', () => {
             expectInitialQueries();
             expect(queries.shift()).toBe("SELECT name, team FROM role");
             expect(queries.shift()).toBe(
-                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
         });
 
         test("for PvE", async () => {
@@ -266,7 +266,7 @@ describe('logparse', () => {
             expectInitialQueries();
             expect(queries.shift()).toBe("SELECT name, team FROM role");
             expect(queries.shift()).toBe(
-                "INSERT INTO damages (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)");
+                "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)");
         });
 
         test("for non-weapon kill", async () => {
@@ -279,7 +279,7 @@ describe('logparse', () => {
             expectInitialQueries();
             expect(queries.shift()).toBe("SELECT name, team FROM role");
             expect(queries.shift()).toBe(
-                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)");
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)");
         });
 
         test("for selfkill", async () => {
@@ -292,7 +292,7 @@ describe('logparse', () => {
             expectInitialQueries();
             expect(queries.shift()).toBe("SELECT name, team FROM role");
             expect(queries.shift()).toBe(
-                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
         })
 
         test("for teamkill", async () => {
@@ -305,7 +305,7 @@ describe('logparse', () => {
             expectInitialQueries();
             expect(queries.shift()).toBe("SELECT name, team FROM role");
             expect(queries.shift()).toBe(
-                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', true, 85)");
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', true, 85)");
         });
 
         test("through aggregation", async () => {
@@ -319,7 +319,7 @@ describe('logparse', () => {
             expectInitialQueries();
             expect(queries.shift()).toBe("SELECT name, team FROM role");
             expect(queries.shift()).toBe(
-                "INSERT INTO damages (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)");
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)");
         });
     });
 

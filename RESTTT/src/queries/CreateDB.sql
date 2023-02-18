@@ -123,7 +123,7 @@ CREATE TABLE rolechange (
   dest VARCHAR(15) NOT NULL,
   time FLOAT NOT NULL
 );
-CREATE TABLE damages (
+CREATE TABLE damage (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   vktrole VARCHAR(15) NOT NULL,
