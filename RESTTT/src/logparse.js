@@ -323,6 +323,23 @@ function captureVampireDmg(match, state) {
   return true
 }
 
+const surviveTracker = {
+  "death": (match, state) => {
+    state.clients.get(match.victim).alive = false
+  },
+  "revive": (match, state) => {
+    state.clients.get(match.name).alive = true
+  },
+  "gameEnd": (match, state) => {
+    for (const [name, client] of state.clients)
+      db.queryAdmin(
+        "UPDATE participates SET survived = ? WHERE mid = ? AND player = ?",
+        [client.alive, state.mid, name]
+      )
+    }
+  }
+}
+
 class DuplicateFilter {
   constructor(andfilter = undefined) {
     this.last = undefined
@@ -349,6 +366,7 @@ class Client {
     this.role = undefined
     this.team = undefined
     this.karma = 1000
+    this.alive = true
   }
 }
 
@@ -383,12 +401,14 @@ async function load_logfile(log, date) {
   lp.listen("init_round", RoleAssigner.init)
   lp.listen("init_round", resetTeamRoles)
   lp.listen("init_round", DamageHandler.init)
+  lp.listen("init_round", surviveTracker.init)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
     "initial_role"
   )
   lp.listen("initial_role", RoleAssigner.onRoleAssigned)
+  lp.listen("initial_role", surviveTracker.role)
 
   lp.register(
     /Round state: 3/,
@@ -409,6 +429,12 @@ async function load_logfile(log, date) {
   lp.listen("team_change", onTeamChange)
   // CP_TC is called twice, before and after CP_RC
   lp.subscribe("team_change", new DuplicateFilter(), 'filter', 999)
+
+  lp.register(
+   /ServerLog: (?<time>[0-9:.]*) - TTT2Revive: (?<name>\w+) has been respawned./,
+   "revive" 
+  )
+  lp.listen("revive", surviveTracker.revive)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
@@ -478,6 +504,7 @@ async function load_logfile(log, date) {
     "pvp_kill"
   )
   lp.listen("pvp_kill", onPvPKill)
+  lp.listen("pvp_kill", surviveTracker.death)
   lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
@@ -488,6 +515,7 @@ async function load_logfile(log, date) {
     "pve_kill"
   )
   lp.listen("pve_kill", onPvEKill)
+  lp.listen("pve_kill", surviveTracker.death)
 
   lp.register(
     /ServerLog: Result: (?<team>\w+) wins?/,

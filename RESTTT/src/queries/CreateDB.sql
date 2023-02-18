@@ -113,7 +113,8 @@ CREATE TABLE participates (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   startrole VARCHAR(15) NOT NULL,  -- initial role
-  won BOOLEAN
+  won BOOLEAN DEFAULT 0,
+  survived BOOLEAN DEFAULT 0
 );
 CREATE TABLE rolechange (
   mid INT NOT NULL,

@@ -388,6 +388,53 @@ describe('logparse', () => {
             expect(queries.includes(
                 "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 0)"
             )).toBe(true);
-        })
-    })
-})
+        });
+    });
+
+    describe("tracks survival", () => {
+        test("when player survives", async () => {
+            await logparse.load_logfile([
+                'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+                'Round state: 2',
+                'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
+                "Round state: 3",
+                "Round state: 4"
+            ], "");
+
+            expect(queries.includes(
+                "UPDATE participates SET survived = 1 WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);
+        });
+
+        test("when player dies", async () => {
+            await logparse.load_logfile([
+                'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+                'Round state: 2',
+                'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
+                "Round state: 3",
+                'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
+                "Round state: 4"
+            ], "");
+
+            expect(queries.includes(
+                "UPDATE participates SET survived = 0 WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);
+        });
+
+        test("when player is revived", async () => {
+            await logparse.load_logfile([
+                'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+                'Round state: 2',
+                'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
+                "Round state: 3",
+                'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
+                'ServerLog: 01:12.15 - TTT2Revive: Zumoari has been respawned.',
+                "Round state: 4"
+            ], "");
+
+            expect(queries.includes(
+                "UPDATE participates SET survived = 1 WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);})
+        });
+    });
+});
