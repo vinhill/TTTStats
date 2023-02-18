@@ -2,6 +2,7 @@
 Main REST routes for getting TTT statistics
 */
 const express = require("express")
+const { NODE_ENV } = require("../utils/config.js")
 const router = express.Router()
 const db = require("../utils/database.js")
 const logger = require("../utils/logger.js")
@@ -9,6 +10,23 @@ const logger = require("../utils/logger.js")
 function konjugateWhere(...conditions) {
   if (conditions.length === 0) return ""
   return "WHERE " + conditions.join(" AND ")
+}
+
+const firstMidLastDate = await (async () => {
+  const recent = await db.query(
+    "SELECT mid FROM game ORDER BY date DESC, mid ASC LIMIT 1")
+  return recent[0].mid
+})();
+
+if (NODE_ENV === "prod") {
+  // currently, frontend only used firstMidLastDate for since
+  // so block everything else to prevent abuse
+  router.use(function(req, res, next) {
+    const since = req.params.since || req.query.since
+    if (since && since != firstMidLastDate)
+      return res.status(400).json("The MID (since) has to be " + firstMidLastDate)
+    next()
+  })
 }
 
 router.get("/Players", function (req, res, next) {
