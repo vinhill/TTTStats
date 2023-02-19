@@ -24,10 +24,10 @@ export class DocsComponent implements OnInit {
   }
 
   async load() {
-    let roles = await this.resttt.get("Roles");
+    let roles = await this.resttt.RoleDescriptions();
     // sort roles by team
     for (let group of Object.keys(this.groups)) {
-      this.groups[group] = roles.filter(function(r:any) { return r.superteam == group; });
+      this.groups[group] = roles.filter(function(r:any) { return r.category == group; });
     }
     // sort teams by length of role descriptions
     for (let group of Object.keys(this.groups)) {

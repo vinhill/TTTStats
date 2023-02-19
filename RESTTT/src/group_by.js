@@ -27,6 +27,8 @@ function sortByCols(rows, cols) {
   })
 }
 
+// rows is a list of lists
+// cols is a list of indices representing columns
 function groupBy(rows, cols, ...aggregators) {
   sortByCols(rows, cols)
 
