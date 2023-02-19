@@ -2,6 +2,55 @@ const db = require('../src/utils/database.js');
 const logparse = require('../src/logparse.js');
 const logger = require('../src/utils/logger.js');
 
+class SimuGame {
+    constructor(map = "", date = "", mid = 0) {
+        this.map = map
+        this.date = date
+        this.mid = mid
+        this.players = new Set()
+        this.logs = []
+    }
+
+    addPlayer(name) {
+        this.players.add(name)
+        this.logs.push(`Client "${name}" spawned in server <STEAM_0:0:000000000> (took 5 seconds).`)
+    }
+
+    removePlayer(name) {
+        this.players.delete(name)
+        this.logs.push(`Dropped ${name} from server`)
+    }
+
+    init() {
+        this.logs.push(`Map: ${this.map}`)
+        this.logs.push("Round state: 2")
+    }
+
+    prepare(roles = {}) {
+        for (const p of this.players) {
+            this.logs.push(`ServerLog: 00:00.00 - ROUND_START: ${p} is ${roles[p]}`)
+        }
+        this.logs.push("Round state: 3")
+    }
+
+    game(logs) {
+        this.logs.concat(logs)
+    }
+
+    end(timeout = false, elseresult = "traitors wins.", time = "09:01.01") {
+        if (timeout)
+            this.logs.push("ServerLog: Result: timelimit reached, traitors lose.")
+        else
+            this.logs.push(`ServerLog: Result: ${elseresult}`)
+        this.logs.push(`ServerLog: ${time} - ROUND_ENDED at given time`)
+        this.logs.push("Round state: 4")
+    }
+
+    async submit() {
+        await logparse.load_logfile(this.logs, this.date)
+    }
+}
+
 describe('logparse', () => {
     var queries = [];
     var results = [];
