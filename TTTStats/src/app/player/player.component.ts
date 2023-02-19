@@ -9,7 +9,7 @@ import { getColumn } from '../datautils';
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
-  styleUrls: ['./player.component.css']
+  styleUrls: []
 })
 export class PlayerComponent implements OnInit {
   LegendType = LegendType;

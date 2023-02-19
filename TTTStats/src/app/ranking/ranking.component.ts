@@ -25,48 +25,45 @@ export class RankingComponent implements OnInit {
   }
 
   async loadRankings() {
-    let killstats = (await this.resttt.KillStats());
-    killstats.sort((a:any, b:any) => b.kd - a.kd);
-    killstats.forEach((k:any) => {
-      k.name = k.player;
-      k.value = k.kd;
+    const kdstat = await this.resttt.KDStat();
+
+    let kdratio = kdstat.map(k => {
+      return {name: k.player, value: k.kills / k.deaths}
     });
+    kdratio.sort((a:any, b:any) => b.value - a.value);
     this.rankings.push({
       title: 'K/D',
-      rows: killstats
+      rows: kdratio
     });
     
-    let teamkills = (await this.resttt.KillStats());
-    teamkills.sort((a:any, b:any) => b.wrong - a.wrong);
-    teamkills.forEach((k:any) => {
-      k.name = k.player;
-      k.value = k.wrong;
+
+    let teamkills = kdstat.map(k => {
+      return {player: k.player, value: k.teamkills}
     });
+    teamkills.sort((a:any, b:any) => b.value - a.value);
     this.rankings.push({
       title: 'Teamkills',
       rows: teamkills
     });
 
-    let games = (await this.resttt.PlayerGameCounts());
-    games.sort((a:any, b:any) => b.rounds - a.rounds);
-    games.forEach((k:any) => {
-      k.name = k.player;
-      k.value = k.rounds;
+    const participateStats = await this.resttt.ParticipateStats();
+
+    let games = participateStats.map(k => {
+      return {name: k.player, value: k.games}
     });
+    games.sort((a:any, b:any) => b.value - a.value);
     this.rankings.push({
       title: 'Games',
       rows: games
     });
 
-    let survived = (await this.resttt.Survived());
-    survived.sort((a:any, b:any) => b.rate - a.rate);
-    survived.forEach((k:any) => {
-      k.name = k.player;
-      k.value = k.rate;
+    let surviverate = participateStats.map(k => {
+      return {player: k.player, rate: k.survived / k.games}
     });
+    surviverate.sort((a:any, b:any) => b.rate - a.rate);
     this.rankings.push({
       title: 'Survival rate',
-      rows: survived
+      rows: surviverate
     });
 
     this.loaded = true;

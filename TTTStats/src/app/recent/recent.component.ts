@@ -8,7 +8,7 @@ import { getColumn } from '../datautils';
 @Component({
   selector: 'app-recent',
   templateUrl: './recent.component.html',
-  styleUrls: ['./recent.component.css']
+  styleUrls: []
 })
 export class RecentComponent {
   LegendType = LegendType;

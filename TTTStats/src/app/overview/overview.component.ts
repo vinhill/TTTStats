@@ -8,7 +8,7 @@ import { getColumn } from '../datautils';
 @Component({
   selector: 'app-overview',
   templateUrl: './overview.component.html',
-  styleUrls: ['./overview.component.css']
+  styleUrls: []
 })
 export class OverviewComponent implements OnInit {
   LegendType = LegendType;
