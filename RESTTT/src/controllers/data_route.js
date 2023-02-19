@@ -12,19 +12,23 @@ function konjugateWhere(...conditions) {
   return "WHERE " + conditions.join(" AND ")
 }
 
-const firstMidLastDate = await (async () => {
-  const recent = await db.query(
-    "SELECT mid FROM game ORDER BY date DESC, mid ASC LIMIT 1")
-  return recent[0].mid
-})();
+const _firstMidLastDate = -1
+async function firstMidLastDate() {
+  if (_firstMidLastDate == -1) {
+    const recent = await db.query(
+      "SELECT mid FROM game ORDER BY date DESC, mid ASC LIMIT 1")
+    _firstMidLastDate = recent[0].mid
+  }
+  return _firstMidLastDate
+}
 
 if (NODE_ENV === "prod") {
   // currently, frontend only used firstMidLastDate for since
   // so block everything else to prevent abuse
   router.use(function(req, res, next) {
     const since = req.params.since || req.query.since
-    if (since && since != firstMidLastDate)
-      return res.status(400).json("The MID (since) has to be " + firstMidLastDate)
+    if (since && since != firstMidLastDate())
+      return res.status(400).json("The MID (since) has to be " + firstMidLastDate())
     next()
   })
 }
