@@ -334,8 +334,7 @@ const surviveTracker = {
       db.queryAdmin(
         "UPDATE participates SET survived = ? WHERE mid = ? AND player = ?",
         [client.alive, state.mid, name]
-      )
-    }
+    )
   }
 }
 
@@ -400,14 +399,12 @@ async function load_logfile(log, date) {
   lp.listen("init_round", RoleAssigner.init)
   lp.listen("init_round", resetTeamRoles)
   lp.listen("init_round", DamageHandler.init)
-  lp.listen("init_round", surviveTracker.init)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
     "initial_role"
   )
   lp.listen("initial_role", RoleAssigner.onRoleAssigned)
-  lp.listen("initial_role", surviveTracker.role)
 
   lp.register(
     /Round state: 3/,
@@ -537,6 +534,7 @@ async function load_logfile(log, date) {
   )
   lp.listen("game_end", DamageHandler.insert)
   lp.listen("game_end", gameEndListener.onGameEnd)
+  lp.listen("game_end", surviveTracker.gameEnd)
 
   lp.register(
     /Dropped (?<name>\w*) from server/,

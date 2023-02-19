@@ -194,51 +194,57 @@ describe('logparse', () => {
     describe('handles kills', () => {
         test("for PvE", async () => {
             await logparse.load_logfile([
+                'Client "Schnitzelboy" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]",
             ], "");
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', 177.16)");
+            expect(queries.includes(
+                "INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', 177.16)"
+            )).toBe(true);
         });
 
         test("for PvP", async () => {
             await logparse.load_logfile([
+                'Client "Poci" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [amnesiac, nones]"
             ], "");
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 178.71, 'GhastM4n', 'Glutton', 'w1', false)");
+            expect(queries.includes(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 178.71, 'GhastM4n', 'Glutton', 'w1', false)"
+            )).toBe(true);
         });
 
         test("for non-weapon kill", async () => {
             await logparse.load_logfile([
+                'Client "Poci" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed Poci [amnesiac, nones]"
             ], "");
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 268.22, 'vinno', 'Traitor', 'env_explosion', false)");
+            expect(queries.includes(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
+            )).toBe(true);
         });
 
         test("for selfkill", async () => {
             await logparse.load_logfile([
+                'Client "vinno" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed vinno [traitor, traitors]"
             ], "");
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', 268.22, 'vinno', 'Traitor', 'env_explosion', false)");
-        })
+            expect(queries.includes(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
+            )).toBe(true);
+        });
 
         test("for teamkill", async () => {
             await logparse.load_logfile([
+                'Client "Poci" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [glutton, traitors]"
             ], "");
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', 178.71, 'GhastM4n', 'Glutton', 'w1', true)");
+            expect(queries.includes(
+                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', 178.71, 'GhastM4n', 'Glutton', 'w1', true)"
+            )).toBe(true);
         });
     });
 
@@ -269,7 +275,7 @@ describe('logparse', () => {
                 "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)");
         });
 
-        test("for non-weapon kill", async () => {
+        test("for non-weapon damage", async () => {
             await logparse.load_logfile([
                 "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG EXPL: p1 [r1, t1] <[NULL Entity]>, (Entity [3][w1], ) damaged p2 [r2, t2] for 85",
@@ -282,7 +288,7 @@ describe('logparse', () => {
                 "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)");
         });
 
-        test("for selfkill", async () => {
+        test("for selfdamage", async () => {
             await logparse.load_logfile([
                 "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p1 [r1, t1] for 85",
@@ -295,7 +301,7 @@ describe('logparse', () => {
                 "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
         })
 
-        test("for teamkill", async () => {
+        test("for teamdamage", async () => {
             await logparse.load_logfile([
                 "Round state: 2",
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t1] for 85",
@@ -397,44 +403,39 @@ describe('logparse', () => {
                 'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
                 'Round state: 2',
                 'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
-                "Round state: 3",
                 "Round state: 4"
             ], "");
 
             expect(queries.includes(
-                "UPDATE participates SET survived = 1 WHERE mid = 0 AND player = 'Zumoari'"
+                "UPDATE participates SET survived = true WHERE mid = 0 AND player = 'Zumoari'"
             )).toBe(true);
         });
 
         test("when player dies", async () => {
             await logparse.load_logfile([
                 'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'Round state: 2',
                 'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
-                "Round state: 3",
                 'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
                 "Round state: 4"
             ], "");
 
             expect(queries.includes(
-                "UPDATE participates SET survived = 0 WHERE mid = 0 AND player = 'Zumoari'"
+                "UPDATE participates SET survived = false WHERE mid = 0 AND player = 'Zumoari'"
             )).toBe(true);
         });
 
         test("when player is revived", async () => {
             await logparse.load_logfile([
                 'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'Round state: 2',
                 'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
-                "Round state: 3",
                 'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
                 'ServerLog: 01:12.15 - TTT2Revive: Zumoari has been respawned.',
                 "Round state: 4"
             ], "");
 
             expect(queries.includes(
-                "UPDATE participates SET survived = 1 WHERE mid = 0 AND player = 'Zumoari'"
-            )).toBe(true);})
+                "UPDATE participates SET survived = true WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);
         });
     });
 });
