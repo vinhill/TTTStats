@@ -1,0 +1,15 @@
+<div class="masonry" #masonry>
+	<card>
+		<h1 class="display-3">Recent Match</h1>
+		<p class="lead">on {{fillin.dow}}, {{fillin.datestr}}</p>
+		<p>You played {{fillin.rounds}} rounds.</p>
+	</card>
+	<card title="Maps" [loaded]="cMapCount !== undefined" (reload)="loadMapCount()">
+		<data-chart [data]="cMapCount!"></data-chart>
+	</card>
+	<!--
+		TODO
+		Win / loss per Role and per Team
+		Smaller cards for in between
+	-->
+</div>

@@ -1,0 +1,54 @@
+<div id="page-container">
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<div class="container-fluid">
+			<a class="navbar-brand" href="../index.html">TTTStats</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a class="nav-link" routerLink="/overview" routerLinkActive="active">Overview</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" routerLink="/recent" routerLinkActive="active">Recent</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" routerLink="/ranking" routerLinkActive="active">Ranking</a>
+					</li>
+					<li class="nav-item dropdown">
+						<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+							Players
+						</a>
+						<ul class="dropdown-menu">
+							<li>
+								<a class="dropdown-item" routerLink="/player/{{player}}" routerLinkActive="active" *ngFor="let player of players">{{player}}</a>
+							</li>
+						</ul>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" routerLink="/docs" routerLinkActive="active">Docs</a>
+					</li>
+				</ul>
+				<div class="d-flex" *ngIf="isDevMode">
+					<input class="form-control mr-sm-2" #restUrlInput type="RESTTT URL" placeholder="RESTTT URL" aria-label="RESTTT URL" [value]="restURL">
+					<button class="btn btn-outline-success my-2 my-sm-0" type="apply" (click)="setRestUrl()">Apply</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+	<!-- Content -->
+	<div id="content-wrap" class="container">
+		<router-outlet></router-outlet>
+	</div>
+	<!-- Footer -->
+	<footer class="page-footer text-center bg-light">
+		<div class="text-center p-2">
+			Made with ❤ by Josu und <a class="link-secondary" href="../index.html">Vincent</a>
+			<br>
+			<a class="link-secondary" href="../impressum.html">Impressum</a>
+			&copy; 2021 Copyright Vincent Hilla
+		</div>
+	</footer>
+</div>

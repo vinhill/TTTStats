@@ -51,7 +51,7 @@ router.get("/Roles", function(req, res, next) {
   const since = req.params.since
   const player = req.params.player
   req.sqlquery = `
-    SELECT startrole AS name, team, category, color,
+    SELECT startrole AS name, team, category,
       COUNT(mid) AS participated, SUM(won) AS won, SUM(survived) AS survived
     FROM participates
     ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
@@ -172,7 +172,7 @@ router.get("/JesterKills", function(req, res, next) {
 })
 
 router.get("/MIDs/:date", function(req, res, next) {
-  req.sqlquery = "SELECT mid FROM game WHERE date = :date ORDER BY mid ASC"
+  req.sqlquery = "SELECT mid FROM game WHERE date = :date"
   next()
 })
 

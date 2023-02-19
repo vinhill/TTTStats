@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
+import { DataStoreService } from '../data-store.service';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { getColormap } from '../utils';
-import { RestttService } from '../resttt.service';
-import { getColumn } from '../datautils';
+import { Dataframe } from '../dataframe';
 
 @Component({
   selector: 'app-recent',
@@ -23,9 +23,7 @@ export class RecentComponent {
 
   date: string = "yyyy-mm-ddThh:mm:ss.sssZ";
 
-  since: number = 0;
-
-  constructor(private resttt: RestttService) { }
+  constructor(private datastore: DataStoreService) { }
 
   ngOnInit() {
     this.loadApiData();
@@ -40,24 +38,18 @@ export class RecentComponent {
   }
 
   async loadDate() {
-    var res = await this.resttt.Games();
+    var res = await this.datastore.Dates();
     res = res.sort((a: any, b: any) => b.date - a.date);
-
     this.date = res[0].date;
-
-    const mids = await this.resttt.MIDs(this.date.substring(0, 10));
-    this.since = mids[0].mid;
-    
-
     this.fillin.datestr = new Date(res[0].date).toLocaleDateString();
     this.fillin.dow = new Date(res[0].date).toLocaleDateString("en-US", { weekday: "long" });
-    this.fillin.rounds = res[0].rounds;
+    this.fillin.rounds = res[0].count;
   }
 
-  simpleDataset(data: any[], cmap: string) {
-    const colors = getColormap(cmap, data.length);
+  simpleDataset(tbl: Dataframe, col: string, cmap: string) {
+    const colors = getColormap(cmap, tbl.length);
     return {
-      data: data,
+      data: tbl.cols[col](),
       backgroundColor: colors,
       hoverBackgroundColor: colors,
       hoverBorderColor: colors,
@@ -66,14 +58,15 @@ export class RecentComponent {
   }
 
   async loadMapCount() {
-    const res = await this.resttt.Maps(this.since);
+    const res = await this.datastore.MapCount(this.date);
+    const tbl = new Dataframe(res);
 
     this.cMapCount = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "name")
+        datasets: [this.simpleDataset(tbl, "count", "plotly")],
+        labels: tbl.cols.map()
       }
     }
   }

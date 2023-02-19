@@ -88,7 +88,7 @@ export class RestttService {
 
 	async Roles(since?: number, player?: string)
 		: Promise<{
-			name: string, team: string, category: string, color: string,
+			name: string, team: string, category: string,
 			participated: number, won: number, survived: number
 		}[]>
 	{
@@ -223,13 +223,5 @@ export class RestttService {
 		}[]>
 	{
 		return this.get("DeathsByWeapon/" + player);
-	}
-
-	async RoleDescriptions()
-		: Promise<{
-			name: string, team: string, category: string, color: string, descr: string
-		}[]>
-	{
-		return this.get("RoleDescriptions");
 	}
 }

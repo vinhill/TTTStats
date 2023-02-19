@@ -1,10 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { DataStoreService } from '../data-store.service';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { getColormap } from '../utils';
-import { RestttService } from '../resttt.service';
-import { getColumn } from '../datautils';
+import { Dataframe } from '../dataframe';
 
 @Component({
   selector: 'app-player',
@@ -26,7 +26,7 @@ export class PlayerComponent implements OnInit {
   kdratio: number | undefined;
   kgratio: number | undefined;
 
-  constructor(private route: ActivatedRoute, private resttt: RestttService) {}
+  constructor(private route: ActivatedRoute, private datastore: DataStoreService) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -45,10 +45,10 @@ export class PlayerComponent implements OnInit {
     ]).catch(err => console.log(err));
   }
 
-  simpleDataset(data: any[], cmap: string) {
-    const colors = getColormap(cmap, data.length);
+  simpleDataset(tbl: Dataframe, col: string, cmap: string) {
+    const colors = getColormap(cmap, tbl.length);
     return {
-      data: data,
+      data: tbl.cols[col](),
       backgroundColor: colors,
       hoverBackgroundColor: colors,
       hoverBorderColor: colors,
@@ -61,67 +61,67 @@ export class PlayerComponent implements OnInit {
   }
 
   async loadBasics() {
-    const participateStat = await this.resttt.ParticipateStats(undefined, this.name);
-    this.rounds = participateStat[0].games;
-
-    const killstats = await this.resttt.KDStat(undefined, this.name);
-    this.kills = killstats[0].kills;
-    this.teamkills = killstats[0].teamkills;
-    this.kdratio = this.kills / killstats[0].deaths;
-    this.kgratio = this.kills / this.rounds;
+    this.rounds = await this.datastore.PlayerGameCount(this.name);
+    let killdata = await this.datastore.PlayerKillStats(this.name);
+    this.kills = killdata.kills;
+    this.teamkills = killdata.wrong;
+    this.kdratio = killdata.kd;
+    this.kgratio = killdata.kpg;
   }
 
   async loadPopularPurchases() {
-    const res = await this.resttt.Items(undefined, this.name);
+    const res = await this.datastore.PlayerPopularPurchases(this.name);
+    const tbl = new Dataframe(res);
 
     this.cPopularPurchases = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "amount"), "plotly")],
-        labels: getColumn(res, "item")
+        datasets: [this.simpleDataset(tbl, "amount", "plotly")],
+        labels: tbl.cols.item()
       }
     }
   }
 
   async loadKillsByWeapon() {
-    var res = await this.resttt.Weapons(undefined, this.name);
-    res = res.sort((a: any, b: any) => b.kills-a.kills);
-    res = res.splice(0, 25);
+    const res = await this.datastore.PlayerKillsByWeapon(this.name);
+    const tbl = new Dataframe(res);
 
     this.cKillsByWeapon = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "weapon")
+        datasets: [this.simpleDataset(tbl, "count", "plotly")],
+        labels: tbl.cols.weapon()
       }
     }
   }
 
   async loadDeathsByWeapon() {
-    const res = await this.resttt.DeathsByWeapon(this.name);
+    const res = await this.datastore.PlayerDeathsByWeapon(this.name);
+    const tbl = new Dataframe(res);
 
     this.cDeathsByWeapon = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "weapon")
+        datasets: [this.simpleDataset(tbl, "count", "plotly")],
+        labels: tbl.cols.weapon()
       }
     }
   }
 
   async loadRolesTreemap() {
-    const res = await this.resttt.Roles(undefined, this.name);
+    const res = await this.datastore.PlayerRoleCount(this.name);
+    const tbl = new Dataframe(res);
 
     let dataitem = {
       type: "treemap",
       branchvalues: "total",
-      labels: getColumn(res, "name"),
-      parents: getColumn(res, "category"),
-      values: getColumn(res, "participated"),
-      marker: {colors: getColumn(res, "color")},
+      labels: tbl.cols.startrole(),
+      parents: tbl.cols.superteam(),
+      values: tbl.cols.count(),
+      marker: {colors: tbl.cols.colour()},
     };
 
     // aggregate group value from subgroups

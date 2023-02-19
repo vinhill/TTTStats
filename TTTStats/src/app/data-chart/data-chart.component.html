@@ -1,0 +1,12 @@
+<div class="chart-container" [class.chart-container-halfwidth]="_legendtype == LegendType.HTML">
+  <canvas #chart></canvas>
+</div>
+
+<div class="chart-legend" *ngIf="_legendtype === LegendType.HTML">
+  <ul class="chart-legend-list">
+    <li class="chart-legend-item" (click)="toggleItem(item)" *ngFor="let item of htmlLegenditems">
+      <span class="small" [style.background]="item.fillStyle" [style.border-color]="item.strokeStyle" [style.border-width]="item.lineWidth+'px'"></span>
+      <p class="small" [style.font-color]="item.fontColor" [style.text-decoration]="item.hidden ? 'line-through' : ''">{{item.text}}</p>
+    </li>
+  </ul>
+</div>

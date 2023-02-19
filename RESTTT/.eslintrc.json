@@ -1,0 +1,43 @@
+{
+    "env": {
+        "node": true,
+        "commonjs": true,
+        "es2021": true,
+        "jest": true,
+        "jest/globals": true
+    },
+    "extends": [
+        "eslint:recommended"
+    ],
+    "overrides": [
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "indent": [
+            "error",
+            2
+        ],
+        "eqeqeq": "error",
+        "no-trailing-spaces": "error",
+        "object-curly-spacing": [
+            "error", "always"
+        ],
+        "arrow-spacing": [
+            "error", { "before": true, "after": true }
+        ],
+        "no-param-reassign": 0,
+        "no-underscore-dangle": 0,
+        "no-console": 1,
+        "semi": [
+            "error", "never"
+        ],
+        "comma-spacing": [
+            "error", { "before": false, "after": true }
+        ],
+        "space-before-blocks": [
+            "error", "always"
+        ]
+    }
+}
