@@ -8,6 +8,7 @@ const db = require("../utils/database.js")
 const logger = require("../utils/logger.js")
 
 function konjugateWhere(...conditions) {
+  conditions = conditions.filter(c => c && c.length > 0)
   if (conditions.length === 0) return ""
   return "WHERE " + conditions.join(" AND ")
 }
@@ -22,17 +23,6 @@ async function firstMidLastDate() {
   return _firstMidLastDate
 }
 
-if (NODE_ENV === "prod") {
-  // currently, frontend only used firstMidLastDate for since
-  // so block everything else to prevent abuse
-  router.use(function(req, res, next) {
-    const since = req.params.since || req.query.since
-    if (since && since != firstMidLastDate())
-      return res.status(400).json("The MID (since) has to be " + firstMidLastDate())
-    next()
-  })
-}
-
 router.get("/Players", function (req, res, next) {
   req.sqlquery = "SELECT name FROM player ORDER BY name ASC"
   next()
@@ -42,27 +32,27 @@ router.get("/Maps", function(req, res, next) {
   req.sqlquery = `
     SELECT map as name, COUNT(mid) as count
     FROM game
-    ${req.params.since ? 'WHERE mid >= :since' : ''}
+    ${req.query.since ? 'WHERE mid >= :since' : ''}
     GROUP BY map ORDER BY count DESC`
   next()
 })
 
 router.get("/Roles", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+  const since = req.query.since
+  const player = req.query.player
   req.sqlquery = `
-    SELECT startrole AS name, team, category,
+    SELECT startrole AS name, team, category, color,
       COUNT(mid) AS participated, SUM(won) AS won, SUM(survived) AS survived
     FROM participates
-    ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
     JOIN role ON participates.startrole = role.name
-    GROUP BY startrole ORDER BY participates DESC`
+    ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
+    GROUP BY startrole ORDER BY participated DESC`
   next()
 })
 
 router.get("/Teams", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+  const since = req.query.since
+  const player = req.query.player
   req.sqlquery = `
     SELECT team as name, category,
       COUNT(mid) AS participated, SUM(won) AS won, SUM(survived) AS survived
@@ -74,7 +64,7 @@ router.get("/Teams", function(req, res, next) {
 })
 
 router.get("/KDStat", function(req, res, next) {
-  const since = req.params.since
+  const since = req.query.since
   if (since) req.sqlparams = [since, since]
   req.sqlquery = `
     SELECT s1.player, kills, deaths, teamkills
@@ -90,13 +80,14 @@ router.get("/KDStat", function(req, res, next) {
       FROM dies
       ${since ? 'WHERE mid >= :since' : ''}
       GROUP BY player
-    ) AS s2`
+    ) AS s2
+    ON s1.player = s2.player`
     next()
 })
 
 router.get("/Weapons", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+  const since = req.query.since
+  const player = req.query.player
   req.sqlquery = `
     SELECT weapon, COUNT(*) as kills
     FROM dies
@@ -110,8 +101,8 @@ router.get("/Weapons", function(req, res, next) {
 })
 
 router.get("/Items", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+  const since = req.query.since
+  const player = req.query.player
   req.sqlquery = `
     SELECT item, COUNT(*) as count
     FROM buys
@@ -120,14 +111,14 @@ router.get("/Items", function(req, res, next) {
   next()
 })
 
-router.get("/ParticipateStata", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+router.get("/ParticipateStats", function(req, res, next) {
+  const since = req.query.since
+  const player = req.query.player
   req.sqlquery = `
     SELECT player, COUNT(*) as games, SUM(survived) as survived, SUM(won) as won
     FROM participates
     ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
-    GROUP BY player ORDER BY count DESC`
+    GROUP BY player ORDER BY games DESC`
   next()
 })
 
@@ -141,15 +132,12 @@ router.get("/Games", function(req, res, next) {
   next()
 })
 
-router.get("/MediumTexts", function(req, res, next) {
-  const since = req.params.since
-  if (!since)
-    return res.status(400).json("You need to specify a recent, minimum mid (since)")
-
+router.get("/MediumTexts/:since", function(req, res, next) {
   req.sqlquery = `
     SELECT msg
     FROM mediumchat
-    ${since ? 'WHERE mid >= :since' : ''}`
+    WHERE mid >= :since`
+  req.sqlparams = {since: req.params.since}
   next()
 })
 
@@ -173,12 +161,13 @@ router.get("/JesterKills", function(req, res, next) {
 
 router.get("/MIDs/:date", function(req, res, next) {
   req.sqlquery = "SELECT mid FROM game WHERE date = :date"
+  req.sqlparams = {date: req.params.date}
   next()
 })
 
 router.get("/Teamup", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+  const since = req.query.since
+  const player = req.query.player
   if (!since && !player)
     return res.status(400).json("You need to specify either player or a recent, minimum mid (since)")
 
@@ -193,8 +182,8 @@ router.get("/Teamup", function(req, res, next) {
 })
 
 router.get("/KarmaTS", function(req, res, next) {
-  const since = req.params.since
-  const player = req.params.player
+  const since = req.query.since
+  const player = req.query.player
   if (!since && !player)
     return res.status(400).json("You need to specify either player or a recent, minimum mid (since)")
 
@@ -206,7 +195,7 @@ router.get("/KarmaTS", function(req, res, next) {
 })
 
 router.get("/Karma", function(req, res, next) {
-  const since = req.params.since
+  const since = req.query.since
   req.sqlquery = `
     SELECT player, DATE_FORMAT(s1.date, '%Y-%m-%d') AS date, MIN(karma) AS min
     FROM karma
@@ -216,7 +205,7 @@ router.get("/Karma", function(req, res, next) {
   next()
 })
 
-router.get("KDTS/:player", function(req, res, next) {
+router.get("/KDTS/:player", function(req, res, next) {
   req.sqlquery = `
     SELECT DATE_FORMAT(s1.date, '%Y-%m-%d') AS date, kills, deaths
     FROM (
@@ -233,6 +222,7 @@ router.get("KDTS/:player", function(req, res, next) {
       WHERE player = :player
       GROUP BY date
     ) AS s2`
+  req.sqlparams = {player: req.params.player}
   next()
 })
 
@@ -245,6 +235,7 @@ router.get("/ParticipateTS/:player", function(req, res, next) {
     ON game.mid = participates.mid
     WHERE player = :player
     GROUP BY date`
+  req.sqlparams = {player: req.params.player}
   next()
 })
 
@@ -252,16 +243,26 @@ router.get("/DeathsByWeapon/:player", function(req, res, next) {
   req.sqlquery = `
     SELECT weapon, COUNT(*) AS count
     FROM dies
-    WHERE player = :player
+    WHERE weapon IS NOT NULL AND player = :player
     GROUP BY weapon ORDER BY count DESC`
+  req.sqlparams = {player: req.params.player}
+  next()
 })
 
 router.use("/", async function(req, res, next) {
   if(!req.sqlquery)
     return next()
 
+  if (NODE_ENV === "prod") {
+    // currently, frontend only used firstMidLastDate for since
+    // so block everything else to prevent abuse
+    const since = req.sqlparams.since || req.query.since
+    if (since && since != firstMidLastDate())
+      return res.status(400).json("The MID (since) has to be " + firstMidLastDate())
+  }
+
   try {
-    const data = await db.query(req.sqlquery, {...req.params, ...req.body})
+    const data = await db.query(req.sqlquery, {...req.sqlparams, ...req.query})
     res.status(200).json(data)
   } catch (e) {
     res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)

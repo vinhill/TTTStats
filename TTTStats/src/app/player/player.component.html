@@ -18,9 +18,7 @@
 	<card title="Most dangerous for you" [loaded]="cDeathsByWeapon !== undefined" (reload)="loadDeathsByWeapon()">
 		<data-chart [data]="cDeathsByWeapon!"></data-chart>
 	</card>
-	<!--
-		TODO
-		Kills from and for other players
-		Role and team winrate
-	-->
+	<card title="Over time" [loaded]="cTS !== undefined" (reload)="loadTS()" size="large">
+		<data-chart [data]="cTS!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
 </div>

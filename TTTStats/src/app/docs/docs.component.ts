@@ -12,7 +12,7 @@ export class DocsComponent implements OnInit {
     "Detective": [],
     "Traitor": [],
     "Killer": [],
-    "Other": []
+    "None": []
   };
   groupNames: any = Object.keys(this.groups);
   loaded: boolean = false;

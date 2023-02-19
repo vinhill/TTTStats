@@ -60,6 +60,9 @@ export class DataChartComponent implements OnChanges {
     if (this._legendtype == LegendType.HTML)
       this.prepareHTMLLegend();
 
+    if (this.chart)
+      this.chart.destroy();
+
     this.chart = new Chart(this.canvas.nativeElement, this.data);
   }
 

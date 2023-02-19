@@ -11,7 +11,7 @@
 	<card title="Kills / Deaths" [loaded]="cKillsDeaths !== undefined" (reload)="loadKillsDeaths()">
 		<data-chart [data]="cKillsDeaths!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
-	<card title="Roles" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
+	<card title="Role distribution" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
 		<data-plotly [data]="cRoles!"></data-plotly>
 	</card>
 	<card title="Who kills who?" [loaded]="cWhoKilledWho !== undefined" (reload)="loadWhoKilledWho()">
@@ -20,12 +20,10 @@
 	<card title="Bought the most" [loaded]="cPopularPurchases !== undefined" (reload)="loadPopularPurchases()">
 		<data-chart [data]="cPopularPurchases!"></data-chart>
 	</card>
-	<card title="Top 25 weapons (kills)" [loaded]="cKillsPerWeapon !== undefined" (reload)="loadKillsPerWeapon()">
+	<card title="Top 20 weapons (kills)" [loaded]="cKillsPerWeapon !== undefined" (reload)="loadKillsPerWeapon()">
 		<data-chart [data]="cKillsPerWeapon!"></data-chart>
 	</card>
-	<!--
-		TODO
-		Win / loss per Role and per Team
-		Smaller cards for in between
-	-->
+	<card title="Games played over time" [loaded]="cRoundsPlayerTS !== undefined" (reload)="loadRoundsPlayerTS()">
+		<data-chart [data]="cRoundsPlayerTS!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
 </div>

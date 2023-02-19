@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RestttService } from '../resttt.service';
+import { round } from '../utils';
 
 @Component({
   selector: 'app-ranking',
@@ -28,7 +29,7 @@ export class RankingComponent implements OnInit {
     const kdstat = await this.resttt.KDStat();
 
     let kdratio = kdstat.map(k => {
-      return {name: k.player, value: k.kills / k.deaths}
+      return {name: k.player, value: round(k.kills / k.deaths, 2)}
     });
     kdratio.sort((a:any, b:any) => b.value - a.value);
     this.rankings.push({
@@ -38,7 +39,7 @@ export class RankingComponent implements OnInit {
     
 
     let teamkills = kdstat.map(k => {
-      return {player: k.player, value: k.teamkills}
+      return {name: k.player, value: k.teamkills}
     });
     teamkills.sort((a:any, b:any) => b.value - a.value);
     this.rankings.push({
@@ -57,13 +58,30 @@ export class RankingComponent implements OnInit {
       rows: games
     });
 
-    let surviverate = participateStats.map(k => {
-      return {player: k.player, rate: k.survived / k.games}
+    let winrate = participateStats.map(k => {
+      return {name: k.player, value: round(k.won / k.games, 2)}
     });
-    surviverate.sort((a:any, b:any) => b.rate - a.rate);
+    winrate.sort((a:any, b:any) => b.value - a.value);
+    this.rankings.push({
+      title: 'Winrate',
+      rows: winrate
+    });
+
+    let surviverate = participateStats.map(k => {
+      return {name: k.player, value: round(k.survived / k.games, 2)}
+    });
+    surviverate.sort((a:any, b:any) => b.value - a.value);
     this.rankings.push({
       title: 'Survival rate',
       rows: surviverate
+    });
+
+    let jesterkills = await this.resttt.JesterKills();
+    jesterkills.map((k: any) => k.value = k.count);
+    jesterkills.sort((a:any, b:any) => b.value - a.value);
+    this.rankings.push({
+      title: 'Jester kills',
+      rows: jesterkills
     });
 
     this.loaded = true;

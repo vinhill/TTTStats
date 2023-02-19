@@ -170,9 +170,9 @@ function format(query, values) {
   else if (Array.isArray(values))
     return mysql.format(query, values)
   else
-    return querystr.replace(/\:(\w+)/g, (txt, key) => {
-      if (params.hasOwnProperty(key)) {
-        return mysql.escape(params[key]);
+    return query.replace(/\:(\w+)/g, (txt, key) => {
+      if (values.hasOwnProperty(key)) {
+        return mysql.escape(values[key]);
       }
       return txt;
     });

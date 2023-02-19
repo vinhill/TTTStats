@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { RestttService } from '../resttt.service';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { getColormap } from '../utils';
+import { getColormap, ttt_prettify_label } from '../utils';
 import { getColumn } from '../datautils';
 
 @Component({
@@ -17,6 +17,7 @@ export class OverviewComponent implements OnInit {
   cKillsDeaths: ChartConfiguration | undefined;
   cPopularPurchases: ChartConfiguration | undefined;
   cKillsPerWeapon: ChartConfiguration | undefined;
+  cRoundsPlayerTS: ChartConfiguration | undefined;
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
 
@@ -33,7 +34,8 @@ export class OverviewComponent implements OnInit {
       this.loadPopularPurchases(),
       this.loadKillsPerWeapon(),
       this.loadRolesTreemap(),
-      this.loadWhoKilledWho()
+      this.loadWhoKilledWho(),
+      this.loadRoundsPlayerTS()
     ]).catch(err => console.log(err));
   }
 
@@ -56,7 +58,7 @@ export class OverviewComponent implements OnInit {
       options: {},
       data: {
         datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "name")
+        labels: getColumn(res, "name").map(ttt_prettify_label)
       }
     }
   }
@@ -94,8 +96,8 @@ export class OverviewComponent implements OnInit {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "amount"), "plotly")],
-        labels: getColumn(res, "item")
+        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
+        labels: getColumn(res, "item").map(ttt_prettify_label)
       }
     }
   }
@@ -103,14 +105,14 @@ export class OverviewComponent implements OnInit {
   async loadKillsPerWeapon() {
     var res = await this.resttt.Weapons();
     res = res.sort((a: any, b: any) => b.kills-a.kills);
-    res = res.splice(0, 25);
+    res = res.splice(0, 20);
 
     this.cKillsPerWeapon = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "weapon")
+        datasets: [this.simpleDataset(getColumn(res, "kills"), "plotly")],
+        labels: getColumn(res, "weapon").map(ttt_prettify_label)
       }
     }
   }
@@ -144,7 +146,7 @@ export class OverviewComponent implements OnInit {
       {name: "Traitors", color: "#d22722", value: values.get("Traitor")},
       {name: "Innocents", color: "#00a01d", value: values.get("Innocent")},
       {name: "Detectives", color: "#1440a4", value: values.get("Detective")},
-      {name: "Others", color: "#b8b8b8", value: values.get("Other")},
+      {name: "Nones", color: "#b8b8b8", value: values.get("None")},
       {name: "Killers", color: "#f542ef", value: values.get("Killer")}
     ];
     for (let group of groups) {
@@ -190,5 +192,33 @@ export class OverviewComponent implements OnInit {
     };
 
     this.cWhoKilledWho = [dataitem];
+  }
+
+  async loadRoundsPlayerTS() {
+    const res = await this.resttt.Games();
+
+    const colors = getColormap("chartjs", 2);
+
+    const ds_rounds = {
+      label: "rounds",
+      data: getColumn(res, "rounds"),
+      backgroundColor: colors[0],
+      borderColor: colors[0]
+    }
+    const ds_players = {
+      label: "player",
+      data: getColumn(res, "participants"),
+      backgroundColor: colors[1],
+      borderColor: colors[1]
+    }
+
+    this.cRoundsPlayerTS = {
+      type: "line" as ChartType,
+      options: {plugins: {legend: {position: 'bottom'}}},
+      data: {
+        datasets: [ds_rounds, ds_players],
+        labels: getColumn(res, "count")
+      }
+    }
   }
 }

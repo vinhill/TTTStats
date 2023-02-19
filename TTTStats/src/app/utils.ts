@@ -222,3 +222,11 @@ export function range(from: number, to: number, step: number = 1) : number[] {
 export function deepcopy(obj: any) {
   return JSON.parse(JSON.stringify(obj));
 }
+
+export function ttt_prettify_label(label: string) {
+  return label.replace(/(item_|weapon_|ttt_)/g, "");
+}
+
+export function reverseIndex(array: any[], i: number) {
+  return array[array.length - 1 - i];
+}

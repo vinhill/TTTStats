@@ -4,12 +4,32 @@
 		<p class="lead">on {{fillin.dow}}, {{fillin.datestr}}</p>
 		<p>You played {{fillin.rounds}} rounds.</p>
 	</card>
+	<card title="Who understands this?" [loaded]="true" (reload)="loadMediumChat()" *ngIf="mediumChats">
+		{{mediumChats}}
+	</card>
+	<card title="Karma" [loaded]="cKarmaTS !== undefined" (reload)="loadKarma()" size="large">
+		<data-chart [data]="cKarmaTS!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
+	<card title="Minimal Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
+		{{minKarma!.player}} with {{minKarma!.karma}}
+	</card>
+
 	<card title="Maps" [loaded]="cMapCount !== undefined" (reload)="loadMapCount()">
 		<data-chart [data]="cMapCount!"></data-chart>
 	</card>
-	<!--
-		TODO
-		Win / loss per Role and per Team
-		Smaller cards for in between
-	-->
+	<card title="Kills / Deaths" [loaded]="cKillsDeaths !== undefined" (reload)="loadKillsDeaths()">
+		<data-chart [data]="cKillsDeaths!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
+	<card title="Role distribution" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
+		<data-plotly [data]="cRoles!"></data-plotly>
+	</card>
+	<card title="Who kills who?" [loaded]="cWhoKilledWho !== undefined" (reload)="loadWhoKilledWho()">
+		<data-plotly [data]="cWhoKilledWho!"></data-plotly>
+	</card>
+	<card title="Bought the most" [loaded]="cPopularPurchases !== undefined" (reload)="loadPopularPurchases()">
+		<data-chart [data]="cPopularPurchases!"></data-chart>
+	</card>
+	<card title="Top 10 weapons (kills)" [loaded]="cKillsPerWeapon !== undefined" (reload)="loadKillsPerWeapon()">
+		<data-chart [data]="cKillsPerWeapon!"></data-chart>
+	</card>
 </div>

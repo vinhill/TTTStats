@@ -128,13 +128,12 @@ export class RestttService {
 		return this.get(this.urlencode("Items", {since: since, player: player}));
 	}
 
-	async ParticipateStats(since?: number, player?: string)
+	async ParticipateStats(since?: number)
 		: Promise<{
 			player: string, games: number, survived: number, won: number
 		}[]>
 	{
-		return this.get(this.urlencode("ParticipateStats",
-			{since: since, player: player}));
+		return this.get(this.urlencode("ParticipateStats", {since: since}));
 	}
 
 	async Games(since?: number, player?: string)
@@ -145,12 +144,12 @@ export class RestttService {
 		return this.get(this.urlencode("Games", {since: since, player: player}));
 	}
 
-	async MediumTexts(since?: number)
+	async MediumTexts(since: number)
 		: Promise<{
 			msg: string
 		}[]>
 	{
-		return this.get(this.urlencode("MediumTexts", {since: since}));
+		return this.get("MediumTexts/" + since);
 	}
 
 	async WhoKilledWho()
@@ -174,7 +173,7 @@ export class RestttService {
 			mid: number
 		}[]>
 	{
-		return this.get("MIDs" + date);
+		return this.get("MIDs/" + date);
 	}
 
 	async Teamup(since?: number, player?: string)

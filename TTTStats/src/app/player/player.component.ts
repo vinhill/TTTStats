@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
-import { getColormap } from '../utils';
+import { getColormap, round, ttt_prettify_label } from '../utils';
 import { RestttService } from '../resttt.service';
 import { getColumn } from '../datautils';
 
@@ -17,6 +17,7 @@ export class PlayerComponent implements OnInit {
   cPopularPurchases: ChartConfiguration | undefined;
   cKillsByWeapon: ChartConfiguration | undefined;
   cDeathsByWeapon: ChartConfiguration | undefined;
+  cTS: ChartConfiguration | undefined;
   cRoles: any[] | undefined;
   
   name: string = "";
@@ -41,7 +42,8 @@ export class PlayerComponent implements OnInit {
       this.loadPopularPurchases(),
       this.loadKillsByWeapon(),
       this.loadDeathsByWeapon(),
-      this.loadRolesTreemap()
+      this.loadRolesTreemap(),
+      this.loadTS()
     ]).catch(err => console.log(err));
   }
 
@@ -61,14 +63,16 @@ export class PlayerComponent implements OnInit {
   }
 
   async loadBasics() {
-    const participateStat = await this.resttt.ParticipateStats(undefined, this.name);
-    this.rounds = participateStat[0].games;
+    const res = await this.resttt.ParticipateStats();
+    const participateStat = res.find((p: any) => p.player == this.name)!;
+    this.rounds = participateStat.games;
 
-    const killstats = await this.resttt.KDStat(undefined, this.name);
-    this.kills = killstats[0].kills;
-    this.teamkills = killstats[0].teamkills;
-    this.kdratio = this.kills / killstats[0].deaths;
-    this.kgratio = this.kills / this.rounds;
+    const res2 = await this.resttt.KDStat();
+    const kdstats = res2.find((p: any) => p.player == this.name)!;
+    this.kills = kdstats.kills;
+    this.teamkills = kdstats.teamkills;
+    this.kdratio = round(kdstats.kills / kdstats.deaths, 2);
+    this.kgratio = round(kdstats.kills / this.rounds, 2);
   }
 
   async loadPopularPurchases() {
@@ -78,8 +82,8 @@ export class PlayerComponent implements OnInit {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "amount"), "plotly")],
-        labels: getColumn(res, "item")
+        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
+        labels: getColumn(res, "item").map(ttt_prettify_label)
       }
     }
   }
@@ -93,8 +97,8 @@ export class PlayerComponent implements OnInit {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "weapon")
+        datasets: [this.simpleDataset(getColumn(res, "kills"), "plotly")],
+        labels: getColumn(res, "weapon").map(ttt_prettify_label)
       }
     }
   }
@@ -107,7 +111,7 @@ export class PlayerComponent implements OnInit {
       options: {},
       data: {
         datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
-        labels: getColumn(res, "weapon")
+        labels: getColumn(res, "weapon").map(ttt_prettify_label)
       }
     }
   }
@@ -141,7 +145,7 @@ export class PlayerComponent implements OnInit {
       {name: "Traitors", color: "#d22722", value: values.get("Traitor")},
       {name: "Innocents", color: "#00a01d", value: values.get("Innocent")},
       {name: "Detectives", color: "#1440a4", value: values.get("Detective")},
-      {name: "Others", color: "#b8b8b8", value: values.get("Other")},
+      {name: "Nones", color: "#b8b8b8", value: values.get("None")},
       {name: "Killers", color: "#f542ef", value: values.get("Killer")}
     ];
     for (let group of groups) {
@@ -153,5 +157,43 @@ export class PlayerComponent implements OnInit {
 
     // finalize roleplot data
     this.cRoles = [dataitem];
+  }
+
+  async loadTS() {
+    const pts = await this.resttt.ParticipateTS(this.name);
+    const kdts = await this.resttt.KDTS(this.name);
+    const colors = getColormap("chartjs", 3);
+
+    const winrate = pts.map(p => round(p.won / p.participated, 2));
+    const surviverate = pts.map(p => round(p.survived / p.participated, 2));
+    const kd = kdts.map(k => round(k.kills / k.deaths, 2));
+
+    const ds_rounds = {
+      label: "win rate",
+      data: winrate,
+      backgroundColor: colors[0],
+      borderColor: colors[0]
+    }
+    const ds_players = {
+      label: "survival rate",
+      data: surviverate,
+      backgroundColor: colors[1],
+      borderColor: colors[1]
+    }
+    const ds_kd = {
+      label: "K/D ratio",
+      data: kd,
+      backgroundColor: colors[2],
+      borderColor: colors[2]
+    }
+
+    this.cTS = {
+      type: "line" as ChartType,
+      options: {plugins: {legend: {position: 'bottom'}}},
+      data: {
+        datasets: [ds_rounds, ds_players, ds_kd],
+        labels: getColumn(pts, "date")
+      }
+    }
   }
 }
