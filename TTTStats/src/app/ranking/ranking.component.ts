@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DataStoreService } from '../data-store.service';
+import { RestttService } from '../resttt.service';
 
 @Component({
   selector: 'app-ranking',
@@ -10,7 +10,7 @@ export class RankingComponent implements OnInit {
   rankings: {title: string, rows: any[]}[] = [];
   loaded: boolean = false;
 
-  constructor(private datastore: DataStoreService) { }
+  constructor(private resttt: RestttService) { }
 
   ngOnInit(): void {
     this.loadApiData();
@@ -25,7 +25,7 @@ export class RankingComponent implements OnInit {
   }
 
   async loadRankings() {
-    let killstats = (await this.datastore.KillStats());
+    let killstats = (await this.resttt.KillStats());
     killstats.sort((a:any, b:any) => b.kd - a.kd);
     killstats.forEach((k:any) => {
       k.name = k.player;
@@ -36,7 +36,7 @@ export class RankingComponent implements OnInit {
       rows: killstats
     });
     
-    let teamkills = (await this.datastore.KillStats());
+    let teamkills = (await this.resttt.KillStats());
     teamkills.sort((a:any, b:any) => b.wrong - a.wrong);
     teamkills.forEach((k:any) => {
       k.name = k.player;
@@ -47,7 +47,7 @@ export class RankingComponent implements OnInit {
       rows: teamkills
     });
 
-    let games = (await this.datastore.PlayerGameCounts());
+    let games = (await this.resttt.PlayerGameCounts());
     games.sort((a:any, b:any) => b.rounds - a.rounds);
     games.forEach((k:any) => {
       k.name = k.player;
@@ -58,7 +58,7 @@ export class RankingComponent implements OnInit {
       rows: games
     });
 
-    let survived = (await this.datastore.Survived());
+    let survived = (await this.resttt.Survived());
     survived.sort((a:any, b:any) => b.rate - a.rate);
     survived.forEach((k:any) => {
       k.name = k.player;

@@ -3,7 +3,7 @@ import { RestttService } from '../resttt.service';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { getColormap } from '../utils';
-import { Dataframe } from '../dataframe';
+import { getColumn } from '../datautils';
 
 @Component({
   selector: 'app-overview',
@@ -37,10 +37,10 @@ export class OverviewComponent implements OnInit {
     ]).catch(err => console.log(err));
   }
 
-  simpleDataset(tbl: Dataframe, col: string, cmap: string) {
-    const colors = getColormap(cmap, tbl.length);
+  simpleDataset(data: any[], cmap: string) {
+    const colors = getColormap(cmap, data.length);
     return {
-      data: tbl.col(col),
+      data: data,
       backgroundColor: colors,
       hoverBackgroundColor: colors,
       hoverBorderColor: colors,
@@ -50,31 +50,29 @@ export class OverviewComponent implements OnInit {
 
   async loadMapCount() {
     const res = await this.resttt.Maps();
-    const tbl = new Dataframe(res);
 
     this.cMapCount = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(tbl, "count", "plotly")],
-        labels: tbl.col("name")
+        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
+        labels: getColumn(res, "name")
       }
     }
   }
 
   async loadKillsDeaths() {
     const res = await this.resttt.KDStat();
-    const tbl = new Dataframe(res);
 
     const ds_kills = {
       label: "Kills",
-      data: tbl.col("kills"),
+      data: getColumn(res, "kills"),
       backgroundColor: "#ff0000",
       borderColor: "#ff0000"
     }
     const ds_deaths = {
       label: "Deaths",
-      data: tbl.col("deaths"),
+      data: getColumn(res, "deaths"),
       backgroundColor: "#0000ff",
       borderColor: "#0000ff"
     }
@@ -84,21 +82,20 @@ export class OverviewComponent implements OnInit {
       options: {plugins: {legend: {position: 'bottom'}}},
       data: {
         datasets: [ds_kills, ds_deaths],
-        labels: tbl.col("player")
+        labels: getColumn(res, "player")
       }
     }
   }
 
   async loadPopularPurchases() {
     const res = await this.resttt.Items();
-    const tbl = new Dataframe(res);
 
     this.cPopularPurchases = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(tbl, "amount", "plotly")],
-        labels: tbl.col("item")
+        datasets: [this.simpleDataset(getColumn(res, "amount"), "plotly")],
+        labels: getColumn(res, "item")
       }
     }
   }
@@ -107,29 +104,27 @@ export class OverviewComponent implements OnInit {
     var res = await this.resttt.Weapons();
     res = res.sort((a: any, b: any) => b.kills-a.kills);
     res = res.splice(0, 25);
-    const tbl = new Dataframe(res);
 
     this.cKillsPerWeapon = {
       type: "doughnut" as ChartType,
       options: {},
       data: {
-        datasets: [this.simpleDataset(tbl, "count", "plotly")],
-        labels: tbl.col("weapon")
+        datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
+        labels: getColumn(res, "weapon")
       }
     }
   }
 
   async loadRolesTreemap() {
     const res = await this.resttt.Roles();
-    const tbl = new Dataframe(res);
 
     let dataitem = {
       type: "treemap",
       branchvalues: "total",
-      labels: tbl.cols.startrole(),
-      parents: tbl.cols.superteam(),
-      values: tbl.cols.count(),
-      marker: {colors: tbl.cols.colour()},
+      labels: getColumn(res, "name"),
+      parents: getColumn(res, "category"),
+      values: getColumn(res, "participated"),
+      marker: {colors: getColumn(res, "color")},
     };
 
     // aggregate group value from subgroups
@@ -164,14 +159,13 @@ export class OverviewComponent implements OnInit {
   }
 
   async loadWhoKilledWho() {
-    const res = await this.datastore.WhoKilledWho();
-    const tbl = new Dataframe(res);
+    const res = await this.resttt.WhoKilledWho();
 
-    const players = (await this.datastore.Players());
+    const players = await this.resttt.Players();
 
     let playerMap = new Map<string, number>();
-    for (let player of players) {
-      playerMap.set(player, playerMap.size);
+    for (const player of players) {
+      playerMap.set(player.name, playerMap.size);
     }
 
     let nodecolors = getColormap("plotly", players.length);
@@ -189,9 +183,9 @@ export class OverviewComponent implements OnInit {
         color: nodecolors,
       },
       link: {
-        source: tbl.cols.killer().map(k => playerMap.get(k)),
-        target: tbl.cols.victim().map(v => players.length+playerMap.get(v)!),
-        value: tbl.cols.count()
+        source: getColumn(res, "killer").map(k => playerMap.get(k)),
+        target: getColumn(res, "victim").map(v => players.length+playerMap.get(v)!),
+        value: getColumn(res, "count")
       }
     };
 
