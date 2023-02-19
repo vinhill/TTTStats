@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DataStoreService } from '../data-store.service';
+import { RestttService } from '../resttt.service';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
 import { getColormap } from '../utils';
@@ -20,7 +20,7 @@ export class OverviewComponent implements OnInit {
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
 
-  constructor(private datastore: DataStoreService) { }
+  constructor(private resttt: RestttService) { }
 
   ngOnInit() {
     this.loadApiData();
@@ -40,7 +40,7 @@ export class OverviewComponent implements OnInit {
   simpleDataset(tbl: Dataframe, col: string, cmap: string) {
     const colors = getColormap(cmap, tbl.length);
     return {
-      data: tbl.cols[col](),
+      data: tbl.col(col),
       backgroundColor: colors,
       hoverBackgroundColor: colors,
       hoverBorderColor: colors,
@@ -49,7 +49,7 @@ export class OverviewComponent implements OnInit {
   }
 
   async loadMapCount() {
-    const res = await this.datastore.MapCount();
+    const res = await this.resttt.Maps();
     const tbl = new Dataframe(res);
 
     this.cMapCount = {
@@ -57,24 +57,24 @@ export class OverviewComponent implements OnInit {
       options: {},
       data: {
         datasets: [this.simpleDataset(tbl, "count", "plotly")],
-        labels: tbl.cols.map()
+        labels: tbl.col("name")
       }
     }
   }
 
   async loadKillsDeaths() {
-    const res = await this.datastore.KillStats();
+    const res = await this.resttt.KDStat();
     const tbl = new Dataframe(res);
 
     const ds_kills = {
       label: "Kills",
-      data: tbl.cols.kills(),
+      data: tbl.col("kills"),
       backgroundColor: "#ff0000",
       borderColor: "#ff0000"
     }
     const ds_deaths = {
       label: "Deaths",
-      data: tbl.cols.deaths(),
+      data: tbl.col("deaths"),
       backgroundColor: "#0000ff",
       borderColor: "#0000ff"
     }
@@ -84,13 +84,13 @@ export class OverviewComponent implements OnInit {
       options: {plugins: {legend: {position: 'bottom'}}},
       data: {
         datasets: [ds_kills, ds_deaths],
-        labels: tbl.cols.player()
+        labels: tbl.col("player")
       }
     }
   }
 
   async loadPopularPurchases() {
-    const res = await this.datastore.PopularPurchases();
+    const res = await this.resttt.Items();
     const tbl = new Dataframe(res);
 
     this.cPopularPurchases = {
@@ -98,14 +98,14 @@ export class OverviewComponent implements OnInit {
       options: {},
       data: {
         datasets: [this.simpleDataset(tbl, "amount", "plotly")],
-        labels: tbl.cols.item()
+        labels: tbl.col("item")
       }
     }
   }
 
   async loadKillsPerWeapon() {
-    var res = await this.datastore.KillsByWeapon();
-    res = res.sort((a: any, b: any) => b.count-a.count);
+    var res = await this.resttt.Weapons();
+    res = res.sort((a: any, b: any) => b.kills-a.kills);
     res = res.splice(0, 25);
     const tbl = new Dataframe(res);
 
@@ -114,13 +114,13 @@ export class OverviewComponent implements OnInit {
       options: {},
       data: {
         datasets: [this.simpleDataset(tbl, "count", "plotly")],
-        labels: tbl.cols.weapon()
+        labels: tbl.col("weapon")
       }
     }
   }
 
   async loadRolesTreemap() {
-    const res = await this.datastore.RoleCount();
+    const res = await this.resttt.Roles();
     const tbl = new Dataframe(res);
 
     let dataitem = {

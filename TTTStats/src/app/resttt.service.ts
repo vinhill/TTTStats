@@ -78,7 +78,7 @@ export class RestttService {
 		return this.get("Players");
 	}
 
-	async Maps(since: number | undefined)
+	async Maps(since?: number)
 		: Promise<{
 			name: string, count: number
 		}[]> 
@@ -86,7 +86,7 @@ export class RestttService {
 		return this.get(this.urlencode("Maps", {since: since}));
 	}
 
-	async Roles(since: number | undefined, player: string | undefined)
+	async Roles(since?: number, player?: string)
 		: Promise<{
 			name: string, team: string, category: string,
 			participated: number, won: number, survived: number
@@ -95,7 +95,7 @@ export class RestttService {
 		return this.get(this.urlencode("Roles", {since: since, player: player}));
 	}
 
-	async Teams(since: number | undefined, player: string | undefined)
+	async Teams(since?: number, player?: string)
 		: Promise<{
 			name: string, category: string,
 			participated: number, won: number, survived: number
@@ -104,7 +104,7 @@ export class RestttService {
 		return this.get(this.urlencode("Teams", {since: since, player: player}));
 	}
 
-	async KDStat(since: number | undefined, player: string | undefined)
+	async KDStat(since?: number, player?: string)
 		: Promise<{
 			player: string, kills: number, deaths: number, teamkills: number
 		}[]>
@@ -112,7 +112,7 @@ export class RestttService {
 		return this.get(this.urlencode("KDStat", {since: since, player: player}));
 	}
 
-	async Weapons(since: number | undefined, player: string | undefined)
+	async Weapons(since?: number, player?: string)
 		: Promise<{
 			weapon: string, kills: number
 		}[]>
@@ -120,7 +120,7 @@ export class RestttService {
 		return this.get(this.urlencode("Weapons", {since: since, player: player}));
 	}
 
-	async Items(since: number | undefined, player: string | undefined)
+	async Items(since?: number, player?: string)
 		: Promise<{
 			item: string, count: number
 		}[]>
@@ -128,7 +128,7 @@ export class RestttService {
 		return this.get(this.urlencode("Items", {since: since, player: player}));
 	}
 
-	async ParticipateStats(since: number | undefined, player: string | undefined)
+	async ParticipateStats(since?: number, player?: string)
 		: Promise<{
 			player: string, games: number, survived: number, won: number
 		}[]>
@@ -137,7 +137,7 @@ export class RestttService {
 			{since: since, player: player}));
 	}
 
-	async Games(since: number | undefined, player: string | undefined)
+	async Games(since?: number, player?: string)
 		: Promise<{
 			date: string, rounds: number, participants: number
 		}[]>
@@ -145,7 +145,7 @@ export class RestttService {
 		return this.get(this.urlencode("Games", {since: since, player: player}));
 	}
 
-	async MediumTexts(since: number | undefined)
+	async MediumTexts(since?: number)
 		: Promise<{
 			msg: string
 		}[]>
@@ -177,7 +177,7 @@ export class RestttService {
 		return this.get("MIDs" + date);
 	}
 
-	async Teamup(since: number | undefined, player: string | undefined)
+	async Teamup(since?: number, player?: string)
 		: Promise<{
 			first: string, second: string, reason: string, count: number
 		}[]>
@@ -185,7 +185,7 @@ export class RestttService {
 		return this.get(this.urlencode("Teamup", {since: since, player: player}));
 	}
 
-	async KarmaTS(since: number | undefined, player: string | undefined)
+	async KarmaTS(since?: number, player?: string)
 		: Promise<{
 			mid: number, player: string, karma: number, time: number
 		}[]>
@@ -193,7 +193,7 @@ export class RestttService {
 		return this.get(this.urlencode("KarmaTS", {since: since, player: player}));
 	}
 
-	async Karma(since: number | undefined)
+	async Karma(since?: number)
 		: Promise<{
 			player: string, date: string, min: number
 		}[]>
