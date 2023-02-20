@@ -13,7 +13,7 @@ function konjugateWhere(...conditions) {
   return "WHERE " + conditions.join(" AND ")
 }
 
-const _firstMidLastDate = -1
+let _firstMidLastDate = -1
 async function firstMidLastDate() {
   if (_firstMidLastDate == -1) {
     const recent = await db.query(
@@ -22,6 +22,11 @@ async function firstMidLastDate() {
   }
   return _firstMidLastDate
 }
+
+router.use(function(req, res, next) {
+  req.sqlparams = req.query
+  next()
+})
 
 router.get("/Players", function (req, res, next) {
   req.sqlquery = "SELECT name FROM player ORDER BY name ASC"
@@ -65,7 +70,6 @@ router.get("/Teams", function(req, res, next) {
 
 router.get("/KDStat", function(req, res, next) {
   const since = req.query.since
-  if (since) req.sqlparams = [since, since]
   req.sqlquery = `
     SELECT s1.player, kills, deaths, teamkills
     FROM (
@@ -256,13 +260,13 @@ router.use("/", async function(req, res, next) {
   if (NODE_ENV === "prod") {
     // currently, frontend only used firstMidLastDate for since
     // so block everything else to prevent abuse
-    const since = req.sqlparams.since || req.query.since
-    if (since && since != firstMidLastDate())
-      return res.status(400).json("The MID (since) has to be " + firstMidLastDate())
+    const since = req.sqlparams.since
+    if (since && since != await firstMidLastDate())
+      return res.status(400).json("The MID (since) has to be " + await firstMidLastDate())
   }
 
   try {
-    const data = await db.query(req.sqlquery, {...req.sqlparams, ...req.query})
+    const data = await db.query(req.sqlquery, req.sqlparams)
     res.status(200).json(data)
   } catch (e) {
     res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
