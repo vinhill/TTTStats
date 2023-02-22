@@ -487,4 +487,16 @@ describe('logparse', () => {
             )).toBe(true);
         });
     });
+
+    test("handles duplicated round state 3", async () => {
+        results["SELECT mid FROM game ORDER BY mid DESC LIMIT 1"] = [{mid: 5}]
+
+        await logparse.load_logfile([
+            'Round state: 2',
+            'Round state: 3',
+            'Round state: 3'
+        ], "");
+
+        expect(queries.filter(q => q.startsWith("INSERT INTO game")).length).toBe(1);
+    });
 });

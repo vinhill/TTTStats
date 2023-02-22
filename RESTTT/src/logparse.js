@@ -358,6 +358,30 @@ class DuplicateFilter {
   }
 }
 
+/*
+If log host is revived, round state is logged again
+
+Example
+ServerLog: 00:52.36 - TTT2Revive: Zumoari has been respawned.
+Round state: 3
+
+This should not trigger game_start
+*/
+const roundStateTracker = {
+  onState(rstate) {
+    oldstate = this.rstate
+    this.rstate = rstate
+    if (this.rstate == 2)
+      return true // init always triggers
+    if (oldstate == this.rstate)
+      return false
+    return true
+  },
+  state2() {return this.onState(2)},
+  state3() {return this.onState(3)},
+  state4() {return this.onState(4)},
+}
+
 class Client {
   constructor(name) {
     this.name = name
@@ -394,6 +418,7 @@ async function load_logfile(log, date) {
     /Round state: 2/,
     "init_round"
   )
+  lp.subscribe("init_round", roundStateTracker, "state2", 999)
   lp.listen("init_round", karmaTracker.init)
   lp.listen("init_round", gameEndListener.init)
   lp.listen("init_round", RoleAssigner.init)
@@ -410,6 +435,7 @@ async function load_logfile(log, date) {
     /Round state: 3/,
     "game_start"
   )
+  lp.subscribe("game_start", roundStateTracker, "state3", 999)
   lp.listen("game_start", onGameStart)
 
   lp.register(
@@ -532,6 +558,7 @@ async function load_logfile(log, date) {
     /Round state: 4/,
     "game_end"
   )
+  lp.subscribe("game_end", roundStateTracker, "state4", 999)
   lp.listen("game_end", DamageHandler.insert)
   lp.listen("game_end", gameEndListener.onGameEnd)
   lp.listen("game_end", surviveTracker.gameEnd)
