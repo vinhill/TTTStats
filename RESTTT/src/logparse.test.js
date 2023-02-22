@@ -3,10 +3,9 @@ const logparse = require('../src/logparse.js');
 const logger = require('../src/utils/logger.js');
 
 class SimuGame {
-    constructor(map = "", date = "", mid = 0) {
+    constructor(map = "", date = "") {
         this.map = map
         this.date = date
-        this.mid = mid
         this.players = new Set()
         this.logs = []
     }
@@ -33,8 +32,8 @@ class SimuGame {
         this.logs.push("Round state: 3")
     }
 
-    game(logs) {
-        this.logs.concat(logs)
+    start(logs) {
+        this.logs = this.logs.concat(logs)
     }
 
     end(timeout = false, elseresult = "traitors wins.", time = "09:01.01") {
@@ -53,7 +52,7 @@ class SimuGame {
 
 describe('logparse', () => {
     var queries = [];
-    var results = [];
+    var results = {};
 
     function expectInitialQueries() {
         expect(queries.shift()).toBe('SET autocommit=0');
@@ -61,7 +60,9 @@ describe('logparse', () => {
 
     beforeEach(() => {
         queries = [];
-        results = {};
+        results = {
+            "SELECT mid FROM game ORDER BY mid DESC LIMIT 1": [{mid: 0}]
+        };
         db.setTestFunctions((con, query, params) => {
             queries.push(db.format(query, params));
             logger.debug("LogParseTest", "Queried " + queries[queries.length - 1])
@@ -194,19 +195,21 @@ describe('logparse', () => {
         test("doppelganger may stay killer", async () => {
             results["SELECT name, team FROM role"] = [{name: 'Doppelganger', team: 'Doppelganger'}];
 
-            await logparse.load_logfile([
-                'Client "Zumoari" spawned in server <STEAM_0:1:113401183> (took 15 seconds).',
-                'Round state: 2',
+            let game = new SimuGame();
+            game.addPlayer("Zumoari");
+            game.init();
+            game.prepare({"Zumoari": "Doppelganger"});
+            game.start([
                 'ServerLog: 00:00.00 - ROUND_START: Zumoari is doppelganger',
-                'ServerLog: 00:07.35 - CP_RC: Zumoari changed Role from doppelganger to innocent',
-                'ServerLog: Result: doppelganger wins.',
-                'Round state: 4',
-                'ServerLog: 00:00.00 - ROUND_START: Zumoari is doppelganger',
+            ])
+            game.end(false, "doppelganger wins.");
+            game.prepare({"Zumoari": "Doppelganger"});
+            game.start([
                 'ServerLog: 00:08.39 - CP_TC: Zumoari [cursed] changed Team from doppelgangers to nones',
-                'ServerLog: 00:08.39 - CP_RC: Zumoari changed Role from innocent to cursed',
-                'ServerLog: Result: doppelganger wins.',
-                'Round state: 4',
-            ], "");
+                'ServerLog: 00:08.39 - CP_RC: Zumoari changed Role from innocent to cursed'
+            ])
+            game.end(false, "doppelganger wins.");
+            await game.submit();
 
             expect(queries.includes(
                 "UPDATE participates SET won = true WHERE mid = 0 AND player = 'Zumoari'"
@@ -448,12 +451,13 @@ describe('logparse', () => {
 
     describe("tracks survival", () => {
         test("when player survives", async () => {
-            await logparse.load_logfile([
-                'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'Round state: 2',
-                'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
-                "Round state: 4"
-            ], "");
+            let game = new SimuGame();
+            game.addPlayer("Zumoari");
+            game.init();
+            game.prepare({"Zumoari": "innocent"});
+            game.start();
+            game.end();
+            await game.submit();
 
             expect(queries.includes(
                 "UPDATE participates SET survived = true WHERE mid = 0 AND player = 'Zumoari'"
@@ -461,12 +465,15 @@ describe('logparse', () => {
         });
 
         test("when player dies", async () => {
-            await logparse.load_logfile([
-                'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
+            let game = new SimuGame();
+            game.addPlayer("Zumoari");
+            game.init();
+            game.prepare({"Zumoari": "innocent"});
+            game.start([
                 'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
             expect(queries.includes(
                 "UPDATE participates SET survived = false WHERE mid = 0 AND player = 'Zumoari'"
@@ -474,13 +481,16 @@ describe('logparse', () => {
         });
 
         test("when player is revived", async () => {
-            await logparse.load_logfile([
-                'Client "Zumoari" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'ServerLog: 00:00.00 - ROUND_START: Zumoari is innocent',
+            let game = new SimuGame();
+            game.addPlayer("Zumoari");
+            game.init();
+            game.prepare({"Zumoari": "innocent"});
+            game.start([
                 'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
                 'ServerLog: 01:12.15 - TTT2Revive: Zumoari has been respawned.',
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
             expect(queries.includes(
                 "UPDATE participates SET survived = true WHERE mid = 0 AND player = 'Zumoari'"
