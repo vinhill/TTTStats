@@ -196,7 +196,7 @@ export class OverviewComponent implements OnInit {
   }
 
   async loadRoundsPlayerTS() {
-    const res = await this.resttt.Games();
+    const res = await this.resttt.GameDays();
 
     const colors = getColormap("chartjs", 2);
 

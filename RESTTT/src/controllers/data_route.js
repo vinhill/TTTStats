@@ -35,7 +35,7 @@ router.get("/Players", function (req, res, next) {
 
 router.get("/Maps", function(req, res, next) {
   req.sqlquery = `
-    SELECT map as name, COUNT(mid) as count
+    SELECT map as name, COUNT(mid) as count, AVG(duration) as avg_duration
     FROM game
     ${req.query.since ? 'WHERE mid >= :since' : ''}
     GROUP BY map ORDER BY count DESC`
@@ -127,6 +127,18 @@ router.get("/ParticipateStats", function(req, res, next) {
 })
 
 router.get("/Games", function(req, res, next) {
+  const since = req.query.since
+  const player = req.query.player
+  req.sqlquery = `
+    SELECT mid, map, duration, date, COUNT(player) AS participants
+    FROM games
+    JOIN participates ON games.mid = participates.mid
+    ${konjugateWhere(since ? 'games.mid >= :since' : '', player ? 'player = :player' : '')}
+    GROUP BY games.mid, map, duration, data ORDER BY mid ASC`
+  next()
+})
+
+router.get("/GameDays", function(req, res, next) {
   req.sqlquery = `
     SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
     COUNT(DISTINCT game.mid) AS rounds, COUNT(DISTINCT player) AS participants

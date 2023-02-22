@@ -80,7 +80,7 @@ export class RestttService {
 
 	async Maps(since?: number)
 		: Promise<{
-			name: string, count: number
+			name: string, count: number, avg_duration: number
 		}[]> 
 	{
 		return this.get(this.urlencode("Maps", {since: since}));
@@ -136,9 +136,17 @@ export class RestttService {
 		return this.get(this.urlencode("ParticipateStats", {since: since}));
 	}
 
-	async Games(since?: number, player?: string)
+	async GameDays()
 		: Promise<{
 			date: string, rounds: number, participants: number
+		}[]>
+	{
+		return this.get("GameDays");
+	}
+
+	async Games(since?: number, player?: string)
+		: Promise<{
+			mid: number, date: string, duration: number, map: string, participants: number
 		}[]>
 	{
 		return this.get(this.urlencode("Games", {since: since, player: player}));

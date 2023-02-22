@@ -57,7 +57,7 @@ export class RecentComponent {
   }
 
   async loadDate() {
-    var res = await this.resttt.Games();
+    var res = await this.resttt.GameDays();
     res = res.sort((a: any, b: any) => b.date - a.date);
 
     this.date = res[0].date;
@@ -88,16 +88,17 @@ export class RecentComponent {
   }
 
   async loadKarma() {
-    let res = await this.resttt.KarmaTS(this.since);
+    let karmats = await this.resttt.KarmaTS(this.since);
 
-    const min = res.reduce((a, b) => a.karma < b.karma ? a : b);
+    const min = karmats.reduce((a, b) => a.karma < b.karma ? a : b);
     this.minKarma = {player: min.player, karma: min.karma};
 
-    const players = new Set<string>(res.map(x => x.player));
+    const players = new Set<string>(karmats.map(x => x.player));
 
+    // separate karmats out by player
     let player_ts: {[player: string]: number[]} = {};
     players.forEach(x => player_ts[x] = [1000]);
-    for (const row of res) {
+    for (const row of karmats) {
       player_ts[row.player].push(row.karma);
       for (const player of players) {
         if (player === row.player) continue;
@@ -122,7 +123,7 @@ export class RecentComponent {
       options: {plugins: {legend: {position: 'bottom'}}},
       data: {
         datasets: datasets,
-        labels: res.map(x => "")
+        labels: karmats.map(x => "")
       }
     }
   }
