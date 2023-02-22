@@ -82,13 +82,13 @@ async function onPlayerJoined(match, state) {
 }
 
 const RoleAssigner = {
-  "init": async () => {
+  async init() {
     this.defaultTeams = new Map()
     const res = await db.query("SELECT name, team FROM role")
     for (let { name, team } of res)
       this.defaultTeams.set(name, team)
   },
-  "onRoleAssigned": (match, state) => {
+  onRoleAssigned(match, state) {
     // captures: time, name, role
     const role = capitalizeFirstLetter(match.role)
     state.clients.get(match.name).role = role
@@ -172,11 +172,11 @@ function jackalTeamup(match, state) {
 // TODO deputy teamup
 
 const DamageHandler = {
-  "init": () => {
+  init() {
     this.pvp_dmg = []
     this.pve_dmg = []
   },
-  "pvp": (match, state) => {
+  pvp(match, state) {
     // captures: time, type, dmgtype, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam, damage
     const atkrole = capitalizeFirstLetter(match.atkrole)
     const vktrole = capitalizeFirstLetter(match.vktrole)
@@ -195,14 +195,14 @@ const DamageHandler = {
 
     this.pvp_dmg.push([state.mid, match.victim, vktrole, match.type, match.attacker, atkrole, weapon, teamdmg, damage])
   },
-  "pve": (match, state) => {
+  pve(match, state) {
     // captures: time, type, dmgtype, weapon, inflictor, victim, vktrole, vktteam, damage
     let vktrole = capitalizeFirstLetter(match.vktrole)
     let damage = Math.min(match.damage, 2147483647)
 
     this.pve_dmg.push([state.mid, match.victim, vktrole, match.type, damage])
   },
-  "insert": () => {
+  insert() {
     const sum = (vals) => vals.reduce((prev, v) => prev + Number(v), 0)
 
     const PvPDmgArgs = groupBy(this.pvp_dmg, [0, 1, 2, 3, 4, 5, 6, 7], sum)
@@ -254,14 +254,20 @@ async function onPvEKill(match, state) {
 }
 
 const gameEndListener = {
-  "init": () => {
+  init() {
     this.winner = undefined
     this.duration = undefined
   },
-  "onResult": match => this.winner = unifyTeamname(match.team),
-  "onTimeout": () => this.winner = "Innocent",
-  "onGameDuration": match => this.duration = timeToSeconds(match.time),
-  "onGameEnd": (match, state) => {
+  onResult(match) {
+    this.winner = unifyTeamname(match.team)
+  },
+  onTimeout() {
+    this.winner = "Innocent"
+  },
+  onGameDuration(match) {
+    this.duration = timeToSeconds(match.time)
+  },
+  onGameEnd(match, state) {
     db.queryAdmin(
       "UPDATE game SET duration = ? WHERE mid = ?",
       [this.duration, state.mid]
@@ -295,11 +301,13 @@ function onMediumMsg(match, state) {
 }
 
 const karmaTracker = {
-  "init": () => this.last_dmg_time = 0,
-  "onPvPDmg": (match, state) => {
+  init() {
+    this.last_dmg_time = 0
+  },
+  onPvPDmg(match, state) {
     this.last_dmg_time = timeToSeconds(match.time)
   },
-  "onKarma": (match, state) => {
+  onKarma(match, state) {
     // captures: name, karma
     const client = state.clients.get(match.name)
     if (client.karma < 1000 || match.karma < 1000) {
@@ -323,13 +331,13 @@ function captureVampireDmg(match, state) {
 }
 
 const surviveTracker = {
-  "death": (match, state) => {
+  death(match, state) {
     state.clients.get(match.victim).alive = false
   },
-  "revive": (match, state) => {
+  revive(match, state) {
     state.clients.get(match.name).alive = true
   },
-  "gameEnd": (match, state) => {
+  gameEnd(match, state) {
     for (const [name, client] of state.clients)
       db.queryAdmin(
         "UPDATE participates SET survived = ? WHERE mid = ? AND player = ?",
@@ -419,17 +427,17 @@ async function load_logfile(log, date) {
     "init_round"
   )
   lp.subscribe("init_round", roundStateTracker, "state2", 999)
-  lp.listen("init_round", karmaTracker.init)
-  lp.listen("init_round", gameEndListener.init)
-  lp.listen("init_round", RoleAssigner.init)
+  lp.subscribe("init_round", karmaTracker, "init")
+  lp.subscribe("init_round", gameEndListener, "init")
+  lp.subscribe("init_round", RoleAssigner, "init")
+  lp.subscribe("init_round", DamageHandler, "init")
   lp.listen("init_round", resetTeamRoles)
-  lp.listen("init_round", DamageHandler.init)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
     "initial_role"
   )
-  lp.listen("initial_role", RoleAssigner.onRoleAssigned)
+  lp.subscribe("initial_role", RoleAssigner, "onRoleAssigned")
 
   lp.register(
     /Round state: 3/,
@@ -456,7 +464,7 @@ async function load_logfile(log, date) {
    /ServerLog: (?<time>[0-9:.]*) - TTT2Revive: (?<name>\w+) has been respawned./,
    "revive" 
   )
-  lp.listen("revive", surviveTracker.revive)
+  lp.subscribe("revive", surviveTracker, "revive")
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
@@ -480,7 +488,7 @@ async function load_logfile(log, date) {
     /(?<name>\w*) \((?<karma>[0-9.]*)\) hurt \w* \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
     "karma"
   )
-  lp.listen("karma", karmaTracker.onKarma)
+  lp.subscribe("karma", karmaTracker, "onKarma")
 
   lp.register(
     regex`
@@ -507,9 +515,9 @@ async function load_logfile(log, date) {
     "pve_dmg"
   )
   lp.listen("pve_dmg", captureVampireDmg, 999)
-  lp.listen("pvp_dmg", DamageHandler.pvp)
-  lp.listen("pve_dmg", DamageHandler.pve)
-  lp.listen("pvp_dmg", karmaTracker.onPvPDmg)
+  lp.subscribe("pvp_dmg", DamageHandler, "pvp")
+  lp.subscribe("pve_dmg", DamageHandler, "pve")
+  lp.subscribe("pvp_dmg", karmaTracker, "onPvPDmg")
   lp.listen("pvp_dmg", jackalTeamup)
   // sidekick deagle for some reason fires twice
   lp.subscribe("pvp_dmg", new DuplicateFilter(
@@ -526,7 +534,7 @@ async function load_logfile(log, date) {
     "pvp_kill"
   )
   lp.listen("pvp_kill", onPvPKill)
-  lp.listen("pvp_kill", surviveTracker.death)
+  lp.subscribe("pvp_kill", surviveTracker, "death")
   lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
@@ -537,31 +545,31 @@ async function load_logfile(log, date) {
     "pve_kill"
   )
   lp.listen("pve_kill", onPvEKill)
-  lp.listen("pve_kill", surviveTracker.death)
+  lp.subscribe("pve_kill", surviveTracker, "death")
 
   lp.register(
     /ServerLog: Result: (?<team>\w+) wins?/,
     "result"
   )
-  lp.listen("result", gameEndListener.onResult)
+  lp.subscribe("result", gameEndListener, "onResult")
   lp.register(
     /ServerLog: Result: (?<timeout>timelimit) reached, traitors lose./,
     "timeout"
   )
-  lp.listen("timeout", gameEndListener.onTimeout)
+  lp.subscribe("timeout", gameEndListener, "onTimeout")
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_ENDED at given time/,
     "game_duration"
   )
-  lp.listen("game_duration", gameEndListener.onGameDuration)
+  lp.subscribe("game_duration", gameEndListener, "onGameDuration")
   lp.register(
     /Round state: 4/,
     "game_end"
   )
   lp.subscribe("game_end", roundStateTracker, "state4", 999)
-  lp.listen("game_end", DamageHandler.insert)
-  lp.listen("game_end", gameEndListener.onGameEnd)
-  lp.listen("game_end", surviveTracker.gameEnd)
+  lp.subscribe("game_end", DamageHandler, "insert")
+  lp.subscribe("game_end", gameEndListener, "onGameEnd")
+  lp.subscribe("game_end", surviveTracker, "gameEnd")
 
   lp.register(
     /Dropped (?<name>\w*) from server/,
