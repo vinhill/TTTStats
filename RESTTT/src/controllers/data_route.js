@@ -130,11 +130,11 @@ router.get("/Games", function(req, res, next) {
   const since = req.query.since
   const player = req.query.player
   req.sqlquery = `
-    SELECT mid, map, duration, date, COUNT(player) AS participants
-    FROM games
-    JOIN participates ON games.mid = participates.mid
-    ${konjugateWhere(since ? 'games.mid >= :since' : '', player ? 'player = :player' : '')}
-    GROUP BY games.mid, map, duration, data ORDER BY mid ASC`
+    SELECT game.mid, map, duration, date, COUNT(player) AS participants
+    FROM game
+    JOIN participates ON game.mid = participates.mid
+    ${konjugateWhere(since ? 'game.mid >= :since' : '', player ? 'player = :player' : '')}
+    GROUP BY game.mid, map, duration, date ORDER BY mid ASC`
   next()
 })
 
