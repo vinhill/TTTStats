@@ -238,20 +238,20 @@ export class RecentComponent {
   }
 
   async loadWhoKilledWho() {
-    const res = await this.resttt.WhoKilledWho();
+    const res = await this.resttt.WhoKilledWho(this.since);
 
-    const players = await this.resttt.Players();
+    const players = (await this.resttt.Players()).map(p => p.name);
 
-    let playerMap = new Map<string, number>();
+    let playerIdx = new Map<string, number>();
     for (const player of players) {
-      playerMap.set(player.name, playerMap.size);
+      playerIdx.set(player, playerIdx.size);
     }
 
     let nodecolors = getColormap("plotly", players.length);
     nodecolors = [...nodecolors, ...nodecolors];
-    let nodelabels = [...players, ...players];
+    const nodelabels = [...players, ...players];
 
-    let dataitem = {
+    const dataitem = {
       type: "sankey",
       orientation: "h",
       node: {
@@ -260,10 +260,11 @@ export class RecentComponent {
         line: {color: "black", width: 0.5},
         label: nodelabels,
         color: nodecolors,
+        hovertemplate: '%{label}',
       },
       link: {
-        source: getColumn(res, "killer").map(k => playerMap.get(k)),
-        target: getColumn(res, "victim").map(v => players.length+playerMap.get(v)!),
+        source: getColumn(res, "killer").map(k => playerIdx.get(k)),
+        target: getColumn(res, "victim").map(v => players.length+playerIdx.get(v)!),
         value: getColumn(res, "count")
       }
     };

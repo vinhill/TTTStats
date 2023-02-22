@@ -146,10 +146,12 @@ router.get("/MediumTexts/:since", function(req, res, next) {
 })
 
 router.get("/WhoKilledWho", function(req, res, next) {
+  const since = req.query.since
   req.sqlquery = `
     SELECT causee AS killer, player AS victim, COUNT(*) AS count
     FROM dies
     WHERE causee IS NOT NULL
+    ${since ? 'AND mid >= :since' : ''}
     GROUP BY player, causee
   `
   next()

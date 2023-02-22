@@ -152,12 +152,12 @@ export class RestttService {
 		return this.get("MediumTexts/" + since);
 	}
 
-	async WhoKilledWho()
+	async WhoKilledWho(since?: number)
 		: Promise<{
 			killer: string, victim: string, count: number
 		}[]>
 	{
-		return this.get("WhoKilledWho");
+		return this.get(this.urlencode("WhoKilledWho", {since: since}));
 	}
 
 	async JesterKills()

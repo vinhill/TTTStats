@@ -10,8 +10,8 @@
 	<card title="Karma" [loaded]="cKarmaTS !== undefined" (reload)="loadKarma()" size="large">
 		<data-chart [data]="cKarmaTS!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
-	<card title="Minimal Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
-		{{minKarma!.player}} with {{minKarma!.karma}}
+	<card [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
+		{{minKarma!.player}} god a very bad karma of {{minKarma!.karma}}
 	</card>
 
 	<card title="Maps" [loaded]="cMapCount !== undefined" (reload)="loadMapCount()">
