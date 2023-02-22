@@ -586,6 +586,12 @@ async function load_logfile(log, date) {
   await db.queryAdmin("COMMIT")
   await db.queryAdmin("SET autocommit=1")
   db.clearCache()
+
+  if (Object.keys(lp.state).length != 4) {
+    // this can happen if listener object has lambda functions
+    // prefer function definitions with usage of lp.subscribe for binding this
+    logger.error("Logparser", "listtener modified logparse state: " + Object.keys(lp.state))
+  }
 }
 
 module.exports = {
