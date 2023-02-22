@@ -1,24 +1,17 @@
 <div class="masonry" #masonry>
 	<card>
-		<h1 class="display-3">Recent Match</h1>
-		<p class="lead">on {{fillin.dow}}, {{fillin.datestr}}</p>
-		<p>You played {{fillin.rounds}} rounds.</p>
+		<h1 class="display-3">Recent Game</h1>
+		<div class="lead">on {{fillin.dow}}, {{fillin.datestr}}</div>
+		You played {{fillin.rounds}} rounds.
 	</card>
-	<card title="Who understands this?" [loaded]="true" (reload)="loadMediumChat()" *ngIf="mediumChats">
-		{{mediumChats}}
-	</card>
-	<card title="Karma" [loaded]="cKarmaTS !== undefined" (reload)="loadKarma()" size="large">
-		<data-chart [data]="cKarmaTS!" [legend]="LegendType.ChartJS"></data-chart>
-	</card>
-	<card [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
-		{{minKarma!.player}} god a very bad karma of {{minKarma!.karma}}
-	</card>
-
 	<card title="Maps" [loaded]="cMapCount !== undefined" (reload)="loadMapCount()">
 		<data-chart [data]="cMapCount!"></data-chart>
 	</card>
 	<card title="Kills / Deaths" [loaded]="cKillsDeaths !== undefined" (reload)="loadKillsDeaths()">
 		<data-chart [data]="cKillsDeaths!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
+	<card title="Karma" [loaded]="cKarmaTS !== undefined" (reload)="loadKarma()" size="large">
+		<data-plotly [data]="cKarmaTS?.data!" [layout]="cKarmaTS?.layout"></data-plotly>
 	</card>
 	<card title="Role distribution" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
 		<data-plotly [data]="cRoles!"></data-plotly>
@@ -31,5 +24,14 @@
 	</card>
 	<card title="Top 10 weapons (kills)" [loaded]="cKillsPerWeapon !== undefined" (reload)="loadKillsPerWeapon()">
 		<data-chart [data]="cKillsPerWeapon!"></data-chart>
+	</card>
+	<card title="Who understands this?" [loaded]="true" (reload)="loadMediumChat()" *ngIf="mediumChats">
+		{{mediumChats}}
+	</card>
+	<card title="Team winrate / surviverate" [loaded]="cTeamWonSurRate !== undefined" (reload)="loadTeamWonSurRate()">
+		<data-chart [data]="cTeamWonSurRate!" [legend]="LegendType.None"></data-chart>
+	</card>
+	<card title="Min Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
+		{{minKarma!.player}} got a {{minKarma!.karma < 900 ? 'very' : ''}} bad karma of {{minKarma!.karma}}
 	</card>
 </div>

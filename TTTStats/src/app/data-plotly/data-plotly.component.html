@@ -1,6 +1,8 @@
 <plotly-plot
     [data]="data"
-    [layout]="{margin: {l: 0, r: 0, b: 0, t:0}, autosize: true}"
+    [layout]="layout"
     [config]="{responsive: true}"
+    [useResizeHandler]="true"
+    style.max_width="100%"
     (afterPlot)="plotlyResizeWorkaround()">
 </plotly-plot>

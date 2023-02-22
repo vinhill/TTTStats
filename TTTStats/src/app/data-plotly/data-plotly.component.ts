@@ -7,6 +7,7 @@ import { Component, ElementRef, Input } from '@angular/core';
 })
 export class DataPlotlyComponent {
   @Input() data!: any[];
+  @Input() layout?: any = {margin: {l: 0, r: 0, b: 0, t:0}, autosize: true};
 
   constructor(private element: ElementRef) { }
 

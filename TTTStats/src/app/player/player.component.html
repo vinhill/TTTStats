@@ -1,10 +1,15 @@
 <div class="masonry" #masonry>
 	<card>
-		<h1 class="display-3">{{name}}</h1>
-		<p>You played {{rounds}} games!</p>
-		<p>During these, you got {{kills}} kills</p>
-		<p>That's a k/d of {{kdratio}} and a game-average of {{kgratio}}.</p>
-		<p *ngIf="teamkills">... buuut you also killed {{teamkills}} of your COLLEAGUES!</p>
+		<h1 class="display-3">{{player}}</h1>
+		You played {{fillin.rounds}} games!
+		<br>
+		And you won {{100*fillin.winratio}}%, survived {{100*fillin.surviveratio}}% of them :)
+		<br>
+		During these, you got {{fillin.kills}} kills.
+		<br>
+		That's a k/d of {{fillin.kdratio}} and a game-average of {{100*fillin.kgratio}}%.
+		<br>
+		<div *ngIf="fillin.teamkills">... buuut you also killed {{fillin.teamkills}} of your COLLEAGUES!</div>
 	</card>
 	<card title="Bought the most" [loaded]="cPopularPurchases !== undefined" (reload)="loadPopularPurchases()">
 		<data-chart [data]="cPopularPurchases!"></data-chart>
@@ -15,10 +20,13 @@
 	<card title="Roles" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
 		<data-plotly [data]="cRoles!"></data-plotly>
 	</card>	
+	<card title="Over time" [loaded]="cTS !== undefined" (reload)="loadTS()">
+		<data-chart [data]="cTS!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
 	<card title="Most dangerous for you" [loaded]="cDeathsByWeapon !== undefined" (reload)="loadDeathsByWeapon()">
 		<data-chart [data]="cDeathsByWeapon!"></data-chart>
 	</card>
-	<card title="Over time" [loaded]="cTS !== undefined" (reload)="loadTS()" size="large">
-		<data-chart [data]="cTS!" [legend]="LegendType.ChartJS"></data-chart>
+	<card title="Who kills who more?" [loaded]="cWhoKilledWhoMore !== undefined" (reload)="loadWhoKilledWhoMore()">
+		<data-chart [data]="cWhoKilledWhoMore!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
 </div>

@@ -18,6 +18,8 @@ export class OverviewComponent implements OnInit {
   cPopularPurchases: ChartConfiguration | undefined;
   cKillsPerWeapon: ChartConfiguration | undefined;
   cRoundsPlayerTS: ChartConfiguration | undefined;
+  cRoleWonSurRate: ChartConfiguration | undefined;
+  cTeamWonSurRate: ChartConfiguration | undefined;
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
 
@@ -35,11 +37,13 @@ export class OverviewComponent implements OnInit {
       this.loadKillsPerWeapon(),
       this.loadRolesTreemap(),
       this.loadWhoKilledWho(),
-      this.loadRoundsPlayerTS()
+      this.loadRoundsPlayerTS(),
+      this.loadRoleWonSurRate(),
+      this.loadTeamWonSurRate(),
     ]).catch(err => console.log(err));
   }
 
-  simpleDataset(data: any[], cmap: string) {
+  simpleDataset(data: any[], cmap: string): ChartConfiguration["data"]["datasets"][0] {
     const colors = getColormap(cmap, data.length);
     return {
       data: data,
@@ -55,7 +59,6 @@ export class OverviewComponent implements OnInit {
 
     this.cMapCount = {
       type: "doughnut" as ChartType,
-      options: {},
       data: {
         datasets: [this.simpleDataset(getColumn(res, "count"), "plotly")],
         labels: getColumn(res, "name").map(ttt_prettify_label)
@@ -198,7 +201,7 @@ export class OverviewComponent implements OnInit {
   async loadRoundsPlayerTS() {
     const res = await this.resttt.GameDays();
 
-    const colors = getColormap("chartjs", 2);
+    const colors = getColormap("plotly", 2);
 
     const ds_rounds = {
       label: "rounds",
@@ -219,6 +222,82 @@ export class OverviewComponent implements OnInit {
       data: {
         datasets: [ds_rounds, ds_players],
         labels: getColumn(res, "count")
+      }
+    }
+  }
+
+  async loadRoleWonSurRate() {
+    let res = await this.resttt.Roles();
+    res = res.filter(x => x.won > 0 || x.survived > 0)
+
+    const points = res.map(x => {
+      return {x: x.won / x.participated, y: x.survived / x.participated}
+    });
+    
+    this.cRoleWonSurRate = {
+      type: "scatter" as ChartType,
+      data: {
+        datasets: [{
+          borderColor: getColumn(res, "color"),
+          backgroundColor: getColumn(res, "color"),
+          data: points,
+          radius: 5,
+        }],
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: "win rate", font: { size: 14 } } },
+          y: { title: { display: true, text: "survival rate" } }
+        },
+        aspectRatio: 1.5,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (context: any) => {
+                return `${res[context.dataIndex].name}: won ${100*context.parsed.x.toFixed(2)}%, survived ${100*context.parsed.y.toFixed(2)}%`;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  async loadTeamWonSurRate() {
+    let res = await this.resttt.Teams();
+    res = res.filter(x => x.won > 0 || x.survived > 0)
+
+    const points = res.map(x => {
+      return {x: x.won / x.participated, y: x.survived / x.participated}
+    });
+
+    const colors = getColormap("plotly", res.length);
+
+    this.cTeamWonSurRate = {
+      type: "scatter" as ChartType,
+      data: {
+        datasets: [{
+          borderColor: colors,
+          backgroundColor: colors,
+          data: points,
+          radius: 5,
+        }],
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: "win rate", font: { size: 14 } } },
+          y: { title: { display: true, text: "survival rate" } }
+        },
+        aspectRatio: 1.5,
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (context: any) => {
+                return `${res[context.dataIndex].name}: won ${100*context.parsed.x.toFixed(2)}%, survived ${100*context.parsed.y.toFixed(2)}%`;
+              }
+            }
+          }
+        }
       }
     }
   }

@@ -62,9 +62,9 @@ router.get("/Teams", function(req, res, next) {
     SELECT team as name, category,
       COUNT(mid) AS participated, SUM(won) AS won, SUM(survived) AS survived
     FROM participates
-    ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
     JOIN role ON participates.startrole = role.name
-    GROUP BY team, category ORDER BY participates DESC`
+    ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
+    GROUP BY team, category ORDER BY participated DESC`
     next()
 })
 

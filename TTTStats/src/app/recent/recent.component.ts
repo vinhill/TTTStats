@@ -13,13 +13,14 @@ import { getColumn } from '../datautils';
 export class RecentComponent {
   LegendType = LegendType;
 
-  cKarmaTS: ChartConfiguration | undefined;
+  cKarmaTS: {data: any[], layout: any} | undefined;
 
   cMapCount: ChartConfiguration | undefined;
   cKillsDeaths: ChartConfiguration | undefined;
   cPopularPurchases: ChartConfiguration | undefined;
   cKillsPerWeapon: ChartConfiguration | undefined;
   cRoundsPlayerTS: ChartConfiguration | undefined;
+  cTeamWonSurRate: ChartConfiguration | undefined;
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
 
@@ -52,6 +53,7 @@ export class RecentComponent {
         this.loadKillsPerWeapon(),
         this.loadRolesTreemap(),
         this.loadWhoKilledWho(),
+        this.loadTeamWonSurRate(),
       ]))
       .catch(err => console.log(err));
   }
@@ -88,44 +90,45 @@ export class RecentComponent {
   }
 
   async loadKarma() {
-    let karmats = await this.resttt.KarmaTS(this.since);
+    const games = await this.resttt.Games(this.since);
+    const karmats = await this.resttt.KarmaTS(this.since);
 
     const min = karmats.reduce((a, b) => a.karma < b.karma ? a : b);
     this.minKarma = {player: min.player, karma: min.karma};
 
+    const first_mid = games[0].mid;
+    const xmax = games[games.length - 1].mid - first_mid + 1;
+    const get_xpos = (mid: number, time: number) => {
+      // 1+ for xmin = 1
+      return mid - first_mid + 1 + time / games[mid - first_mid].duration
+    };
+
+    // separate out karmats by player
     const players = new Set<string>(karmats.map(x => x.player));
-
-    // separate karmats out by player
-    let player_ts: {[player: string]: number[]} = {};
-    players.forEach(x => player_ts[x] = [1000]);
+    let playerts: any = {};
+    players.forEach(x => playerts[x] = {
+      x: [1], y: [1000], type: 'scatter', name: x
+    });
     for (const row of karmats) {
-      player_ts[row.player].push(row.karma);
-      for (const player of players) {
-        if (player === row.player) continue;
-        player_ts[player].push(reverseIndex(player_ts[player], 0));
-      }
+      playerts[row.player].x.push(get_xpos(row.mid, row.time));
+      playerts[row.player].y.push(row.karma);
     }
-        
-    const colors = getColormap("chartjs", Object.keys(player_ts).length);
-    const datasets = [];
-    for (const player of players) {
-      const color = colors.shift();
-      datasets.push({
-        label: player,
-        data: player_ts[player],
-        backgroundColor: color,
-        borderColor: color
-      });
-    }
-
+    players.forEach(p => {
+      playerts[p].x.push(xmax);
+      playerts[p].y.push(reverseIndex(playerts[p].y, 0));
+    });
+    
     this.cKarmaTS = {
-      type: "line" as ChartType,
-      options: {plugins: {legend: {position: 'bottom'}}},
-      data: {
-        datasets: datasets,
-        labels: karmats.map(x => "")
+      data: Object.keys(playerts).map(x => playerts[x]),
+      layout: {
+        //margin: {l: 0, r: 0, b: 0, t:0},
+        //legend: {x: 0.5, y: 0},
+        showlegend: false,
+        autosize: true,
+        xaxis: {title: "Game"},
+        yaxis: {title: "Karma"},
       }
-    }
+    };
   }
 
   async loadMapCount() {
@@ -271,5 +274,43 @@ export class RecentComponent {
     };
 
     this.cWhoKilledWho = [dataitem];
+  }
+  
+  async loadTeamWonSurRate() {
+    let res = await this.resttt.Teams(this.since);
+    res = res.filter(x => x.won > 0 || x.survived > 0)
+
+    const points = res.map(x => {
+      return {x: x.won / x.participated, y: x.survived / x.participated}
+    });
+
+    const colors = getColormap("plotly", res.length);
+
+    this.cTeamWonSurRate = {
+      type: "scatter" as ChartType,
+      data: {
+        datasets: [{
+          borderColor: colors,
+          backgroundColor: colors,
+          data: points,
+          radius: 5,
+        }],
+      },
+      options: {
+        scales: {
+          x: { title: { display: true, text: "win rate", font: { size: 14 } } },
+          y: { title: { display: true, text: "survival rate" } }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (context: any) => {
+                return `${res[context.dataIndex].name}: won ${100*context.parsed.x.toFixed(2)}%, survived ${100*context.parsed.y.toFixed(2)}%`;
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

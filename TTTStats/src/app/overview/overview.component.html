@@ -1,6 +1,6 @@
 <div class="masonry">
 	<card>
-		<h1 class="display-3">TTT Overview</h1>
+		<h1 class="display-3">TTT Stats</h1>
 		Made with ❤ by Josu und Vincent
 		<br>
 		Code available <a class="link-secondary" href="https://github.com/vinhill/TTTStats">here</a>
@@ -25,5 +25,11 @@
 	</card>
 	<card title="Games played over time" [loaded]="cRoundsPlayerTS !== undefined" (reload)="loadRoundsPlayerTS()">
 		<data-chart [data]="cRoundsPlayerTS!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
+	<card title="Role winrate / surviverate" [loaded]="cRoleWonSurRate !== undefined" (reload)="loadRoleWonSurRate()">
+		<data-chart [data]="cRoleWonSurRate!" [legend]="LegendType.None"></data-chart>
+	</card>
+	<card title="Team winrate / surviverate" [loaded]="cTeamWonSurRate !== undefined" (reload)="loadTeamWonSurRate()">
+		<data-chart [data]="cTeamWonSurRate!" [legend]="LegendType.None"></data-chart>
 	</card>
 </div>
