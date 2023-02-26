@@ -1,6 +1,6 @@
 --Variable if round is over
 roundOver = true
-
+f = "console_print"
 --[[
 	Returns the name of the entity which inflicted damage to a player
 
@@ -9,7 +9,7 @@ roundOver = true
 	RETURN example:
 	"Entity [0][worldspawn]"
 ]]
-local function InflictorStr(infl)
+function InflictorStr(infl)
 	if IsValid(infl) then
 		return tostring(infl) .. ", " .. infl:GetName()
 	else
@@ -24,7 +24,7 @@ end
 	"GhastM4n [executioner, traitors] <Weapon [1483][weapon_zm_rifle]>, (Player [2][GhastM4n], GhastM4n)"
 	"Zumoari [hidden, hiddens] <Weapon [15][weapon_ttt_hd_knife]>, (Player [1][Zumoari], Zumoari)"
 ]]
-local function AttackerStr(att, infl)
+function AttackerStr(att, infl)
 	if att:IsPlayer() then
 		if att:GetRoleString() == "jester" then return end
 		return PlayerStr(att) .. "<" .. tostring(att:GetActiveWeapon()) .. ">, (" .. InflictorStr(infl) .. ")"
@@ -39,7 +39,7 @@ end
 	RETURN example:
 	"Zumoari [hidden, hiddens]"
 ]]
-local function PlayerStr(ply)
+function PlayerStr(ply)
 	if ply:IsPlayer() then
 		return ply:Nick() .. " [" .. ply:GetRoleString() ..  ", " .. ply:GetTeam() .. "] "
 	end
@@ -48,7 +48,7 @@ end
 --[[
 	Returns the DamageType as String
 ]]
-local function DamageStr(dmginfo)
+function DamageStr(dmginfo)
 	if dmginfo:IsFallDamage() then
 		return "FALL"
 	elseif dmginfo:IsBulletDamage() then
@@ -63,7 +63,7 @@ end
 --[[
 	Retunrs information of the victim. Is only to be called if the victim is a player!
 ]]
-local function VictimStr(ent)
+function VictimStr(ent)
 	return PlayerStr(ent)
 end
 
@@ -72,8 +72,9 @@ end
 	Returns Name and Role and Team of each player
 ]]
 hook.Add("TTTBeginRound", "CP_round_start_role_print", function()
+	file.Append(f .. ".txt", "ROUND IS STARTING ON " .. game.GetMap() .. "\n")
 	for i, v in ipairs( player.GetAll() ) do
-		DamageLog( "ROUND_START: " .. PlayerStr(v))
+		file.Append(f .. ".txt", "ROUND_START: " .. PlayerStr(v).. "\n")
 	end
 	roundOver = false
 end)
@@ -90,7 +91,7 @@ end)
 hook.Add( "PlayerTakeDamage", "CP_player_damaged", function(ent, infl, att, amount, dmginfo)
 	if not ent:IsPlayer() or roundOver then return end
 			
-	DamageLog( "CP_DMG " .. DamageStr(dmginfo) .. ": " .. AttackerStr(att, infl) .. " damaged " .. VictimStr(ent) .. " for " .. tostring(amount))
+	file.Append( f .. ".txt",  "CP_DMG " .. DamageStr(dmginfo) .. ": " .. AttackerStr(att, infl) .. " damaged " .. VictimStr(ent) .. " for " .. tostring(amount).. "\n")
 end)
 
 --[[
@@ -103,7 +104,9 @@ hook.Add( "PlayerDeath", "CP_player_death", function(ent, infl, att)
 	if ent.GetRoleString ~= "cursed" then return end --Dont print when player is cursed
 	if not ent:IsPlayer() or roundOver then return end
 
-	DamageLog( "CP_KILL: " .. AttackerStr(att, infl) .. " killed " .. VictimStr(ent) )
+
+	file.Append( f .. ".txt",  "CP_KILL: " .. AttackerStr(att, infl) .. " killed " .. VictimStr(ent) .. "\n")
+
 end)
 
 --[[
@@ -116,17 +119,21 @@ hook.Add("TTTOrderedEquipment", "CP_order_equipment", function(ply, equipment, i
 	else
 		item_name = equipment
 	end
-	DamageLog( "CP_OE: " .. PlayerStr(ply) .. " ordered " .. item_name)
+
+	file.Append( f .. ".txt",  "CP_OE: " .. PlayerStr(ply) .. " ordered " .. item_name .. "\n")
+
 end)
 
 --[[
 	Gets called on Round End
 ]]
-hook.Add("TTTEndRound", "CP_round_end_role_print", function()
-	DamageLog( "ROUND_ENDED at given time")
+hook.Add("TTTEndRound", "CP_round_end_role_print", function(result)
+
+	file.Append( f .. ".txt", "ROUND ENDS -> WINNING TEAM: " .. result .. "\n")
 	for i, v in ipairs( player.GetAll() ) do
-    		DamageLog( "ROUND_END: " .. v:Nick() .. " was " .. v:GetRoleString() .. " team " .. v:GetTeam())
+		file.Append( f .. ".txt",  "ROUND_END: " .. v:Nick() .. " was " .. v:GetRoleString() .. " team " .. v:GetTeam() .. "\n")
 	end
+
 	roundOver = true
 end)
 
@@ -134,18 +141,22 @@ end)
 	Gets called when a palyer changes his role
 ]]
 hook.Add("TTT2UpdateBaserole", "CP_update_baserole", function(ply, oldBaserole, newBaserole)
+	
 	if not transition and roundOver ~= true then
-		DamageLog( "CP_RC: " .. PlayerStr(ply) .. "changed Role from [" .. roles.GetByIndex(oldBaserole).name .. "] to [" .. roles.GetByIndex(newBaserole).name .. "]")
+		file.Append( f .. ".txt",  "CP_RC: " .. PlayerStr(ply) .. "changed Role from [" .. roles.GetByIndex(oldBaserole).name .. "] to [" .. roles.GetByIndex(newBaserole).name .. "]" .. "\n")
 	end
+
 end)
 
 --[[
 	Gets called when a player changes the team
 ]]
 hook.Add("TTT2UpdateTeam", "CP_update_team", function(ply, oldTeam, newTeam)
+
 	if not transition and roundOver ~= true then
-		DamageLog( "CP_TC: " .. PlayerStr(ply) .. "changed Team from [" .. oldTeam .. "] to [" .. newTeam .. "]")
+		file.Append( f .. ".txt",  "CP_TC: " .. PlayerStr(ply) .. "changed Team from [" .. oldTeam .. "] to [" .. newTeam .. "]" .. "\n")
 	end
+
 end)
 
 
