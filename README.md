@@ -23,3 +23,13 @@ If some bundle is too large, do
 - ng build TTTStats --base-href="https://vinhill.github.io/TTTStats/"
 - source-map-explorer the_bundle_file.js
 - check which parts are too large and do something against it. I.e. lazy-loading
+
+### Custom Output Generator
+
+To generate the statistics you need to add the file sv_custom_print.lua to the following folder:
+
+...\steamapps\common\GarrysMod\garrysmod\lua\autorun\server
+
+The folder structure might be a little bit different, depending if you are hosting a local server or using a dedicated provider. However you should at least find ...\lua\autorun\server, so you can just put it there.
+
+The file sv_custom_print.lua generates the custom outputs and writes it in the following file: ...\steamapps\common\GarrysMod\garrysmod\data\console_print.txt. If the file does not exist, the script automatically builds it when it tries to open it for the first time.
