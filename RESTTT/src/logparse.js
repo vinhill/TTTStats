@@ -274,7 +274,9 @@ const gameEndListener = {
     )
 
     for (let [name, client] of state.clients) {
-      const won = this.winner === client.team
+      let won = this.winner === client.team
+      if (client.role === "Lootgoblin")
+        won = client.alive
       db.queryAdmin(
         "UPDATE participates SET won = ? WHERE mid = ? AND player = ?",
         [won, state.mid, name]

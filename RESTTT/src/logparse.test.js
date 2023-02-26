@@ -241,6 +241,40 @@ describe('logparse', () => {
             )).toBe(true);
             expect(queries.filter(q => q.includes("INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'vinno', 'GhastM4n', 'jackal')")).length).toBe(1);
         });
+
+        test("lootgoblin win on survive", async () => {
+            results["SELECT name, team FROM role"] = [{name: 'Lootgoblin', team: 'None'}];
+
+            let game = new SimuGame();
+            game.addPlayer("Zumoari");
+            game.init();
+            game.prepare({"Zumoari": "Lootgoblin"});
+            game.start()
+            game.end(true);
+            await game.submit();
+
+            expect(queries.includes(
+                "UPDATE participates SET won = true WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);
+        });
+
+        test("lootgoblin lose on death", async () => {
+            results["SELECT name, team FROM role"] = [{name: 'Lootgoblin', team: 'None'}];
+
+            let game = new SimuGame();
+            game.addPlayer("Zumoari");
+            game.init();
+            game.prepare({"Zumoari": "Lootgoblin"});
+            game.start([
+                "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Zumoari [lootgoblin, nones]"
+            ])
+            game.end(false, "nones win.");
+            await game.submit();
+
+            expect(queries.includes(
+                "UPDATE participates SET won = false WHERE mid = 0 AND player = 'Zumoari'"
+            )).toBe(true);
+        });
     });
 
     describe('handles kills', () => {
