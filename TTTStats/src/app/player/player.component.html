@@ -14,19 +14,25 @@
 	<card title="Bought the most" [loaded]="cPopularPurchases !== undefined" (reload)="loadPopularPurchases()">
 		<data-chart [data]="cPopularPurchases!"></data-chart>
 	</card>
-	<card title="Best weapon" [loaded]="cKillsByWeapon !== undefined" (reload)="loadKillsByWeapon()">
+	<card title="Your best weapons" [loaded]="cKillsByWeapon !== undefined" (reload)="loadKillsByWeapon()">
 		<data-chart [data]="cKillsByWeapon!"></data-chart>
 	</card>
-	<card title="Roles" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
-		<data-plotly [data]="cRoles!"></data-plotly>
+	<card title="Who do you kill more?" [loaded]="cWhoKilledWhoMore !== undefined" (reload)="loadWhoKilledWhoMore()">
+		<data-chart [data]="cWhoKilledWhoMore!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
+	<card title="Your best and worst roles" [loaded]="cRolesWinSur !== undefined" (reload)="loadRolesWinSur()">
+		<select class="form-control" (change)="loadRolesWinSur()" #cRoleSelect>
+			<option value="best_win_rt">Best winrate</option>
+			<option value="best_sur_rt">Best survival</option>
+			<option value="worst_win_rt">Worst winrate</option>
+			<option value="worst_sur_rt">Worst survival</option>
+		</select>
+		<data-chart [data]="cRolesWinSur!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>	
 	<card title="Over time" [loaded]="cTS !== undefined" (reload)="loadTS()">
 		<data-chart [data]="cTS!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
 	<card title="Most dangerous for you" [loaded]="cDeathsByWeapon !== undefined" (reload)="loadDeathsByWeapon()">
 		<data-chart [data]="cDeathsByWeapon!"></data-chart>
-	</card>
-	<card title="Who kills who more?" [loaded]="cWhoKilledWhoMore !== undefined" (reload)="loadWhoKilledWhoMore()">
-		<data-chart [data]="cWhoKilledWhoMore!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
 </div>

@@ -13,8 +13,7 @@ import { getColumn } from '../datautils';
 export class RecentComponent {
   LegendType = LegendType;
 
-  cKarmaTS: {data: any[], layout: any} | undefined;
-
+  cKarmaTS: ChartConfiguration | undefined;
   cMapCount: ChartConfiguration | undefined;
   cKillsDeaths: ChartConfiguration | undefined;
   cPopularPurchases: ChartConfiguration | undefined;
@@ -105,28 +104,56 @@ export class RecentComponent {
 
     // separate out karmats by player
     const players = new Set<string>(karmats.map(x => x.player));
-    let playerts: any = {};
-    players.forEach(x => playerts[x] = {
-      x: [1], y: [1000], type: 'scatter', name: x
-    });
+
+    let playerts: {[player: string]: [{x: number, y: number}]} = {};
+    players.forEach(x => playerts[x] = [{x: 1, y: 1000}]);
     for (const row of karmats) {
-      playerts[row.player].x.push(get_xpos(row.mid, row.time));
-      playerts[row.player].y.push(row.karma);
+      playerts[row.player].push({
+        x: get_xpos(row.mid, row.time),
+        y: row.karma
+      });
     }
     players.forEach(p => {
-      playerts[p].x.push(xmax);
-      playerts[p].y.push(reverseIndex(playerts[p].y, 0));
+      playerts[p].push({
+        x: xmax,
+        y: reverseIndex(playerts[p], 0).y
+      });
     });
+
+    // create plot
+    const datasets: ChartConfiguration["data"]["datasets"] = [];
+    const cmap = getColormap("plotly", players.size);
+    let pidx = 0;
+    for (const player of players) {
+      datasets.push({
+        label: player,
+        data: playerts[player],
+        borderColor: cmap[pidx],
+        backgroundColor: cmap[pidx],
+        pointBackgroundColor: cmap[pidx],
+        pointBorderColor: cmap[pidx],
+        pointHoverBackgroundColor: cmap[pidx],
+        pointHoverBorderColor: cmap[pidx],
+      });
+      pidx++;
+    }
     
     this.cKarmaTS = {
-      data: Object.keys(playerts).map(x => playerts[x]),
-      layout: {
-        //margin: {l: 0, r: 0, b: 0, t:0},
-        //legend: {x: 0.5, y: 0},
-        showlegend: false,
-        autosize: true,
-        xaxis: {title: "Game"},
-        yaxis: {title: "Karma"},
+      type: "line" as ChartType,
+      options: {
+        plugins: { legend: { position: "bottom" } },
+        scales: {
+          x: {
+            type: "linear",
+            title: { text: "Game", display: true },
+          },
+          y: {
+            title: { text: "Karma", display: true },
+          }
+        }
+      },
+      data: {
+        datasets: datasets,
       }
     };
   }

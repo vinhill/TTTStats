@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { LegendType } from '../data-chart/data-chart.component';
 import { ChartConfiguration, ChartType } from 'chart.js';
@@ -19,8 +19,8 @@ export class PlayerComponent implements OnInit {
   cDeathsByWeapon: ChartConfiguration | undefined;
   cTS: ChartConfiguration | undefined;
   cWhoKilledWhoMore: ChartConfiguration | undefined;
-  cRoles: any[] | undefined;
-  
+  cRolesWinSur: ChartConfiguration | undefined;
+
   fillin = {
     rounds: 0,
     kills: 0,
@@ -32,6 +32,8 @@ export class PlayerComponent implements OnInit {
   }
 
   player: string = "";
+  
+  @ViewChild('cRoleSelect') cRoleSelect!: ElementRef;
 
   constructor(private route: ActivatedRoute, private resttt: RestttService) {}
 
@@ -48,9 +50,9 @@ export class PlayerComponent implements OnInit {
       this.loadPopularPurchases(),
       this.loadKillsByWeapon(),
       this.loadDeathsByWeapon(),
-      this.loadRolesTreemap(),
       this.loadTS(),
       this.loadWhoKilledWhoMore(),
+      this.loadRolesWinSur(),
     ]).catch(err => console.log(err));
   }
 
@@ -125,49 +127,6 @@ export class PlayerComponent implements OnInit {
     }
   }
 
-  async loadRolesTreemap() {
-    const res = await this.resttt.Roles(undefined, this.player);
-
-    let dataitem = {
-      type: "treemap",
-      branchvalues: "total",
-      labels: getColumn(res, "name"),
-      parents: getColumn(res, "category"),
-      values: getColumn(res, "participated"),
-      marker: {colors: getColumn(res, "color")},
-    };
-
-    // aggregate group value from subgroups
-    let values = new Map<string, number>();
-    for (let i = 0; i < dataitem.labels.length; i++) {
-      let group = dataitem.parents[i];
-      if (!values.has(group))
-        values.set(group, 0);
-      values.set(group, values.get(group) + dataitem.values[i]);
-    }
-
-    // add suffix to parents to make superteam names unique
-    dataitem.parents = dataitem.parents.map((val: any) => val + "s");
-
-    // add first-level groups in sunburst plot
-    let groups = [
-      {name: "Traitors", color: "#d22722", value: values.get("Traitor")},
-      {name: "Innocents", color: "#00a01d", value: values.get("Innocent")},
-      {name: "Detectives", color: "#1440a4", value: values.get("Detective")},
-      {name: "Nones", color: "#b8b8b8", value: values.get("None")},
-      {name: "Killers", color: "#f542ef", value: values.get("Killer")}
-    ];
-    for (let group of groups) {
-      dataitem.labels.push(group.name);
-      dataitem.marker.colors.push(group.color);
-      dataitem.parents.push("");
-      dataitem.values.push(group.value);
-    }
-
-    // finalize roleplot data
-    this.cRoles = [dataitem];
-  }
-
   async loadTS() {
     const pts = await this.resttt.ParticipateTS(this.player);
     const kdts = await this.resttt.KDTS(this.player);
@@ -230,6 +189,44 @@ export class PlayerComponent implements OnInit {
     let data = Object.entries(player_kd).map(([player, kd]) => ({player, ...kd}));
     data.sort((a, b) => Math.abs(b.kills / b.deaths) - Math.abs(a.kills / a.deaths));
 
+    const d_kills: ChartConfiguration["data"]["datasets"][0] = {
+      label: "kills",
+      data: data.map(d => d.kills),
+      backgroundColor: "#d22722",
+      borderColor: "#d22722",
+      pointBorderColor: "#d2272280",
+      pointBackgroundColor: "#d2272280",
+      pointHoverBackgroundColor: "#d2272280",
+      pointHoverBorderColor: "#d2272280",
+      radius: 5,
+      hoverRadius: 6,
+      xAxisID: "xAxis",
+    }
+    const d_deaths: ChartConfiguration["data"]["datasets"][0] = {
+      label: "deaths",
+      data: data.map(d => d.deaths),
+      backgroundColor: "#00a01d",
+      borderColor: "#00a01d",
+      pointBorderColor: "#00a01d80",
+      pointBackgroundColor: "#00a01d80",
+      pointHoverBackgroundColor: "#00a01d80",
+      pointHoverBorderColor: "#00a01d80",
+      radius: 5,
+      hoverRadius: 6,
+      xAxisID: "xAxis",
+    }
+    const d_kd: ChartConfiguration["data"]["datasets"][0] = {
+      label: "K/D",
+      data: data.map(d => round(d.kills / Math.max(d.deaths, 0.5), 2)),
+      backgroundColor: "##242424",
+      borderColor: "##242424",
+      pointBorderColor: "##242424",
+      pointBackgroundColor: "##242424",
+      radius: 5,
+      hoverRadius: 6,
+      xAxisID: "kd",
+    }
+
     // no lines
     this.cWhoKilledWhoMore = {
       type: "line" as ChartType,
@@ -237,29 +234,112 @@ export class PlayerComponent implements OnInit {
         plugins: {legend: {position: 'bottom'}},
         aspectRatio: 1,
         indexAxis: "y",
-        datasets: {line: {showLine: false}}
+        datasets: {line: {showLine: false}},
+        scales: {
+          kd: {
+            position: "top",
+            title: {
+              text: "KD ratio",
+              display: true
+            }
+          },
+          xAxis: {
+            position: "bottom",
+            title: {
+              text: "kills and deaths",
+              display: true
+            }
+          }
+        }
       },
       data: {
         datasets: [
-          {
-            label: "kills",
-            data: data.map(d => d.kills),
-            backgroundColor: "#d22722",
-            borderColor: "#d22722",
-            pointBorderColor: "#d22722",
-            pointBackgroundColor: "#d22722",
-          },
-          {
-            label: "deaths",
-            data: data.map(d => d.deaths),
-            backgroundColor: "#00a01d",
-            borderColor: "#00a01d",
-            pointBorderColor: "#00a01d",
-            pointBackgroundColor: "#00a01d",
-          }
+          d_kills, d_deaths, d_kd
         ],
         labels: data.map(d => d.player)
       },
     };
+  }
+
+  async loadRolesWinSur() {
+    const total_res = await this.resttt.Roles();
+    const player_res = await this.resttt.Roles(undefined, this.player);
+    
+    const total_map = new Map<string, {winrate: number, surviverate: number}>();
+    for (const r of total_res)
+      total_map.set(r.name, {
+        winrate: r.won / r.participated,
+        surviverate: r.survived / r.participated
+      });
+    
+    const data: {
+      role: string, win_rt: number, surv_rt: number, tot_win_rt: number, tot_surv_rt: number, color: string
+    }[] = [];
+    for (const r of player_res) {
+      const tot = total_map.get(r.name)!;
+      data.push({
+        role: r.name,
+        win_rt: r.won / r.participated,
+        surv_rt: r.survived / r.participated,
+        tot_win_rt: tot.winrate,
+        tot_surv_rt: tot.surviverate,
+        color: r.color
+      });
+    }
+
+    const select = this.cRoleSelect.nativeElement.value;
+
+    // top and worst n for surviverate, winrate
+    const n_each = 10;
+    const roles: Set<string> = new Set();
+    if (select === "best_win_rt" || select === "worst_win_rt")
+      data.sort((a, b) => a.win_rt - b.win_rt);
+    else
+      data.sort((a, b) => a.surv_rt - b.surv_rt);
+    for (let i = 0; i < n_each; i++) {
+      if (select === "best_win_rt" || select === "best_sur_rt")
+        roles.add(data[data.length - 1 - i].role);
+      else
+        roles.add(data[i].role);
+    }
+
+    let datasets: ChartConfiguration["data"]["datasets"] = [];
+    const colors = data.filter(d => roles.has(d.role)).map(d => d.color);
+    if (select === "best_win_rt" || select === "worst_win_rt") {
+      datasets.push({
+        label: "your winrate",
+        data: data.filter(d => roles.has(d.role)).map(d => d.win_rt),
+        backgroundColor: colors,
+      });
+      datasets.push({
+        label: "total winrate",
+        data: data.filter(d => roles.has(d.role)).map(d => d.tot_win_rt),
+        backgroundColor: colors.map(x => x+"80"),
+      });
+    } else {
+      datasets.push({
+        label: "your surviverate",
+        data: data.filter(d => roles.has(d.role)).map(d => d.surv_rt),
+        backgroundColor: colors,
+      });
+      datasets.push({
+        label: "total surviverate",
+        data: data.filter(d => roles.has(d.role)).map(d => d.tot_surv_rt),
+        backgroundColor: colors.map(x => x+"80"),
+      });
+    }
+
+    this.cRolesWinSur = {
+      type: "bar" as ChartType,
+      options: {
+        plugins: {legend: {position: 'bottom'}},
+        indexAxis: "y",
+        aspectRatio: 0.9,
+      },
+      data: {
+        datasets,
+        labels: data.filter(d => roles.has(d.role)).map(d => d.role)
+      }
+    }
   }
 }

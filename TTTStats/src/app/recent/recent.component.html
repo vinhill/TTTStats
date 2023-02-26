@@ -11,7 +11,8 @@
 		<data-chart [data]="cKillsDeaths!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
 	<card title="Karma" [loaded]="cKarmaTS !== undefined" (reload)="loadKarma()" size="large">
-		<data-plotly [data]="cKarmaTS?.data!" [layout]="cKarmaTS?.layout"></data-plotly>
+		<!--<data-plotly [data]="cKarmaTS?.data!" [layout]="cKarmaTS?.layout"></data-plotly>-->
+		<data-chart [data]="cKarmaTS!" [legend]="LegendType.ChartJS"></data-chart>
 	</card>
 	<card title="Role distribution" size="large" [loaded]="cRoles !== undefined" (reload)="loadRolesTreemap()">
 		<data-plotly [data]="cRoles!"></data-plotly>

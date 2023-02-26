@@ -63,7 +63,7 @@ VALUES
   ("Amnesiac", "None", "#7f6fda", "None", "Inspect a uninspected, dead body to take their role. Everyone will be alerted."), -- Changes Role -> wins with that team
   ("Pirate_captain", "Pirates", "#613721", "None", "Has a contract. Giving it to a player puts you and all pirates onto their team."), -- Wins with a team
   ("Pirate", "Pirates", "#d09542", "None", "Wins with the team that holds the pirate captains contract."), -- Wins with a team
-  ("Bodyguard", "Innocent", "#dc8f19", "None", "Has to protect another person, win when they win."), -- ?
+  ("Bodyguard", "Innocent", "#dc8f19", "None", "Has to protect another person, win when they win."), -- starts as innocent and might immediately switch according to who they protect
   ("Drunk", "None", "#d7a018", "None", "Has the change to take the role of a player after they die."), -- Changes Role -> wins with that team
   ("Jester", "Jester", "#d73e90", "None", "Wins when killed, cannot deal damage."), -- Wins on Kill
   ("Unknown", "None", "#a7b5b6", "None", "Come back as your killers role when killed."), -- Dies -> comes back and changes role -> wins with that team

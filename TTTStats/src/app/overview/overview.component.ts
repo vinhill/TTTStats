@@ -240,8 +240,11 @@ export class OverviewComponent implements OnInit {
         datasets: [{
           borderColor: getColumn(res, "color"),
           backgroundColor: getColumn(res, "color"),
+          hoverBackgroundColor: getColumn(res, "color"),
+          hoverBorderColor: getColumn(res, "color"),
           data: points,
           radius: 5,
+          hoverRadius: 6,
         }],
       },
       options: {
@@ -254,7 +257,7 @@ export class OverviewComponent implements OnInit {
           tooltip: {
             callbacks: {
               label: (context: any) => {
-                return `${res[context.dataIndex].name}: won ${100*context.parsed.x.toFixed(2)}%, survived ${100*context.parsed.y.toFixed(2)}%`;
+                return `${res[context.dataIndex].name}: won ${Math.round(100*context.parsed.x)}%, survived ${Math.round(100*context.parsed.y)}%`;
               }
             }
           }
@@ -271,16 +274,17 @@ export class OverviewComponent implements OnInit {
       return {x: x.won / x.participated, y: x.survived / x.participated}
     });
 
-    const colors = getColormap("plotly", res.length);
-
     this.cTeamWonSurRate = {
       type: "scatter" as ChartType,
       data: {
         datasets: [{
-          borderColor: colors,
-          backgroundColor: colors,
+          borderColor: getColumn(res, "color"),
+          backgroundColor: getColumn(res, "color"),
+          hoverBackgroundColor: getColumn(res, "color"),
+          hoverBorderColor: getColumn(res, "color"),
           data: points,
-          radius: 5,
+          radius: 8,
+          hoverRadius: 9,
         }],
       },
       options: {
@@ -293,7 +297,7 @@ export class OverviewComponent implements OnInit {
           tooltip: {
             callbacks: {
               label: (context: any) => {
-                return `${res[context.dataIndex].name}: won ${100*context.parsed.x.toFixed(2)}%, survived ${100*context.parsed.y.toFixed(2)}%`;
+                return `${res[context.dataIndex].name}: won ${Math.round(100*context.parsed.x)}%, survived ${Math.round(100*context.parsed.y)}%`;
               }
             }
           }

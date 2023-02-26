@@ -97,7 +97,7 @@ export class RestttService {
 
 	async Teams(since?: number, player?: string)
 		: Promise<{
-			name: string, category: string,
+			name: string, color: string,
 			participated: number, won: number, survived: number
 		}[]>
 	{
