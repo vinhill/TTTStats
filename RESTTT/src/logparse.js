@@ -91,6 +91,8 @@ const RoleAssigner = {
   onRoleAssigned(match, state) {
     // captures: time, name, role
     const role = capitalizeFirstLetter(match.role)
+    if (!state.clients.has(match.name))
+      state.clients.set(match.name, new Client(match.name))
     state.clients.get(match.name).role = role
     // initialize team per role, bodyguard will directly emit CP_RC
     state.clients.get(match.name).team = this.defaultTeams.get(role)
@@ -436,7 +438,7 @@ async function load_logfile(log, date) {
   lp.listen("init_round", resetTeamRoles)
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) is (?<role>\w+)/,
+    /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) \[(?<role>\w+), (?<team>\w+)\]/,
     "initial_role"
   )
   lp.subscribe("initial_role", RoleAssigner, "onRoleAssigned")
@@ -499,7 +501,7 @@ async function load_logfile(log, date) {
       (?<attacker>\w*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s damaged \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
-      \s for \s
+      \s+ for \s
       (?<damage>\d*)
     `,
     "pvp_dmg"
@@ -511,7 +513,7 @@ async function load_logfile(log, date) {
       \s nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s damaged \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
-      \s for \s
+      \s+ for \s
       (?<damage>\d*)
     `,
     "pve_dmg"

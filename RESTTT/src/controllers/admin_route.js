@@ -6,6 +6,8 @@ const router = express.Router()
 const db = require("../utils/database.js")
 const fetch = require("cross-fetch")
 const logparse = require("../logparse.js")
+const logfile = require("../logfile.js")
+const { REST_ADMIN_TOKEN } = require("../utils/config.js")
 
 // eslint-disable-next-line no-unused-vars
 async function get_all_logs() {
@@ -46,22 +48,39 @@ router.get("/health", async function(req, res) {
   })
 })
 
+router.get("/listlogs", async function(req, res) {
+  const logs = await logfile.list_logs()
+  res.status(200).send(logs)
+})
+
+router.post("/fetchlog", async function(req, res) {
+  if (req.body.token !== REST_ADMIN_TOKEN) {
+    res.status(401).json("fetchlog route requires an authentication token in the body.")
+    return
+  }
+
+  const fname = req.body.fname
+  if (!fname) {
+    res.status(400).json("The fetchlog route requires the 'fname' field in the body.")
+    return
+  }
+
+  await logfile.process_current_log(fname)
+  res.status(200).end()
+})
+
 router.post("/parselog", async function(req, res) {
   // check request parameters
-  let filename = req.body.name
-  let date = req.body.date
-  if (!filename) {
-    res.status(400).json("The config/parse route requires the 'name' field in the body. It will be resolved to the URL 'https://raw.githubusercontent.com/vinhill/TTTStats/master/logs/<name>'")
+  const fname = req.body.fname
+  if (!fname) {
+    res.status(400).json("The parselog route requires the 'fname' field in the body.")
     return
   }
-  if(!date) {
-    res.status(400).json("The config/parse route requires the 'date' field in the body.")
-    return
+  const fname_re = /^....-..-../
+  if(!fname_re.exec(fname)) {
+    res.status(400).json("Filename not in the format YYYY-MM-DD")
   }
-  let date_re = /^....-..-..$/
-  if(!date_re.exec(date)) {
-    res.status(400).json("The config/parse route requires a date in the format YYYY-MM-DD")
-  }
+  const date = fname.substring(0, 10)
 
   // race condition with the check for presence, fetching file and declaring presence
   if (_mutex) {
@@ -72,29 +91,29 @@ router.post("/parselog", async function(req, res) {
   }
 
   // check if already present
-  let config = await db.query("SELECT * FROM configs WHERE filename = ?", [filename], false)
+  const config = await db.query("SELECT * FROM configs WHERE filename = ?", [fname], false)
   if (config.length !== 0) {
-    res.status(409).json(`Config with filename '${filename}' was already parsed.`)
+    res.status(409).json(`Config with filename '${fname}' was already parsed.`)
     return
   }
 
   // retreive log
-  let data = null
-  let status = 500
-  try{
-    let fetched = await fetch(`https://raw.githubusercontent.com/vinhill/TTTStats/master/logs/${filename}`)
-    data = await fetched.text()
-    status = fetched.status
-  }catch(e) {
-    res.status(400).json(`Could not get config file because of an error: ${e}`)
+  let data = ""
+  try {
+    data = await logfile.get_log(fname)
+  } catch (e) {
+    if (e.code === 550)
+      res.status(404).json(`Log file '${fname}' not found.`)
+    else {
+      res.status(500).json(`Error retreiving log file '${fname}'`)
+      logger.error("AdminRoute", e)
+    }
+    _mutex = false
     return
-  }
-  if(status !== 200) {
-    res.status(status).json(`Could not get config file: ${data}`)
   }
 
   // before adding anything to the db, add filename to configs table
-  await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [filename])
+  await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [fname])
   _mutex = false
 
   // parse

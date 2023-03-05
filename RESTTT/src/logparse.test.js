@@ -25,9 +25,9 @@ class SimuGame {
         this.logs.push("Round state: 2")
     }
 
-    prepare(roles = {}) {
+    prepare(roles = {}, teams = {}) {
         for (const p of this.players) {
-            this.logs.push(`ServerLog: 00:00.00 - ROUND_START: ${p} is ${roles[p]}`)
+            this.logs.push(`ServerLog: 00:00.00 - ROUND_START: ${p} [${roles[p]}, ${teams[p]}]`)
         }
         this.logs.push("Round state: 3")
     }

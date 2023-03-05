@@ -62,5 +62,6 @@ function shutdown() {
   logger.info("Server", 'Server is shutting down...')
   server.close(function() {
     require("./src/utils/database.js").shutdown()
+    require("./src/utils/filebase.js").shutdown()
   })
 }

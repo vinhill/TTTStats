@@ -33,28 +33,50 @@ function update_urlencoded() {
   enc.value = encodeURIComponent(dec.value);
 }
 
+const today = (() => {
+  const date = new Date();
+  const year = date.getFullYear();
+  let month = date.getMonth() + 1;
+  if (month < 10) month = "0" + month.toString();
+  let day = date.getDate();
+  if (day < 10) day = "0" + day.toString();
+  return `${year}-${month}-${day}`;
+})();
+
 const templates = {
-  "reset": {
-    "uri": "/api/v1/dev/makedb",
-    "method": "POST",
-    "title": "Reset DB"
+  "health_checks": {
+    "uri": "/api/v1/admin/health",
+    "method": "GET",
+    "title": "Health"
   },
-  "loadcnf": {
+  "list_logs": {
+    "uri": "/api/v1/admin/listlogs",
+    "method": "GET",
+    "title": "List logs"
+  },
+  "fetch_new_log": {
+    "uri": "/api/v1/admin/fetchlog",
+    "method": "POST",
+    "body": `fname=${today}&token=`,
+    "encode": "application/x-www-form-urlencoded",
+    "title": "Fetch new log"
+  },
+  "parse_log": {
     "uri": "/api/v1/admin/parselog",
-    "body": "name=2023.02.06.log&date=2023-02-06",
+    "body": `fname=${today}.log`,
     "method": "POST",
     "encode": "application/x-www-form-urlencoded",
-    "title": "Load config"
+    "title": "Parse log"
   },
-  "unsetmut": {
+  "unset_mutex": {
     "uri": "/api/v1/admin/unsetmutex",
     "method": "POST",
     "title": "Unset mutex"
   },
-  "health": {
-    "uri": "/api/v1/admin/health",
-    "method": "GET",
-    "title": "Health"
+  "reset_db": {
+    "uri": "/api/v1/dev/makedb",
+    "method": "POST",
+    "title": "Reset DB"
   },
 }
 
