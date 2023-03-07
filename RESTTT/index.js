@@ -63,7 +63,7 @@ const templates = {
   },
   "parse_log": {
     "uri": "/api/v1/admin/parselog",
-    "body": `fname=${today}.log`,
+    "body": `fname=${today}.log.zip`,
     "method": "POST",
     "encode": "application/x-www-form-urlencoded",
     "title": "Parse log"

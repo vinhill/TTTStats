@@ -54,8 +54,9 @@ function clean_log(log) {
             }
         }
     }
-    const duration = Math.round(1000*(Date.now() - start))
-    logger.info("Logfile", `Cleaning log with ${lines.length} lines took ${duration} s.`)
+    const dur_s = Math.round((Date.now() - start)/1000)
+    const dur_ms = Math.round((Date.now() - start)%1000)
+    logger.info("Logfile", `Cleaning log with ${lines.length} lines took ${dur_s}.${dur_ms} s.`)
     return res
 }
 
@@ -64,15 +65,17 @@ async function process_current_log(fname) {
     const clean = clean_log(log)
 
     const files = await fb.list()
-    let path = fname + ".log"
+    let path1 = fname + ".log.zip"
+    let path2 = fname + ".raw.log.zip"
     let i = 0
-    while (files.includes(path) || files.includes(path + ".raw")) {
+    while (files.includes(path1) || files.includes(path2)) {
         i++
-        path = fname + "_" + i + ".log"
+        path1 = fname + `-${i}.log.zip`
+        path2 = fname + `-${i}.raw.log.zip`
     }
 
-    await save_log(fname + ".raw", log)
-    await save_log(path, clean)
+    await save_log(path2, log)
+    await save_log(path1, clean)
 
     await fb.remove("garrysmod/garrysmod/console.log", "nitrado")
 }
