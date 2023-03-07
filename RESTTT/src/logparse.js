@@ -137,12 +137,30 @@ function onBuy(match, state) {
   )
 }
 
-function onLove(match, state) {
-  // captures: firstname, secondname
-  db.queryAdmin(
-    "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'love')",
-    [state.mid, ...([match.firstname, match.secondname]).sort()]
-  )
+// note that depending on role settings, cupid and two lovers join together
+const LoveHandle = {
+  init() {
+    this.time = "00:00.00"
+    this.lovers = []
+  },
+  onTC(match, state) {
+    // captures: time, name
+    if (match.time == this.time) {
+      this._pushdb(match.name, state.mid)
+      this.lovers.push(match.name)
+    } else {
+      this.time = match.time
+      this.lovers = [match.name]
+    }
+  },
+  _pushdb(newlover, mid) {
+    for (const lover of this.lovers) {
+      db.queryAdmin(
+        "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'love')",
+        [mid, ...([lover, newlover]).sort()]
+      )
+    }
+  }
 }
 
 function jackalTeamup(match, state) {
@@ -382,6 +400,7 @@ async function load_logfile(log, date) {
   lp.subscribe("init_round", gameEndListener, "init")
   lp.subscribe("init_round", RoleAssigner, "init")
   lp.subscribe("init_round", DamageHandler, "init")
+  lp.subscribe("init_round", LoveHandle, "init")
   lp.listen("init_round", resetState)
 
   lp.register(
@@ -407,7 +426,9 @@ async function load_logfile(log, date) {
     "team_change"
   )
   lp.listen("team_change", onTeamChange)
+  lp.listen("team_change", LoveHandle, "onTC")
   // CP_TC is called twice, before and after CP_RC
+  // TODO still the case?
   lp.subscribe("team_change", new DuplicateFilter(), 'filter', 999)
 
   lp.register(
@@ -421,12 +442,6 @@ async function load_logfile(log, date) {
     "buy"
   )
   lp.listen("buy", onBuy)
-
-  lp.register(
-    /(?<firstname>\w+) is now in love with (?<secondname>\w+)/,
-    "love"
-  )
-  lp.listen("love", onLove)
 
   lp.register(
     /\[TTT2 Medium Role\] Noisified chat: (?<msg>.*)/,

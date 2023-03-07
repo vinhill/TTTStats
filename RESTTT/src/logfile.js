@@ -22,10 +22,6 @@ async function save_log(name, log) {
 }
 
 const keep_loglines = [
-    'Client "\w+" spawned in server <.*> \(took \d+ seconds?\).',
-    '\w+ is now in love with \w+.',
-    "Dropped \w+ from server",
-
     'CP map: \w+',
     'CP round state',
     'ServerLog: [0-9.:]+ - ROUND_START',
