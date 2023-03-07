@@ -75,7 +75,7 @@ async function onRoleAssigned(match, state) {
   // captures: time, name, role, team
   const client = new Client(match.name)
   client.role = capitalizeFirstLetter(match.role)
-  client.team = capitalizeFirstLetter(match.team)
+  client.team = unifyTeamname(match.team)
   state.clients.set(match.name, client)
 
   await db.queryAdmin(
@@ -144,7 +144,9 @@ const LoveHandle = {
     this.lovers = []
   },
   onTC(match, state) {
-    // captures: time, name
+    if (match.newteam != "lovers")
+      return
+
     if (match.time == this.time) {
       this._pushdb(match.name, state.mid)
       this.lovers.push(match.name)
@@ -395,10 +397,8 @@ async function load_logfile(log, date) {
     /CP round state: prep/,
     "init_round"
   )
-  lp.subscribe("init_round", roundStateTracker, "state2", 999)
   lp.subscribe("init_round", karmaTracker, "init")
   lp.subscribe("init_round", gameEndListener, "init")
-  lp.subscribe("init_round", RoleAssigner, "init")
   lp.subscribe("init_round", DamageHandler, "init")
   lp.subscribe("init_round", LoveHandle, "init")
   lp.listen("init_round", resetState)
@@ -416,17 +416,17 @@ async function load_logfile(log, date) {
   lp.listen("game_start", onGameStart)
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_RC: (?<name>\w+) changed Role from (?<oldrole>\w*) to (?<newrole>\w*)/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_RC: (?<name>\w+) \[\w+, \w+\] changed Role from \[(?<oldrole>\w*)\] to \[(?<newrole>\w*)\]/,
     "role_change"
   )
   lp.listen("role_change", onRoleChange)
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_TC: (?<name>\w+) \[(?<role>\w+)\] changed Team from (?<oldteam>\w*) to (?<newteam>\w*)/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_TC: (?<name>\w+) \[\w+, \w+\] changed Team from \[(?<oldteam>\w*)\] to \[(?<newteam>\w*)\]/,
     "team_change"
   )
   lp.listen("team_change", onTeamChange)
-  lp.listen("team_change", LoveHandle, "onTC")
+  lp.subscribe("team_change", LoveHandle, "onTC")
   // CP_TC is called twice, before and after CP_RC
   // TODO still the case?
   lp.subscribe("team_change", new DuplicateFilter(), 'filter', 999)
@@ -438,7 +438,7 @@ async function load_logfile(log, date) {
   lp.subscribe("revive", surviveTracker, "revive")
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+)\]\s{2}ordered (?<equipment>\w*)/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+), (?<team>\w+)\]\s ordered (?<equipment>\w*)/,
     "buy"
   )
   lp.listen("buy", onBuy)
@@ -548,7 +548,7 @@ async function load_logfile(log, date) {
   if (Object.keys(lp.state).length != 4) {
     // this can happen if listener object has lambda functions
     // prefer function definitions with usage of lp.subscribe for binding this
-    logger.error("Logparser", "listtener modified logparse state: " + Object.keys(lp.state))
+    logger.error("Logparser", "listener modified logparse state: " + Object.keys(lp.state))
   }
 }
 

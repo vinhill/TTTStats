@@ -6,33 +6,34 @@ class SimuGame {
     constructor(map = "", date = "") {
         this.map = map
         this.date = date
-        this.players = new Set()
+        this.players = []
         this.logs = []
     }
 
-    addPlayer(name) {
-        this.players.add(name)
-        this.logs.push(`Client "${name}" spawned in server <STEAM_0:0:000000000> (took 5 seconds).`)
+    addPlayer(name, role="innocent", team="innocents") {
+        this.players.push({name, role, team})
     }
 
     removePlayer(name) {
-        this.players.delete(name)
-        this.logs.push(`Dropped ${name} from server`)
+        this.players = this.players.filter(p => p.name !== name)
     }
 
-    init() {
-        this.logs.push(`Map: ${this.map}`)
-        this.logs.push("Round state: 2")
+    updatePlayer(name, role, team) {
+        this.players = this.players.map(p => {
+            p.name == name ? {name, role, team} : p
+        })
     }
 
-    prepare(roles = {}, teams = {}) {
-        for (const p of this.players) {
-            this.logs.push(`ServerLog: 00:00.00 - ROUND_START: ${p} [${roles[p]}, ${teams[p]}]`)
+    prepare() {
+        this.logs.push(`CP map: ${this.map}`)
+        this.logs.push("CP round state: prep")
+        for (let {name, role, team} of this.players) {
+            this.logs.push(`ServerLog: 00:00.00 - ROUND_START: ${name} [${role}, ${team}]`)
         }
-        this.logs.push("Round state: 3")
     }
 
-    start(logs) {
+    start(logs = []) {
+        this.logs.push("CP round state: active")
         this.logs = this.logs.concat(logs)
     }
 
@@ -42,11 +43,21 @@ class SimuGame {
         else
             this.logs.push(`ServerLog: Result: ${elseresult}`)
         this.logs.push(`ServerLog: ${time} - ROUND_ENDED at given time`)
-        this.logs.push("Round state: 4")
+        this.logs.push("CP round state: post")
     }
 
     async submit() {
         await logparse.load_logfile(this.logs, this.date)
+    }
+
+    async run(steps=[2,3,4]) {
+        if (steps.includes(2))
+            this.prepare()
+        if (steps.includes(3))
+            this.start()
+        if (steps.includes(4))
+            this.end()
+        await this.submit()
     }
 }
 
@@ -82,16 +93,13 @@ describe('logparse', () => {
     describe('for one game', () => {
         test('creates a game and stores duration.', async () => {
             results["SELECT mid FROM game ORDER BY mid DESC LIMIT 1"] = [{mid: 5}]
-    
-            await logparse.load_logfile([
-                "Map: ttt_rooftops_2016_v1",
-                "Round state: 2",
-                "Round state: 3",
-                "ServerLog: Result: innocents wins.",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time",
-                "Round state: 4"
-            ], '2021-01-01');
-    
+
+            const game = new SimuGame(map="ttt_rooftops_2016_v1", date="2021-01-01");
+            game.prepare();
+            game.start();
+            game.end(false, "traitors win.", "4:02.01");
+            await game.submit();
+
             expect(queries.includes(
                 "INSERT INTO game (map, date, duration) VALUES ('ttt_rooftops_2016_v1', '2021-01-01', 0)"
                 )).toBe(true);
@@ -103,11 +111,9 @@ describe('logparse', () => {
         test('stores a players role', async () => {
             results["SELECT mid FROM game ORDER BY mid DESC LIMIT 1"] = [{mid: 1}]
 
-            await logparse.load_logfile([
-                'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'ServerLog: 00:00.00 - ROUND_START: GhastM4n is necromancer',
-                "Round state: 3",
-            ], '');
+            const game = new SimuGame();
+            game.addPlayer('GhastM4n', 'necromancer', 'traitors');
+            await game.run([2, 3]);
 
             expect(queries.includes(
                 "INSERT INTO participates (mid, player, startrole) VALUES (1, 'GhastM4n', 'Necromancer')"
@@ -118,14 +124,12 @@ describe('logparse', () => {
             results["SELECT name, team FROM role"] = [{'name': 'Innocent', 'team': 'Innocent'}];
             results["SELECT mid FROM game ORDER BY mid DESC LIMIT 1"] = [{mid: 0}]
 
-            await logparse.load_logfile([
-                'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'Round state: 2',
-                'ServerLog: 00:00.00 - ROUND_START: GhastM4n is innocent',
-                "ServerLog: Result: timelimit reached, traitors lose.",
-                "ServerLog: 04:02.01 - ROUND_ENDED at given time",
-                "Round state: 4"
-            ], '2021-01-01');
+            const game = new SimuGame();
+            game.addPlayer('GhastM4n', 'innocent', 'innocent');
+            game.prepare();
+            game.start();
+            game.end(true, "", "4:02.01");
+            await game.submit();
 
             expect(queries.includes(
                 "UPDATE game SET duration = 242.01 WHERE mid = 0"
@@ -136,10 +140,10 @@ describe('logparse', () => {
         });
     });
 
-    test('adds joining player to player table', async () => {
-        await logparse.load_logfile([
-            'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).'
-        ], "");
+    test('adds participating player to player table', async () => {
+        const game = new SimuGame();
+        game.addPlayer('GhastM4n', 'necromancer', 'traitors');
+        await game.run([2]);
 
         expect(queries.includes(
             "INSERT IGNORE INTO player (name) VALUES ('GhastM4n')"
@@ -148,7 +152,7 @@ describe('logparse', () => {
 
     test('captures bought items', async () => {
         await logparse.load_logfile([
-            'ServerLog: 01:05.55 - CP_OE: Zumoari [survivalist]  ordered weapon_ttt_sandwich'
+            'ServerLog: 01:05.55 - CP_OE: Zumoari [survivalist, t]  ordered weapon_ttt_sandwich'
         ], "");
 
         expect(queries.includes(
@@ -158,12 +162,15 @@ describe('logparse', () => {
 
     describe('handles role special cases', () => {
         test('ignore vampire world damage', async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.addPlayer('GhastM4n', 'vampire', 'traitors');
+            game.prepare();
+            game.start([
                 "ServerLog: 01:00.02 - CP_DMG OTHER<0>: nonplayer (Entity [0][worldspawn]) damaged GhastM4n [vampire, traitors] for 1",
                 "ServerLog: 01:00.03 - CP_DMG OTHER<0>: nonplayer (Entity [0][worldspawn]) damaged GhastM4n [vampire, traitors] for 2",
-                'Round state: 4'
             ]);
+            game.end();
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (0, 'GhastM4n', 'Vampire', 'OTHER<0>', 2)"
@@ -173,16 +180,15 @@ describe('logparse', () => {
         test('multiple bodyguard win mechanic', async () => {
             results["SELECT name, team FROM role"] = [{name: 'Bodyguard', team: 'Innocent'}];
 
-            await logparse.load_logfile([
-                'Client "V8Block" spawned in server <STEAM_0:1:202841564> (took 40 seconds).',
-                'Client "Poci" spawned in server <STEAM_0:1:202841564> (took 40 seconds).',
-                'Round state: 2',
-                'ServerLog: 00:00.00 - ROUND_START: V8Block is bodyguard',
-                'ServerLog: 00:00.00 - ROUND_START: Poci is bodyguard',
-                'ServerLog: 00:00.06 - CP_TC: V8Block [bodyguard] changed Team from innocents to traitors',
-                'ServerLog: Result: traitors wins.',
-                'Round state: 4'
-            ], "");
+            const game = new SimuGame();
+            game.addPlayer('V8Block', 'bodyguard', 'innocent');
+            game.addPlayer('Poci', 'bodyguard', 'innocent');
+            game.prepare();
+            game.start([
+                'ServerLog: 00:00.06 - CP_TC: V8Block [bodyguard, t] changed Team from [innocents] to [traitors]',
+            ]);
+            game.end(false, "traitors wins.");
+            await game.submit();
 
             expect(queries.includes(
                 "UPDATE participates SET won = true WHERE mid = 0 AND player = 'V8Block'"
@@ -196,17 +202,14 @@ describe('logparse', () => {
             results["SELECT name, team FROM role"] = [{name: 'Doppelganger', team: 'Doppelganger'}];
 
             let game = new SimuGame();
-            game.addPlayer("Zumoari");
-            game.init();
-            game.prepare({"Zumoari": "Doppelganger"});
-            game.start([
-                'ServerLog: 00:00.00 - ROUND_START: Zumoari is doppelganger',
-            ])
+            game.addPlayer("Zumoari", "doppelganger", "doppelganger");
+            game.prepare();
+            game.start();
             game.end(false, "doppelganger wins.");
-            game.prepare({"Zumoari": "Doppelganger"});
+            game.prepare();
             game.start([
-                'ServerLog: 00:08.39 - CP_TC: Zumoari [cursed] changed Team from doppelgangers to nones',
-                'ServerLog: 00:08.39 - CP_RC: Zumoari changed Role from innocent to cursed'
+                'ServerLog: 00:08.39 - CP_TC: Zumoari [cursed, t] changed Team from [doppelgangers] to [nones]',
+                'ServerLog: 00:08.39 - CP_RC: Zumoari [r, t] changed Role from [innocent] to [cursed]'
             ])
             game.end(false, "doppelganger wins.");
             await game.submit();
@@ -220,21 +223,31 @@ describe('logparse', () => {
         });
 
         test('captures loved ones', async () => {
-            await logparse.load_logfile([
-                'P1 is now in love with P2'
-            ], "");
+            const game = new SimuGame();
+            game.addPlayer('Zumoari');
+            game.addPlayer('Poci');
+            game.prepare();
+            game.start([
+                'ServerLog: 00:55.67 - CP_TC: Zumoari [cupid, lovers] changed Team from [innocents] to [lovers]',
+                'ServerLog: 00:55.67 - CP_TC: Poci [bodyguard, lovers] changed Team from [innocents] to [lovers]'
+            ]);
+            await game.submit();
     
             expect(queries.includes(
-                "INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'P1', 'P2', 'love')"
+                "INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'Poci', 'Zumoari', 'love')"
             )).toBe(true);
         });
 
         test("captures jackal teamup", async () => {
-            await logparse.load_logfile([
-                'Round state: 2',
+            const game = new SimuGame();
+            game.addPlayer('vinno', 'jackal', 'jackals');
+            game.addPlayer('GhastM4n', 'innocent', 'innocent');
+            game.prepare();
+            game.start([
                 'ServerLog: 01:41.99 - CP_DMG BULLET: vinno [jackal, jackals] <Weapon [126][weapon_ttt2_sidekickdeagle]>, (Player [4][vinno], vinno) damaged GhastM4n [sidekick, jackals] for 0',
                 'ServerLog: 01:41.99 - CP_DMG BULLET: vinno [jackal, jackals] <Weapon [126][weapon_ttt2_sidekickdeagle]>, (Player [4][vinno], vinno) damaged GhastM4n [sidekick, jackals] for 0'
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'vinno', 'GhastM4n', 'jackal')"
@@ -246,12 +259,8 @@ describe('logparse', () => {
             results["SELECT name, team FROM role"] = [{name: 'Lootgoblin', team: 'None'}];
 
             let game = new SimuGame();
-            game.addPlayer("Zumoari");
-            game.init();
-            game.prepare({"Zumoari": "Lootgoblin"});
-            game.start()
-            game.end(true);
-            await game.submit();
+            game.addPlayer("Zumoari", "lootgoblin", "nones");
+            await game.run();
 
             expect(queries.includes(
                 "UPDATE participates SET won = true WHERE mid = 0 AND player = 'Zumoari'"
@@ -262,13 +271,12 @@ describe('logparse', () => {
             results["SELECT name, team FROM role"] = [{name: 'Lootgoblin', team: 'None'}];
 
             let game = new SimuGame();
-            game.addPlayer("Zumoari");
-            game.init();
-            game.prepare({"Zumoari": "Lootgoblin"});
+            game.addPlayer("Zumoari", "lootgoblin", "nones")
+            game.prepare();
             game.start([
                 "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Zumoari [lootgoblin, nones]"
-            ])
-            game.end(false, "nones win.");
+            ]);
+            game.end();
             await game.submit();
 
             expect(queries.includes(
@@ -279,10 +287,13 @@ describe('logparse', () => {
 
     describe('handles kills', () => {
         test("for PvE", async () => {
-            await logparse.load_logfile([
-                'Client "Schnitzelboy" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer('Schnitzelboy', 'traitor', 'traitors');
+            game.prepare();
+            game.start([
                 "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]",
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', 177.16)"
@@ -290,10 +301,14 @@ describe('logparse', () => {
         });
 
         test("for PvP", async () => {
-            await logparse.load_logfile([
-                'Client "Poci" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer("GhastM4n", "glutton", "traitors");
+            game.addPlayer("Poci", "amnesiac", "nones");
+            game.prepare();
+            game.start([
                 "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [amnesiac, nones]"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 178.71, 'GhastM4n', 'Glutton', 'w1', false)"
@@ -301,10 +316,14 @@ describe('logparse', () => {
         });
 
         test("for non-weapon kill", async () => {
-            await logparse.load_logfile([
-                'Client "Poci" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer("vinno", "traitor", "traitors");
+            game.addPlayer("Poci", "amnesiac", "nones");
+            game.prepare();
+            game.start([
                 "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed Poci [amnesiac, nones]"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
@@ -312,10 +331,13 @@ describe('logparse', () => {
         });
 
         test("for selfkill", async () => {
-            await logparse.load_logfile([
-                'Client "vinno" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer("vinno", "traitor", "traitors");
+            game.prepare();
+            game.start([
                 "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed vinno [traitor, traitors]"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
@@ -323,10 +345,14 @@ describe('logparse', () => {
         });
 
         test("for teamkill", async () => {
-            await logparse.load_logfile([
-                'Client "Poci" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer("GhastM4n", "glutton", "traitors");
+            game.addPlayer("Poci", "glutton", "traitors");
+            game.prepare();
+            game.start([
                 "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [glutton, traitors]"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', 178.71, 'GhastM4n', 'Glutton', 'w1', true)"
@@ -336,90 +362,99 @@ describe('logparse', () => {
 
     describe("handles damage", () => {
         test("for PvP", async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.prepare();
+            game.start([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 85",
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("SELECT name, team FROM role");
-            expect(queries.shift()).toBe(
-                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
+            expect(queries.includes(
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 85)"
+            )).toBe(true);
         });
 
         test("for PvE", async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.prepare();
+            game.start([
                 "ServerLog: 00:52.92 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged p2 [r2, t2] for 85",
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("SELECT name, team FROM role");
-            expect(queries.shift()).toBe(
-                "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)");
+            expect(queries.includes(
+                "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (0, 'p2', 'R2', 'FALL', 85)"
+            )).toBe(true);
         });
 
         test("for non-weapon damage", async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.prepare();
+            game.start([
                 "ServerLog: 00:52.92 - CP_DMG EXPL: p1 [r1, t1] <[NULL Entity]>, (Entity [3][w1], ) damaged p2 [r2, t2] for 85",
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("SELECT name, team FROM role");
-            expect(queries.shift()).toBe(
-                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)");
+            expect(queries.includes(
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'EXPL', 'p1', 'R1', 'w1', false, 85)"
+            )).toBe(true);
         });
 
         test("for selfdamage", async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.prepare();
+            game.start([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p1 [r1, t1] for 85",
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("SELECT name, team FROM role");
-            expect(queries.shift()).toBe(
-                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)");
+            expect(queries.includes(
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p1', 'R1', 'BULLET', 'p1', 'R1', 'w1', false, 85)"
+            )).toBe(true);
         })
 
         test("for teamdamage", async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.prepare();
+            game.start([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t1] for 85",
-                "Round state: 4"
-            ], "");
+            ]);
+            game.end();
+            await game.submit();
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("SELECT name, team FROM role");
-            expect(queries.shift()).toBe(
-                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', true, 85)");
+            expect(queries.includes(
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', true, 85)"
+            )).toBe(true);
         });
 
         test("through aggregation", async () => {
-            await logparse.load_logfile([
-                "Round state: 2",
+            const game = new SimuGame();
+            game.prepare();
+            game.start([
                 "ServerLog: 00:52.92 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 10",
-                "ServerLog: 01:54.93 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 12",
-                "Round state: 4"
-            ], "");
+                "ServerLog: 01:54.93 - CP_DMG BULLET: p1 [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged p2 [r2, t2] for 12"
+            ]);
+            game.end();
+            await game.submit();
 
-            expectInitialQueries();
-            expect(queries.shift()).toBe("SELECT name, team FROM role");
-            expect(queries.shift()).toBe(
-                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)");
+            expect(queries.includes(
+                "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (0, 'p2', 'R2', 'BULLET', 'p1', 'R1', 'w1', false, 22)"
+            )).toBe(true);
         });
     });
 
     test("handles rolechange", async () => {
-        await logparse.load_logfile([
-            'Client "GhastM4n" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-            "ServerLog: 03:35.91 - CP_RC: GhastM4n changed Role from survivalist to traitor"
-        ], "");
+        const game = new SimuGame();
+        game.addPlayer("GhastM4n", "Survivalist", "innocents");
+        game.prepare();
+        game.start([
+            "ServerLog: 03:35.91 - CP_RC: GhastM4n [r, t] changed Role from [survivalist] to [traitor]"
+        ])
+        await game.submit();
 
         expect(queries.includes(
             "INSERT INTO rolechange (mid, player, orig, dest, time) VALUES (0, 'GhastM4n', 'Survivalist', 'Traitor', 215.91)"
@@ -438,12 +473,15 @@ describe('logparse', () => {
 
     describe("handles karma", () => {
         test("by storing the current sub 1000 karma with time", async () => {
-            await logparse.load_logfile([
-                'Round state: 2',
-                'Client "V8Block" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
-                'ServerLog: 00:05.50 - CP_DMG BULLET: V8Block [r, t] <Weapon [735][w]>, (Player [7][V8Block], V8Block) damaged p2 [r2, t2] for 10',
+            const game = new SimuGame();
+            game.addPlayer("V8Block");
+            game.addPlayer("Schnitzelboy");
+            game.prepare();
+            game.start([
+                "ServerLog: 00:05.50 - CP_DMG BULLET: V8Block [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged Schnitzelboy [r2, t1] for 10",
                 "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 5.5)"
@@ -451,12 +489,15 @@ describe('logparse', () => {
         });
 
         test("when getting back to 1000 karma", async () => {
-            await logparse.load_logfile([
-                'Round state: 2',
-                'Client "V8Block" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer("V8Block");
+            game.addPlayer("Schnitzelboy");
+            game.prepare();
+            game.start([
                 "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000",
                 "V8Block (1000) hurt Schnitzelboy (1000.000000) and gets REWARDED for 10.450000"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 0)"
@@ -467,12 +508,15 @@ describe('logparse', () => {
         })
 
         test("by not storing continuous 1000 karma", async () => {
-            await logparse.load_logfile([
-                'Round state: 2',
-                'Client "V8Block" spawned in server <STEAM_0:0:152172591> (took 50 seconds).',
+            const game = new SimuGame();
+            game.addPlayer("V8Block");
+            game.addPlayer("Schnitzelboy")
+            game.prepare();
+            game.start([
                 "V8Block (1000) hurt Schnitzelboy (1000) and gets REWARDED for 10.450000",
                 "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000"
-            ], "");
+            ]);
+            await game.submit();
 
             expect(queries.includes(
                 "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 1000, 0)"
@@ -486,12 +530,8 @@ describe('logparse', () => {
     describe("tracks survival", () => {
         test("when player survives", async () => {
             let game = new SimuGame();
-            game.addPlayer("Zumoari");
-            game.init();
-            game.prepare({"Zumoari": "innocent"});
-            game.start();
-            game.end();
-            await game.submit();
+            game.addPlayer("Zumoari", "Innocent", "innocents");
+            await game.run();
 
             expect(queries.includes(
                 "UPDATE participates SET survived = true WHERE mid = 0 AND player = 'Zumoari'"
@@ -500,9 +540,8 @@ describe('logparse', () => {
 
         test("when player dies", async () => {
             let game = new SimuGame();
-            game.addPlayer("Zumoari");
-            game.init();
-            game.prepare({"Zumoari": "innocent"});
+            game.addPlayer("Zumoari", "Innocent", "innocents");
+            game.prepare();
             game.start([
                 'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
             ]);
@@ -516,9 +555,8 @@ describe('logparse', () => {
 
         test("when player is revived", async () => {
             let game = new SimuGame();
-            game.addPlayer("Zumoari");
-            game.init();
-            game.prepare({"Zumoari": "innocent"});
+            game.addPlayer("Zumoari", "Innocent", "innocents");
+            game.prepare();
             game.start([
                 'ServerLog: 01:12.15 - CP_KILL: p1 [r1, t1] <Weapon [159][w]>, (Player [3][p1], p1) killed Zumoari [r2, t2]',
                 'ServerLog: 01:12.15 - TTT2Revive: Zumoari has been respawned.',
@@ -530,17 +568,5 @@ describe('logparse', () => {
                 "UPDATE participates SET survived = true WHERE mid = 0 AND player = 'Zumoari'"
             )).toBe(true);
         });
-    });
-
-    test("handles duplicated round state 3", async () => {
-        results["SELECT mid FROM game ORDER BY mid DESC LIMIT 1"] = [{mid: 5}]
-
-        await logparse.load_logfile([
-            'Round state: 2',
-            'Round state: 3',
-            'Round state: 3'
-        ], "");
-
-        expect(queries.filter(q => q.startsWith("INSERT INTO game")).length).toBe(1);
     });
 });
