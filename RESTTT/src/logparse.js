@@ -71,32 +71,17 @@ function onSelectMap(match, state) {
   state.map = match.map
 }
 
-async function onPlayerJoined(match, state) {
-  // captures: name
-  state.clients.set(match.name, new Client(match.name))
-  // add player to player table, if it doesn't exist
+async function onRoleAssigned(match, state) {
+  // captures: time, name, role, team
+  const client = new Client(match.name)
+  client.role = capitalizeFirstLetter(match.role)
+  client.team = capitalizeFirstLetter(match.team)
+  state.clients.set(match.name, client)
+
   await db.queryAdmin(
     "INSERT IGNORE INTO player (name) VALUES (?)",
     [match.name]
   )
-}
-
-const RoleAssigner = {
-  async init() {
-    this.defaultTeams = new Map()
-    const res = await db.query("SELECT name, team FROM role")
-    for (let { name, team } of res)
-      this.defaultTeams.set(name, team)
-  },
-  onRoleAssigned(match, state) {
-    // captures: time, name, role
-    const role = capitalizeFirstLetter(match.role)
-    if (!state.clients.has(match.name))
-      state.clients.set(match.name, new Client(match.name))
-    state.clients.get(match.name).role = role
-    // initialize team per role, bodyguard will directly emit CP_RC
-    state.clients.get(match.name).team = this.defaultTeams.get(role)
-  }
 }
 
 async function onGameStart(match, state) {
@@ -287,16 +272,8 @@ const gameEndListener = {
   }
 }
 
-function resetTeamRoles(match, state) {
-  for (let [_, client] of state.clients) {
-    client.role = undefined
-    client.team = undefined
-  }
-}
-
-function onPlayerLeft(match, state) {
-  // captures: name
-  state.clients.delete(match.name)
+function resetState(match, state) {
+  state.clients.clear()
 }
 
 function onMediumMsg(match, state) {
@@ -370,30 +347,6 @@ class DuplicateFilter {
   }
 }
 
-/*
-If log host is revived, round state is logged again
-
-Example
-ServerLog: 00:52.36 - TTT2Revive: Zumoari has been respawned.
-Round state: 3
-
-This should not trigger game_start
-*/
-const roundStateTracker = {
-  onState(rstate) {
-    oldstate = this.rstate
-    this.rstate = rstate
-    if (this.rstate == 2)
-      return true // init always triggers
-    if (oldstate == this.rstate)
-      return false
-    return true
-  },
-  state2() {return this.onState(2)},
-  state3() {return this.onState(3)},
-  state4() {return this.onState(4)},
-}
-
 class Client {
   constructor(name) {
     this.name = name
@@ -415,19 +368,13 @@ async function load_logfile(log, date) {
   })
 
   lp.register(
-    /Map: (?<map>\w+)/,
+    /CP map: (?<map>\w+)/,
     "mapname"
   )
   lp.listen("mapname", onSelectMap)
 
   lp.register(
-    /Client "(?<name>\w+)" spawned in server <STEAM_[0-9:]+>/,
-    "client_joined"
-  )
-  lp.listen("client_joined", onPlayerJoined)
-
-  lp.register(
-    /Round state: 2/,
+    /CP round state: prep/,
     "init_round"
   )
   lp.subscribe("init_round", roundStateTracker, "state2", 999)
@@ -435,19 +382,18 @@ async function load_logfile(log, date) {
   lp.subscribe("init_round", gameEndListener, "init")
   lp.subscribe("init_round", RoleAssigner, "init")
   lp.subscribe("init_round", DamageHandler, "init")
-  lp.listen("init_round", resetTeamRoles)
+  lp.listen("init_round", resetState)
 
   lp.register(
     /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) \[(?<role>\w+), (?<team>\w+)\]/,
     "initial_role"
   )
-  lp.subscribe("initial_role", RoleAssigner, "onRoleAssigned")
+  lp.listen("initial_role", onRoleAssigned)
 
   lp.register(
-    /Round state: 3/,
+    /CP round state: active/,
     "game_start"
   )
-  lp.subscribe("game_start", roundStateTracker, "state3", 999)
   lp.listen("game_start", onGameStart)
 
   lp.register(
@@ -501,7 +447,7 @@ async function load_logfile(log, date) {
       (?<attacker>\w*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s damaged \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
-      \s+ for \s
+      \s for \s
       (?<damage>\d*)
     `,
     "pvp_dmg"
@@ -513,7 +459,7 @@ async function load_logfile(log, date) {
       \s nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s damaged \s
       (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
-      \s+ for \s
+      \s for \s
       (?<damage>\d*)
     `,
     "pve_dmg"
@@ -567,19 +513,12 @@ async function load_logfile(log, date) {
   )
   lp.subscribe("game_duration", gameEndListener, "onGameDuration")
   lp.register(
-    /Round state: 4/,
+    /CP round state: post/,
     "game_end"
   )
-  lp.subscribe("game_end", roundStateTracker, "state4", 999)
   lp.subscribe("game_end", DamageHandler, "insert")
   lp.subscribe("game_end", gameEndListener, "onGameEnd")
   lp.subscribe("game_end", surviveTracker, "gameEnd")
-
-  lp.register(
-    /Dropped (?<name>\w*) from server/,
-    "leave"
-  )
-  lp.listen("leave", onPlayerLeft)
 
   // speed up if many inserts come in a short time
   // otherwise, a flush to disk is performed after each modification

@@ -22,34 +22,35 @@ async function save_log(name, log) {
 }
 
 const keep_loglines = [
-    'Map: \w+',
     'Client "\w+" spawned in server <.*> \(took \d+ seconds?\).',
     '\w+ is now in love with \w+.',
     "Dropped \w+ from server",
-    "\[TTT2\]:\s*The \w* has won!",
-    ".* and gets (REWARDED|penalised for) \d+",
-    'ServerLog: [0-9.:]+ - TTT2Revive:',
-    'ServerLog: Result: \w+ wins?.',
-    'ServerLog: Result: timelimit reached',
+
+    'CP map: \w+',
+    'CP round state',
+    'ServerLog: [0-9.:]+ - ROUND_START',
     'ServerLog: [0-9.:]+ - CP_RC',
     'ServerLog: [0-9.:]+ - CP_TC',
     'ServerLog: [0-9.:]+ - CP_OE',
     'ServerLog: [0-9.:]+ - CP_DMG',
     'ServerLog: [0-9.:]+ - CP_KILL',
-    'ServerLog: [0-9.:]+ - ROUND_END:',
-    'ServerLog: [0-9.:]+ - ROUND_START',
-    'ServerLog: [0-9.:]+ - ROUND_ENDED at given time',
-    'Round state',
+    ".* and gets (REWARDED|penalised for) \d+",
     "ServerLog: \w+ took \d+ credits? from the body of",
-    "\w+ confirmed the death of \w+",
+    'ServerLog: [0-9.:]+ - TTT2Revive:',
+    'ServerLog: Result: \w+ wins?.',
+    'ServerLog: Result: timelimit reached',
+    'ServerLog: [0-9.:]+ - ROUND_END:',
+    'ServerLog: [0-9.:]+ - ROUND_ENDED at given time',
     '\[TTT2 Medium Role\] Noisified chat'
 ]
 
 function clean_log(log) {
     const lines = log.split('\n')
     let res = ""
-    logger.info("Logfile", "Cleaning log with " + lines.length + " lines.")
+    const start = Date.now()
+    logger.info("Logfile", `Cleaning log with ${lines.length} lines.`)
     for (let line of lines) {
+        line = line.trim().replace(/\s+/g, ' ').replace(/\t+/g, ' ')
         for (let pattern of keep_loglines) {
             if (line.match(pattern)) {
                 res += line + '\n'
@@ -57,6 +58,8 @@ function clean_log(log) {
             }
         }
     }
+    const duration = Math.round(1000*(Date.now() - start))
+    logger.info("Logfile", `Cleaning log with ${lines.length} lines took ${duration} s.`)
     return res
 }
 
@@ -67,11 +70,12 @@ async function process_current_log(fname) {
     const files = await fb.list()
     let path = fname + ".log"
     let i = 0
-    while (files.includes(path)) {
+    while (files.includes(path) || files.includes(path + ".raw")) {
         i++
         path = fname + "_" + i + ".log"
     }
 
+    await save_log(fname + ".raw", log)
     await save_log(path, clean)
 
     await fb.remove("garrysmod/garrysmod/console.log", "nitrado")

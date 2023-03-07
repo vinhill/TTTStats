@@ -4,26 +4,24 @@ import sys
 from tqdm import tqdm
 
 keep = [
-    'Map: \w+',
     'Client "\w+" spawned in server <.*> \(took \d+ seconds?\).',
     '\w+ is now in love with \w+.',
     "Dropped \w+ from server",
-    "\[TTT2\]:\s*The \w* has won!",
-    ".* and gets (REWARDED|penalised for) \d+",
-    'ServerLog: [0-9.:]+ - TTT2Revive:',
-    'ServerLog: Result: \w+ wins?.',
-    'ServerLog: Result: timelimit reached',
+    'CP map: \w+',
+    'CP round state',
+    'ServerLog: [0-9.:]+ - ROUND_START',
     'ServerLog: [0-9.:]+ - CP_RC',
     'ServerLog: [0-9.:]+ - CP_TC',
     'ServerLog: [0-9.:]+ - CP_OE',
     'ServerLog: [0-9.:]+ - CP_DMG',
     'ServerLog: [0-9.:]+ - CP_KILL',
-    'ServerLog: [0-9.:]+ - ROUND_END:',
-    'ServerLog: [0-9.:]+ - ROUND_START',
-    'ServerLog: [0-9.:]+ - ROUND_ENDED at given time',
-    'Round state',
+    ".* and gets (REWARDED|penalised for) \d+",
     "ServerLog: \w+ took \d+ credits? from the body of",
-    "\w+ confirmed the death of \w+",
+    'ServerLog: [0-9.:]+ - TTT2Revive:',
+    'ServerLog: Result: \w+ wins?.',
+    'ServerLog: Result: timelimit reached',
+    'ServerLog: [0-9.:]+ - ROUND_END:',
+    'ServerLog: [0-9.:]+ - ROUND_ENDED at given time',
     '\[TTT2 Medium Role\] Noisified chat'
 ]
 
