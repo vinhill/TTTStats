@@ -1,6 +1,9 @@
+-- see https://api-docs.ttt2.neoxult.de/ for TTT2 API Documentation
+
 --Variable if round is over
 roundOver = true
 f = "console_print"
+
 --[[
 	Returns the name of the entity which inflicted damage to a player
 
@@ -66,6 +69,32 @@ end
 function VictimStr(ent)
 	return PlayerStr(ent)
 end
+
+--[[
+	Gets called when prepare started
+	Returns map name and round state
+]]
+hook.Add("TTTPrepareRound", "CP_prep", function()
+	PrintMessage(HUD_PRINTCONSOLE, "CP round state: prep")
+	PrintMessage(HUD_PRINTCONSOLE, "CP map: " .. game.GetMap())
+end)
+
+--[[
+	Gets called when game started
+	Returns round state
+]]
+hook.Add("TTTBeginRound", "CP_active", function()
+	PrintMessage(HUD_PRINTCONSOLE, "CP round state: active")
+end)
+
+--[[
+	Gets called when game ended
+	Returns round state
+]]
+hook.Add("TTTEndRound", "CP_post", function()
+	PrintMessage(HUD_PRINTCONSOLE, "CP round state: post")
+end)
+
 
 --[[
 	Gets called when the round starts:
@@ -209,6 +238,4 @@ end)
 
 	Doppelganger [doppelganger, doppelgangers]:
 	- Rolechange might not affect team (exceptions MAY be: Cursed, Lovers, Amnesiac)
-
-	
 ]]
