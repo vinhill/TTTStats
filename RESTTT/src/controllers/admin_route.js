@@ -49,7 +49,17 @@ router.get("/health", async function(req, res) {
 })
 
 router.get("/listlogs", async function(req, res) {
-  const logs = await logfile.list_logs()
+  const detail = Number(req.query.detail) || 0
+  let logs = await logfile.list_logs()
+  if (detail === 0)
+    logs = logs.map(log => log.name)
+  else if (detail === 1)
+    logs = logs.map(log => {
+      return {name: log.name, size: log.size, modified: log.modifiedAt}
+    })
+  // detail === 2 noop
+  else if (detail > 2)
+    res.status(400).json("detail-lvl must be 0, 1, or 2")
   res.status(200).send(logs)
 })
 
@@ -59,13 +69,17 @@ router.post("/fetchlog", async function(req, res) {
     return
   }
 
-  const fname = req.body.fname
-  if (!fname) {
-    res.status(400).json("The fetchlog route requires the 'fname' field in the body.")
+  const date = req.body.date
+  if (!date) {
+    res.status(400).json("The fetchlog route requires the 'date' field in the body.")
     return
   }
+  const re = /^\d\d\d\d-\d\d-\d\d$/
+  if(!re.exec(date)) {
+    res.status(400).json("Date not in the format YYYY-MM-DD")
+  }
 
-  await logfile.process_current_log(fname)
+  await logfile.process_current_log(date)
   res.status(200).end()
 })
 
@@ -94,6 +108,7 @@ router.post("/parselog", async function(req, res) {
   const config = await db.query("SELECT * FROM configs WHERE filename = ?", [fname], false)
   if (config.length !== 0) {
     res.status(409).json(`Config with filename '${fname}' was already parsed.`)
+    _mutex = false
     return
   }
 

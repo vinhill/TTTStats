@@ -8,7 +8,7 @@ let connections = {}
 
 function getConnection(con) {
     return new Promise((res, rej) => {
-        if (!connections[con]) {
+        if (!connections[con] || connections[con].closed) {
             const client = new ftp.Client()
             if (NODE_ENV === "dev")
                 client.ftp.verbose = true

@@ -50,14 +50,14 @@ const templates = {
     "title": "Health"
   },
   "list_logs": {
-    "uri": "/api/v1/admin/listlogs",
+    "uri": "/api/v1/admin/listlogs?detail=0",
     "method": "GET",
     "title": "List logs"
   },
   "fetch_new_log": {
     "uri": "/api/v1/admin/fetchlog",
     "method": "POST",
-    "body": `fname=${today}&token=`,
+    "body": `date=${today}&token=`,
     "encode": "application/x-www-form-urlencoded",
     "title": "Fetch new log"
   },

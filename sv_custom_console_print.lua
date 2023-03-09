@@ -74,8 +74,8 @@ end
 	Returns map name and round state
 ]]
 hook.Add("TTTPrepareRound", "CP_prep", function()
-	PrintMessage(HUD_PRINTCONSOLE, "CP round state: prep")
-	PrintMessage(HUD_PRINTCONSOLE, "CP map: " .. game.GetMap())
+	print("CP map: " .. game.GetMap())
+	print("CP round state: prep")
 end)
 
 --[[
@@ -83,7 +83,7 @@ end)
 	Returns round state
 ]]
 hook.Add("TTTBeginRound", "CP_active", function()
-	PrintMessage(HUD_PRINTCONSOLE, "CP round state: active")
+	print("CP round state: active")
 end)
 
 --[[
@@ -91,7 +91,7 @@ end)
 	Returns round state
 ]]
 hook.Add("TTTEndRound", "CP_post", function()
-	PrintMessage(HUD_PRINTCONSOLE, "CP round state: post")
+	print("CP round state: post")
 end)
 
 --[[

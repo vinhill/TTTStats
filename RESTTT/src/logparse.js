@@ -265,16 +265,22 @@ const gameEndListener = {
     this.winner = undefined
     this.duration = undefined
   },
-  onResult(match) {
+  onResult(match, state) {
     this.winner = unifyTeamname(match.team)
+    this.trySubmit(state)
   },
-  onTimeout() {
+  onTimeout(match, state) {
     this.winner = "Innocent"
+    this.trySubmit(state)
   },
-  onGameDuration(match) {
+  onGameDuration(match, state) {
     this.duration = timeToSeconds(match.time)
+    this.trySubmit(state)
   },
-  onGameEnd(match, state) {
+  trySubmit(state) {
+    if (this.winner === undefined || this.duration === undefined)
+      return
+    
     db.queryAdmin(
       "UPDATE game SET duration = ? WHERE mid = ?",
       [this.duration, state.mid]
@@ -532,7 +538,6 @@ async function load_logfile(log, date) {
     "game_end"
   )
   lp.subscribe("game_end", DamageHandler, "insert")
-  lp.subscribe("game_end", gameEndListener, "onGameEnd")
   lp.subscribe("game_end", surviveTracker, "gameEnd")
 
   // speed up if many inserts come in a short time

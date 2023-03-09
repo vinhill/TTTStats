@@ -6,6 +6,7 @@ const express = require("express")
 const router = express.Router()
 const db = require("../utils/database.js")
 const logfile = require("../logfile.js")
+const logger = require("../utils/logger.js")
 
 router.post("/makedb", async function(req, res) {
   db.queryAdmin(await db.readQueryFile("CreateDB.sql"))
@@ -19,8 +20,18 @@ router.get("/currentlog", async function(req, res) {
 })
 
 router.get("/logs/:fname", async function(req, res) {
-  const log = await logfile.get_log(req.params.fname)
-  res.status(200).send(log)
+  const fname = req.params.fname
+  try {
+    const log = await logfile.get_log(fname)
+    res.status(200).send(log)
+  } catch (e) {
+    if (e.code === 550)
+      res.status(404).json(`Log file '${fname}' not found.`)
+    else {
+      res.status(500).json(`Error retreiving log file '${fname}'`)
+      logger.error("AdminRoute", e)
+    }
+  }
 })
 
 module.exports = router

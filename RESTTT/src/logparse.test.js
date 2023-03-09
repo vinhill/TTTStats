@@ -42,8 +42,8 @@ class SimuGame {
             this.logs.push("ServerLog: Result: timelimit reached, traitors lose.")
         else
             this.logs.push(`ServerLog: Result: ${elseresult}`)
-        this.logs.push(`ServerLog: ${time} - ROUND_ENDED at given time`)
         this.logs.push("CP round state: post")
+        this.logs.push(`ServerLog: ${time} - ROUND_ENDED at given time`)
     }
 
     async submit() {

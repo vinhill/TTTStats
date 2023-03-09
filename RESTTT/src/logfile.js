@@ -22,7 +22,7 @@ async function save_log(name, log) {
 }
 
 const keep_loglines = [
-    'CP map: \w+',
+    'CP map:',
     'CP round state',
     'ServerLog: [0-9.:]+ - ROUND_START',
     'ServerLog: [0-9.:]+ - CP_RC',
@@ -30,14 +30,14 @@ const keep_loglines = [
     'ServerLog: [0-9.:]+ - CP_OE',
     'ServerLog: [0-9.:]+ - CP_DMG',
     'ServerLog: [0-9.:]+ - CP_KILL',
-    ".* and gets (REWARDED|penalised for) \d+",
-    "ServerLog: \w+ took \d+ credits? from the body of",
+    ".* and gets (REWARDED|penalised for) \\d+",
+    "ServerLog: \\w+ took \\d+ credits? from the body of",
     'ServerLog: [0-9.:]+ - TTT2Revive:',
-    'ServerLog: Result: \w+ wins?.',
+    'ServerLog: Result: \\w+ wins?.',
     'ServerLog: Result: timelimit reached',
     'ServerLog: [0-9.:]+ - ROUND_END:',
     'ServerLog: [0-9.:]+ - ROUND_ENDED at given time',
-    '\[TTT2 Medium Role\] Noisified chat'
+    '\\[TTT2 Medium Role\\] Noisified chat'
 ]
 
 function clean_log(log) {
@@ -60,6 +60,7 @@ function clean_log(log) {
     return res
 }
 
+// fetch log from server, store it under the given fname
 async function process_current_log(fname) {
     const log = await fetch_current_log()
     const clean = clean_log(log)
