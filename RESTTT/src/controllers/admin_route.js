@@ -79,8 +79,8 @@ router.post("/fetchlog", async function(req, res) {
     res.status(400).json("Date not in the format YYYY-MM-DD")
   }
 
-  await logfile.process_current_log(date)
-  res.status(200).end()
+  const fpath = await logfile.process_current_log(date)
+  res.status(200).json({path: fpath})
 })
 
 router.post("/parselog", async function(req, res) {

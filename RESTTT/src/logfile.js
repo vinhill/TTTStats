@@ -79,6 +79,8 @@ async function process_current_log(fname) {
     await save_log(path1, clean)
 
     await fb.remove("garrysmod/garrysmod/console.log", "nitrado")
+
+    return path1
 }
 
 async function list_logs() {
