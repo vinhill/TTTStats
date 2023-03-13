@@ -31,6 +31,9 @@ function getConnection(name, args) {
 
   return new Promise((res, rej) => {
     if (!connections[name]) {
+      logger.info("Database", `Connecting ${name}...`)
+      const start = Date.now()
+
       const con = mysql.createConnection({
         host: "vmd76968.contaboserver.net",
         port: 3306,
@@ -39,6 +42,7 @@ function getConnection(name, args) {
       })
 
       con.connect((err) => {
+        logger.info("Database", `Connecting to ${name} took ${Date.now()-start} ms.`)
         if (err) {
           logger.error("Database", `Error while connecting ${name}: ${err}`)
           rej(err)

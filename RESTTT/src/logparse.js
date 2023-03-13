@@ -63,7 +63,7 @@ function parseEntity(entitystr) {
   if (entitystr === "[NULL Entity]")
     return { class: "Null", entity: "null" }
   else
-    return /(?<class>\w*) \[\d*\]\[(?<entity>\w*)\]/.exec(entitystr).groups
+    return /(?<class>\w*) \[\d*\]\[(?<entity>(\w|\s)*)\]/.exec(entitystr).groups
 }
 
 function onSelectMap(match, state) {
@@ -410,7 +410,7 @@ async function load_logfile(log, date) {
   lp.listen("init_round", resetState)
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>\w+) \[(?<role>\w+), (?<team>\w+)\]/,
+    /ServerLog: (?<time>[0-9:.]*) - ROUND_START: (?<name>(\w|\s)+) \[(?<role>\w+), (?<team>\w+)\]/,
     "initial_role"
   )
   lp.listen("initial_role", onRoleAssigned)
@@ -422,13 +422,13 @@ async function load_logfile(log, date) {
   lp.listen("game_start", onGameStart)
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_RC: (?<name>\w+) \[\w+, \w+\] changed Role from \[(?<oldrole>\w*)\] to \[(?<newrole>\w*)\]/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_RC: (?<name>(\w|\s)+) \[\w+, \w+\] changed Role from \[(?<oldrole>\w*)\] to \[(?<newrole>\w*)\]/,
     "role_change"
   )
   lp.listen("role_change", onRoleChange)
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_TC: (?<name>\w+) \[\w+, \w+\] changed Team from \[(?<oldteam>\w*)\] to \[(?<newteam>\w*)\]/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_TC: (?<name>(\w|\s)+) \[\w+, \w+\] changed Team from \[(?<oldteam>\w*)\] to \[(?<newteam>\w*)\]/,
     "team_change"
   )
   lp.listen("team_change", onTeamChange)
@@ -438,13 +438,13 @@ async function load_logfile(log, date) {
   lp.subscribe("team_change", new DuplicateFilter(), 'filter', 999)
 
   lp.register(
-   /ServerLog: (?<time>[0-9:.]*) - TTT2Revive: (?<name>\w+) has been respawned./,
+   /ServerLog: (?<time>[0-9:.]*) - TTT2Revive: (?<name>(\w|\s)+) has been respawned./,
    "revive" 
   )
   lp.subscribe("revive", surviveTracker, "revive")
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>\w+) \[(?<role>\w+), (?<team>\w+)\]\s ordered (?<equipment>\w*)/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>(\w|\s)+) \[(?<role>\w+), (?<team>\w+)\]\s ordered (?<equipment>\w*)/,
     "buy"
   )
   lp.listen("buy", onBuy)
@@ -456,7 +456,7 @@ async function load_logfile(log, date) {
   lp.listen("medium_msg", onMediumMsg)
 
   lp.register(
-    /(?<name>\w*) \((?<karma>[0-9.]*)\) hurt \w* \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
+    /(?<name>(\w|\s)+) \((?<karma>[0-9.]*)\) hurt (\w|\s)+ \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
     "karma"
   )
   lp.subscribe("karma", karmaTracker, "onKarma")
@@ -465,9 +465,9 @@ async function load_logfile(log, date) {
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_DMG \s
       (?<type>FALL|BULLET|EXPL|OTHER\< (?<dmgtype>\d+) \>): \s
-      (?<attacker>\w*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
+      (?<attacker>(\w|\s)*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s damaged \s
-      (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
+      (?<victim>(\w|\s)*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
       \s for \s
       (?<damage>\d*)
     `,
@@ -479,7 +479,7 @@ async function load_logfile(log, date) {
       (?<type>FALL|BULLET|EXPL|OTHER\< (?<dmgtype>\d+) \>):
       \s nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s damaged \s
-      (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
+      (?<victim>(\w|\s)*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
       \s for \s
       (?<damage>\d*)
     `,
@@ -498,9 +498,9 @@ async function load_logfile(log, date) {
   lp.register(
     regex`
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
-      (?<attacker>\w*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
+      (?<attacker>(\w|\s)*) \s \[(?<atkrole>\w*), \s (?<atkteam>\w*)\] \s \< (?<weapon> [^\>]* ) \>, \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s killed \s
-      (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
+      (?<victim>(\w|\s)*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
     `,
     "pvp_kill"
   )
@@ -511,7 +511,7 @@ async function load_logfile(log, date) {
       ServerLog: \s (?<time>[0-9:.]*) \s-\s CP_KILL: \s
       nonplayer \s \( (?<inflictor> [^\)]*(, \s \w*)? ) \)
       \s killed \s
-      (?<victim>\w*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
+      (?<victim>(\w|\s)*) \s \[(?<vktrole>\w*), \s (?<vktteam>\w*)\]
     `,
     "pve_kill"
   )
