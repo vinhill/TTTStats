@@ -232,7 +232,7 @@ class LogParser {
     if (!this.prepared)
       throw "LogParser wasn't prepared, call prepare"
 
-    logger.debug("LogParser", `Executing line ${line}`)
+    logger.info("LogParser", `Executing line ${line}`)
 
     for (let event of this.events) {
       const match = event.regex.exec(line)
