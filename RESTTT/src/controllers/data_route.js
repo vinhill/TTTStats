@@ -215,11 +215,11 @@ router.get("/KarmaTS", function(req, res, next) {
 router.get("/Karma", function(req, res, next) {
   const since = req.query.since
   req.sqlquery = `
-    SELECT player, DATE_FORMAT(s1.date, '%Y-%m-%d') AS date, MIN(karma) AS min
+    SELECT player, DATE_FORMAT(date, '%Y-%m-%d') AS date, MIN(karma) AS min
     FROM karma
     JOIN game ON karma.mid = game.mid
-    GROUP BY player, date
-    ${since ? 'WHERE mid >= :since' : ''}`
+    ${since ? 'WHERE game.mid >= :since' : ''}
+    GROUP BY player, game.date`
   next()
 })
 
@@ -278,6 +278,8 @@ router.use("/", async function(req, res, next) {
     if (since && since != await firstMidLastDate())
       return res.status(400).json("The MID (since) has to be " + await firstMidLastDate())
   }
+
+  req.sqlquery = req.sqlquery.replace(/\n/g, " ").replace(/\s+/g, " ").trim()
 
   try {
     const data = await db.query(req.sqlquery, req.sqlparams)

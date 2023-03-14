@@ -106,7 +106,7 @@ export class RecentComponent {
     const players = new Set<string>(karmats.map(x => x.player));
 
     let playerts: {[player: string]: [{x: number, y: number}]} = {};
-    players.forEach(x => playerts[x] = [{x: 1, y: 1000}]);
+    players.forEach(x => playerts[x] = [{x: 1, y: 10000}]);
     for (const row of karmats) {
       playerts[row.player].push({
         x: get_xpos(row.mid, row.time),

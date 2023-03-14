@@ -11,7 +11,7 @@ module.exports = {
   "MySQL_READ_PASSWORD": process.env.READERPW,
   "MySQL_ADMIN_PASSWORD": process.env.ADMINPW,
   "CACHE_SIZE": 50,
-  "MAX_RESULT_SIZE_KB": 20,
+  "MAX_RESULT_SIZE_KB": 40,
   "TTT_FTP_PW": process.env.TTTFTPPW,
   "FTP_PW": process.env.FTPPW,
   "REST_ADMIN_TOKEN": process.env.REST_ADMIN_TOKEN,

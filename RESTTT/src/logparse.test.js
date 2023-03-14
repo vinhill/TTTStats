@@ -152,7 +152,7 @@ describe('logparse', () => {
 
     test('captures bought items', async () => {
         await logparse.load_logfile([
-            'ServerLog: 01:05.55 - CP_OE: Zumoari [survivalist, t]  ordered weapon_ttt_sandwich'
+            'ServerLog: 01:05.55 - CP_OE: Zumoari [survivalist, t] ordered weapon_ttt_sandwich'
         ], "");
 
         expect(queries.includes(
@@ -472,14 +472,14 @@ describe('logparse', () => {
     });
 
     describe("handles karma", () => {
-        test("by storing the current sub 1000 karma with time", async () => {
+        test("by storing the current sub 10000 karma with time", async () => {
             const game = new SimuGame();
             game.addPlayer("V8Block");
             game.addPlayer("Schnitzelboy");
             game.prepare();
             game.start([
                 "ServerLog: 00:05.50 - CP_DMG BULLET: V8Block [r1, t1] <Weapon [1081][w1]>, (Player [3][p1], p1) damaged Schnitzelboy [r2, t1] for 10",
-                "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000"
+                "V8Block (989.5) hurt Schnitzelboy (10000.000000) and gets penalised for 10.450000"
             ]);
             await game.submit();
 
@@ -488,41 +488,41 @@ describe('logparse', () => {
             )).toBe(true);
         });
 
-        test("when getting back to 1000 karma", async () => {
+        test("when getting back to 10000 karma", async () => {
             const game = new SimuGame();
             game.addPlayer("V8Block");
             game.addPlayer("Schnitzelboy");
             game.prepare();
             game.start([
-                "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000",
-                "V8Block (1000) hurt Schnitzelboy (1000.000000) and gets REWARDED for 10.450000"
+                "V8Block (9989.5) hurt Schnitzelboy (10000.000000) and gets penalised for 10.450000",
+                "V8Block (10000) hurt Schnitzelboy (10000.000000) and gets REWARDED for 10.450000"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 0)"
+                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 9989.5, 0)"
             )).toBe(true);
             expect(queries.includes(
-                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 1000, 0)"
+                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 10000, 0)"
             )).toBe(true);
         })
 
-        test("by not storing continuous 1000 karma", async () => {
+        test("by not storing continuous 10000 karma", async () => {
             const game = new SimuGame();
             game.addPlayer("V8Block");
             game.addPlayer("Schnitzelboy")
             game.prepare();
             game.start([
-                "V8Block (1000) hurt Schnitzelboy (1000) and gets REWARDED for 10.450000",
-                "V8Block (989.5) hurt Schnitzelboy (1000.000000) and gets penalised for 10.450000"
+                "V8Block (10000) hurt Schnitzelboy (10000) and gets REWARDED for 10.450000",
+                "V8Block (9989.5) hurt Schnitzelboy (10000.000000) and gets penalised for 10.450000"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 1000, 0)"
+                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 10000, 0)"
             )).toBe(false);
             expect(queries.includes(
-                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 989.5, 0)"
+                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 9989.5, 0)"
             )).toBe(true);
         });
     });

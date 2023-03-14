@@ -122,7 +122,7 @@ router.post("/parselog", async function(req, res) {
   await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [fname])
   _mutex = false
 
-  // parse
+  // parse, will continue after this function returns
   logparse.load_logfile(data.split("\n"), date)
 
   res.status(200).end()

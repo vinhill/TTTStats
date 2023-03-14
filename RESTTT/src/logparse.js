@@ -317,7 +317,7 @@ const karmaTracker = {
   onKarma(match, state) {
     // captures: name, karma
     const client = state.clients.get(match.name)
-    if (client.karma < 1000 || match.karma < 1000) {
+    if (client.karma < 10000 || match.karma < 10000) {
       client.karma = Number(match.karma)
       db.queryAdmin(
         "INSERT INTO karma (mid, player, karma, time) VALUES (?, ?, ?, ?)",
@@ -378,7 +378,7 @@ class Client {
     this.name = name
     this.role = undefined
     this.team = undefined
-    this.karma = 1000
+    this.karma = 10000
     this.alive = true
   }
 }
