@@ -4,18 +4,9 @@ REST routes for loading game configs
 const express = require("express")
 const router = express.Router()
 const db = require("../utils/database.js")
-const fetch = require("cross-fetch")
 const logparse = require("../logparse.js")
 const logfile = require("../logfile.js")
 const { REST_ADMIN_TOKEN } = require("../utils/config.js")
-
-// eslint-disable-next-line no-unused-vars
-async function get_all_logs() {
-  let res = await fetch("https://api.github.com/repos/vinhill/TTTStats/git/trees/main?recursive=1").json()
-  let logfiles = res.tree
-  logfiles.filter( f => f.path.startswith("logs/") )
-  logfiles.map(f => f.path.substring(5))
-}
 
 /*
 Mutex for making sure a file isn't parsed twice

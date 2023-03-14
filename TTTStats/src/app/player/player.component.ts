@@ -26,9 +26,9 @@ export class PlayerComponent implements OnInit {
     kills: 0,
     teamkills: 0,
     kdratio: 0,
-    kgratio: 0,
-    winratio: 0,
-    surviveratio: 0
+    kgperc: 0,
+    winperc: 0,
+    surviveperc: 0
   }
 
   player: string = "";
@@ -75,15 +75,15 @@ export class PlayerComponent implements OnInit {
     const res = await this.resttt.ParticipateStats();
     const participateStat = res.find((p: any) => p.player == this.player)!;
     this.fillin.rounds = participateStat.games;
-    this.fillin.winratio = round(participateStat.won / participateStat.games, 2);
-    this.fillin.surviveratio = round(participateStat.survived / participateStat.games, 2);
+    this.fillin.winperc = round(100 * participateStat.won / participateStat.games, 0);
+    this.fillin.surviveperc = round(100 * participateStat.survived / participateStat.games, 0);
 
     const res2 = await this.resttt.KDStat();
     const kdstats = res2.find((p: any) => p.player == this.player)!;
     this.fillin.kills = kdstats.kills;
     this.fillin.teamkills = kdstats.teamkills;
     this.fillin.kdratio = round(kdstats.kills / kdstats.deaths, 2);
-    this.fillin.kgratio = round(kdstats.kills / this.fillin.rounds, 2);
+    this.fillin.kgperc = round(100 * kdstats.kills / this.fillin.rounds, 0);
   }
 
   async loadPopularPurchases() {

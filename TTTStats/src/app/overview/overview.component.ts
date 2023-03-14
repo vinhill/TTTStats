@@ -67,7 +67,8 @@ export class OverviewComponent implements OnInit {
   }
 
   async loadKillsDeaths() {
-    const res = await this.resttt.KDStat();
+    let res = await this.resttt.KDStat();
+    res = res.sort((a: any, b: any) => (b.kills/b.deaths) - (a.kills/a.deaths));
 
     const ds_kills = {
       label: "Kills",

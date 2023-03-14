@@ -384,7 +384,6 @@ class Client {
 }
 
 async function load_logfile(log, date) {
-  
   // initial state
   var lp = new LogParser({
     clients: new Map(),
@@ -444,7 +443,7 @@ async function load_logfile(log, date) {
   lp.subscribe("revive", surviveTracker, "revive")
 
   lp.register(
-    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>(\w|\s)+) \[(?<role>\w+), (?<team>\w+)\]\s ordered (?<equipment>\w*)/,
+    /ServerLog: (?<time>[0-9:.]*) - CP_OE: (?<name>(\w|\s)+) \[(?<role>\w+), (?<team>\w+)\] ordered (?<equipment>\w*)/,
     "buy"
   )
   lp.listen("buy", onBuy)
@@ -456,7 +455,7 @@ async function load_logfile(log, date) {
   lp.listen("medium_msg", onMediumMsg)
 
   lp.register(
-    /(?<name>(\w|\s)+) \((?<karma>[0-9.]*)\) hurt (\w|\s)+ \([0-9.]*\) and gets (?<type>REWARDED|penalised) for [0-9.]*/,
+    /(?<name>(\w|\s)+) \((?<karma>[0-9.]*)\) hurt (\w|\s)+ \([0-9.]*\) and gets (?<type>REWARDED|penalised for) [0-9.]*/,
     "karma"
   )
   lp.subscribe("karma", karmaTracker, "onKarma")

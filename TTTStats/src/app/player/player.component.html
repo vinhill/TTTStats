@@ -3,11 +3,11 @@
 		<h1 class="display-3">{{player}}</h1>
 		You played {{fillin.rounds}} games!
 		<br>
-		And you won {{100*fillin.winratio}}%, survived {{100*fillin.surviveratio}}% of them :)
+		And you won {{fillin.winperc}}%, survived {{fillin.surviveperc}}% of them :)
 		<br>
 		During these, you got {{fillin.kills}} kills.
 		<br>
-		That's a k/d of {{fillin.kdratio}} and a game-average of {{100*fillin.kgratio}}%.
+		That's a k/d of {{fillin.kdratio}} and a game-average of {{fillin.kgperc}}%.
 		<br>
 		<div *ngIf="fillin.teamkills">... buuut you also killed {{fillin.teamkills}} of your COLLEAGUES!</div>
 	</card>

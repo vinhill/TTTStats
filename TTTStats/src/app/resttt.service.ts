@@ -210,7 +210,7 @@ export class RestttService {
 
 	async KDTS(player: string)
 		: Promise<{
-			date: string, kills: number, deaths: number
+			date: string, kills: number, deaths: number, teamkills: number
 		}[]>
 	{
 		return this.get("KDTS/" + player);

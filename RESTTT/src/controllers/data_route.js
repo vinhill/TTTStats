@@ -71,7 +71,7 @@ router.get("/Teams", function(req, res, next) {
 router.get("/KDStat", function(req, res, next) {
   const since = req.query.since
   req.sqlquery = `
-    SELECT s1.player, kills, deaths, teamkills
+    SELECT s1.player, kills - teamkills AS kills, deaths, teamkills
     FROM (
       SELECT causee AS player, COUNT(*) AS kills, SUM(teamkill) AS teamkills
       FROM dies
@@ -225,9 +225,9 @@ router.get("/Karma", function(req, res, next) {
 
 router.get("/KDTS/:player", function(req, res, next) {
   req.sqlquery = `
-    SELECT DATE_FORMAT(s1.date, '%Y-%m-%d') AS date, kills, deaths
+    SELECT DATE_FORMAT(s1.date, '%Y-%m-%d') AS date, kills - teamkills AS kills, deaths, teamkills
     FROM (
-      SELECT date, COUNT(*) AS kills
+      SELECT date, COUNT(*) AS kills, SUM(teamkill) AS teamkills
       FROM dies
       JOIN game ON dies.mid = game.mid
       WHERE causee = :player
