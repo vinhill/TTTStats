@@ -3,7 +3,8 @@ async function submit() {
   const body = document.getElementById("bodytf").value;
   const method = document.getElementById("method").value;
   const encode = document.getElementById("encode").value;
-  const out = document.getElementById("output");
+  const out_ta = document.getElementById("output_ta");
+  const out_code = document.getElementById("output_code");
 
   // confirm dialog
   if (method === "POST") {
@@ -11,6 +12,10 @@ async function submit() {
       return;
     }
   }
+
+  out_code.innerText = "???";
+  out_code.style.color = "black";
+  out_ta.value = "Loading...";
   
   const response = await fetch(uri, {
     method: method,
@@ -21,10 +26,23 @@ async function submit() {
   });
   console.log(response);
 
-  response
-    .json()
-    .then(data => out.value = JSON.stringify(data, null, '\t'))
-    .catch(err => out.value = `Error ${err.message}, Status ${response.status}`);
+  out_code.innerText = response.status;
+  out_code.style.color = response.ok ? "green" : "red";
+
+  if (response.headers.get("Content-Length") === "0") {
+    out_ta.value = "No content";
+    return;
+  } else if (response.headers.get("Content-Type").includes("application/json")) {
+    response
+      .json()
+      .then(data => out_ta.value = JSON.stringify(data, null, '\t'))
+      .catch(err => out_ta.value = `Error ${err.message}, Status ${response.status}`);
+  } else {
+    response
+      .text()
+      .then(data => out_ta.value = data)
+      .catch(err => out_ta.value = `Error ${err.message}, Status ${response.status}`);
+  }
 }
 
 function update_urlencoded() {

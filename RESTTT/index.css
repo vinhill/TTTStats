@@ -1,7 +1,7 @@
 #template-buttons button {
   margin-right: 10px;
 }
-#output {
+#output_ta {
   margin: 1%;
   font-size: 12px;
   font-family:'Lucida Console', monospace;
@@ -28,4 +28,7 @@
   color: #fff;
   background-color: #563d7c;
   border-color: #563d7c;
+}
+.text-center {
+  text-align: center;
 }

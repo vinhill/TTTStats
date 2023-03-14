@@ -104,9 +104,15 @@
           <input id="submitbtn" type="button" value="Submit" class="btn btn-primary" />
         </form>
 
-        <textarea id="output" class="form-control" disabled>
-          No result yet.
-        </textarea>
+        <!-- http status code -->
+        <div id="output">
+          <hr>
+          <h2 class="text-center">Result</h2>
+          <p class="text-center">Status <span id="output_code">xxx</span></p>
+          <textarea id="output_ta" class="form-control" disabled>
+            No result yet.
+          </textarea>
+        </div>
       </div>
     </div>
 
