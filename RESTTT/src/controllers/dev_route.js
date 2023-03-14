@@ -21,17 +21,8 @@ router.get("/currentlog", async function(req, res) {
 
 router.get("/logs/:fname", async function(req, res) {
   const fname = req.params.fname
-  try {
-    const log = await logfile.get_log(fname)
-    res.status(200).send(log)
-  } catch (e) {
-    if (e.code === 550)
-      res.status(404).json(`Log file '${fname}' not found.`)
-    else {
-      res.status(500).json(`Error retreiving log file '${fname}'`)
-      logger.error("AdminRoute", e)
-    }
-  }
+  const log = await logfile.get_log(fname)
+  res.status(200).send(log)
 })
 
 module.exports = router

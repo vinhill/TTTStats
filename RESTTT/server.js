@@ -1,10 +1,12 @@
 const express = require("express")
+require('express-async-errors')
 const app = express()
 
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const path = require('path')
 const logger = require("./src/utils/logger.js")
+const { NotFoundError, errorHandler } = require("./src/utils/error.js")
 
 const { NODE_ENV, PORT } = require("./src/utils/config.js")
 
@@ -45,8 +47,10 @@ if (NODE_ENV === 'dev') {
 }
 
 app.use("/", function(req, res) {
-  res.status(404).json(`Unknown REST route ${req.originalUrl}`)
+  throw NotFoundError(`Unknown REST route ${req.originalUrl}`)
 })
+
+app.use(errorHandler)
 
 const server = app.listen(PORT, function(err, address) {
   if(err) {

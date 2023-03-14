@@ -6,6 +6,7 @@ const { NODE_ENV } = require("../utils/config.js")
 const router = express.Router()
 const db = require("../utils/database.js")
 const logger = require("../utils/logger.js")
+const { ValidationError } = require("../utils/error.js")
 
 function konjugateWhere(...conditions) {
   conditions = conditions.filter(c => c && c.length > 0)
@@ -24,7 +25,20 @@ async function firstMidLastDate() {
 }
 
 router.use(function(req, res, next) {
+  // default case, can be changed to object for key-value pairs
   req.sqlparams = req.query
+  
+  if (req.sqlparams.since) {
+    if (!req.sqlparams.since.match(/^\d+$/))
+      throw ValidationError("since must be a number")
+    req.sqlparams.since = Number(req.sqlparams.since)
+  }
+
+  if (req.sqlparams.player) {
+    if (!req.sqlparams.player.match(/^[a-zA-Z0-9_\s]+$/))
+      throw ValidationError("player must be alphanumeric")
+  }
+
   next()
 })
 
@@ -187,7 +201,7 @@ router.get("/Teamup", function(req, res, next) {
   const since = req.query.since
   const player = req.query.player
   if (!since && !player)
-    return res.status(400).json("You need to specify either player or a recent, minimum mid (since)")
+    throw ValidationError("You need to specify either player or a recent, minimum mid (since)")
 
   req.sqlquery = `
     SELECT first, second, reason, COUNT(mid) as count FROM teamup
@@ -203,7 +217,7 @@ router.get("/KarmaTS", function(req, res, next) {
   const since = req.query.since
   const player = req.query.player
   if (!since && !player)
-    return res.status(400).json("You need to specify either player or a recent, minimum mid (since)")
+    throw ValidationError("You need to specify either player or a recent, minimum mid (since)")
 
   req.sqlquery = `
     SELECT mid, player, karma, time
@@ -276,28 +290,18 @@ router.use("/", async function(req, res, next) {
     // so block everything else to prevent abuse
     const since = req.sqlparams.since
     if (since && since != await firstMidLastDate())
-      return res.status(400).json("The MID (since) has to be " + await firstMidLastDate())
+      throw ValidationError("The MID (since) has to be " + await firstMidLastDate())
   }
 
   req.sqlquery = req.sqlquery.replace(/\n/g, " ").replace(/\s+/g, " ").trim()
 
-  try {
-    const data = await db.query(req.sqlquery, req.sqlparams)
-    res.status(200).json(data)
-  } catch (e) {
-    res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
-    logger.error("QueryRoute", `Could not query database for ${req.sqlquery} because of an error: ${e}`)
-  }
+  const data = await db.query(req.sqlquery, req.sqlparams)
+  res.status(200).json(data)
 })
 
 router.get("/RoleDescriptions", async function(req, res) {
-  try {
-    const data = await db.query("SELECT name, team, category, color, descr FROM role", [], false /*result too long for cache*/)
-    res.status(200).json(data)
-  } catch (e) {
-    res.status(400).json(`Could not query database for ${req.sqlquery} because of an error: ${e}`)
-    logger.error("QueryRoute", `Could not query database for ${req.sqlquery} because of an error: ${e}`)
-  }
+  const data = await db.query("SELECT name, team, category, color, descr FROM role", [], false /*result too long for cache*/)
+  res.status(200).json(data)
 })
 
 module.exports = router
