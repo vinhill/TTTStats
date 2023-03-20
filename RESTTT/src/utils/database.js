@@ -57,12 +57,14 @@ function getConnection(name, args) {
     }
 
     // make sure the connection is still live
+    logger.debug("Database", `Pinging ${name}...`)
     connections[name].ping(err => {
       if (err) {
         logger.warn("Database", `Connection ${name} was dead, reconnecting...`)
         connections[name] = null
         getConnection(name, args).then(res).catch(rej)
       } else {
+        logger.debug("Database", `Pinging ${name} successful`)
         res(connections[name])
       }
     })
