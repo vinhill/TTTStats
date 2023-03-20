@@ -8,7 +8,7 @@ Primary methods to query the db are
 const mysql = require('mysql')
 const fs = require('fs')
 const { performance } = require('perf_hooks')
-const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE, MAX_RESULT_SIZE_KB, NODE_ENV } = require('./config.js')
+const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE, MAX_RESULT_SIZE_KB, NODE_ENV, DB_TIMEOUT } = require('./config.js')
 const logger = require('./logger.js')
 
 const BoundedCache = require("./structs.js").BoundedCache
@@ -56,7 +56,16 @@ function getConnection(name, args) {
       connections[name] = con
     }
 
-    res(connections[name])
+    // make sure the connection is still live
+    connections[name].ping(err => {
+      if (err) {
+        logger.warn("Database", `Connection ${name} was dead, reconnecting...`)
+        connections[name] = null
+        getConnection(name, args).then(res).catch(rej)
+      } else {
+        res(connections[name])
+      }
+    })
   })
 }
 
@@ -96,22 +105,29 @@ function query(con, querystr, params=[]) {
   return new Promise((res, rej) => {
     const startTime = performance.now()
 
-    con.query(querystr, params, (err, result) => {
-      const endTime = performance.now()
-      if (endTime - startTime > 5*1000) {
-        logger.warn("Database", `Query ${querystr} took long (${endTime-startTime} ms)`)
-      }
+    con.query(
+      {
+        sql: querystr,
+        values: params,
+        timeout: DB_TIMEOUT
+      },
+      (err, result) => {
+        const endTime = performance.now()
+        if (endTime - startTime > 5*1000) {
+          logger.warn("Database", `Query ${querystr} took long (${endTime-startTime} ms)`)
+        }
 
-      if(err) {
-        logger.error("Database", `Error while querying db for "${querystr}, ${params}": ${err}`)
-        rej(err)
-      }else {
-        res(result)
+        if(err) {
+          logger.error("Database", `Error while querying db for "${querystr}, ${params}": ${err}`)
+          rej(err)
+        }else {
+          res(result)
 
-        logger.debug("Database", `Successfully queried ${stripstr(querystr)} and got ${result.length} results.`)
-        logger.debug("Database", `Received ${JSON.stringify(result)}`)
+          logger.debug("Database", `Successfully queried ${stripstr(querystr)} and got ${result.length} results.`)
+          logger.debug("Database", `Received ${JSON.stringify(result)}`)
+        }
       }
-    })
+    )
   })
 }
 

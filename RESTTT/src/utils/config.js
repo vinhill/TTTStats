@@ -7,6 +7,7 @@ if (process.env.FORCE_DEV === 'true')
 
 module.exports = {
   "PORT": process.env.PORT || 3001,
+  "DB_TIMEOUT": 1000 * 60,
   NODE_ENV,
   "MySQL_READ_PASSWORD": process.env.READERPW,
   "MySQL_ADMIN_PASSWORD": process.env.ADMINPW,
