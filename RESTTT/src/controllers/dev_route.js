@@ -9,7 +9,7 @@ const logfile = require("../logfile.js")
 const logger = require("../utils/logger.js")
 
 router.post("/makedb", async function(req, res) {
-  db.queryAdmin(await db.readQueryFile("CreateDB.sql"))
+  db.queryAdmin("CreateDB.sql")
   res.status(200).end()
 })
 

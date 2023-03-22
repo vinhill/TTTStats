@@ -1,22 +1,35 @@
-/*
-Module for accessing the database.
-Primary methods to query the db are
-- getCache (reccommended): queryReader but results are cached for repeated access
-- queryAdmin: full access
-- queryReader: select-only access
-*/
 const mysql = require('mysql')
 const fs = require('fs')
 const { performance } = require('perf_hooks')
-const { MySQL_ADMIN_PASSWORD, MySQL_READ_PASSWORD, CACHE_SIZE, MAX_RESULT_SIZE_KB, NODE_ENV, DB_TIMEOUT } = require('./config.js')
+const conf = require('./config.js')
 const logger = require('./logger.js')
 
 const BoundedCache = require("./structs.js").BoundedCache
-const cache = new BoundedCache(CACHE_SIZE)
+const cache = new BoundedCache(conf.CACHE_SIZE)
+logger.info("Database", `Cache will use up to ${conf.CACHE_SIZE*conf.MAX_RESULT_SIZE_KB/1000} mb of memory.`)
 
-logger.info("Database", `Cache will use up to ${CACHE_SIZE*MAX_RESULT_SIZE_KB/1000} mb of memory.`)
-
-let connections = {}
+// automatically pings and, as needed, reconnects when retreiving connections
+const _readerPool = mysql.createPool({
+  connectionLimit: 5,
+  host: "vmd76968.contaboserver.net",
+  port: 3306,
+  database: "ttt_stats",
+  user: "reader",
+  password: conf.MySQL_READ_PASSWORD,
+  acquireTimeout: conf.DB_ACQ_TIMEOUT
+})
+_readerPool.on("connection", () => logger.info("Database", "Connected to reader database."))
+const _adminCon = mysql.createPool({
+  connectionLimit: 1,
+  host: "vmd76968.contaboserver.net",
+  port: 3306,
+  database: "ttt_stats",
+  user: "admin",
+  password: conf.MySQL_ADMIN_PASSWORD,
+  multipleStatements: true,
+  acquireTimeout: conf.DB_ACQ_TIMEOUT
+})
+_adminCon.on("connection", () => logger.info("Database", "Connected to admin database."))
 
 let getTestConnection = () => console.warn("No test connection provider set.")
 let queryTest = () => console.warn("No test query provider set.")
@@ -25,65 +38,16 @@ function stripstr(str) {
   return str.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ")
 }
 
-function getConnection(name, args) {
-  if (NODE_ENV === "test")
-    return getTestConnection(name, args)
+function getConnection(name) {
+  if (conf.NODE_ENV === "test")
+    return getTestConnection(name)
 
-  return new Promise((res, rej) => {
-    if (!connections[name]) {
-      logger.info("Database", `Connecting ${name}...`)
-      const start = Date.now()
-
-      const con = mysql.createConnection({
-        host: "vmd76968.contaboserver.net",
-        port: 3306,
-        database: "ttt_stats",
-        ...args
-      })
-
-      con.connect((err) => {
-        logger.info("Database", `Connecting to ${name} took ${Date.now()-start} ms.`)
-        if (err) {
-          logger.error("Database", `Error while connecting ${name}: ${err}`)
-          rej(err)
-        }else {
-          logger.info("Database", `Connected ${name}!`)
-        }
-      })
-
-      con.config.queryFormat = format
-
-      connections[name] = con
-    }
-
-    // make sure the connection is still live
-    logger.debug("Database", `Pinging ${name}...`)
-    connections[name].ping({timeout: DB_TIMEOUT}, err => {
-      if (err) {
-        logger.warn("Database", `Connection ${name} was dead, reconnecting...`)
-        connections[name] = null
-        getConnection(name, args).then(res).catch(rej)
-      } else {
-        logger.debug("Database", `Pinging ${name} successful`)
-        res(connections[name])
-      }
-    })
-  })
-}
-
-function getReadCon() {
-  return getConnection("read-only", {
-    user: "reader",
-    password: MySQL_READ_PASSWORD
-  })
-}
-
-function getAdminCon() {
-  return getConnection("admin", {
-    user: "admin",
-    password: MySQL_ADMIN_PASSWORD,
-    multipleStatements: true
-  })
+  if (name === "reader")
+    return _readerPool
+  else if (name === "admin")
+    return _adminCon
+  else
+    throw new Error(`Unknown connection name ${name}`)
 }
 
 function readQueryFile(queryFileName) {
@@ -101,7 +65,7 @@ function readQueryFile(queryFileName) {
 }
 
 function query(con, querystr, params=[]) {
-  if (NODE_ENV === "test")
+  if (conf.NODE_ENV === "test")
     return queryTest(con, querystr, params)
 
   return new Promise((res, rej) => {
@@ -111,7 +75,7 @@ function query(con, querystr, params=[]) {
       {
         sql: querystr,
         values: params,
-        timeout: DB_TIMEOUT
+        timeout: conf.DB_QER_TIMEOUT
       },
       (err, result) => {
         const endTime = performance.now()
@@ -143,42 +107,29 @@ function queryCached(con, querystr, params=[]) {
     const future_ret = new Promise(resolve => {
       future_res.then(res => {
         const size_kb = new TextEncoder().encode(JSON.stringify(res)).length / 1000
-        if (size_kb > MAX_RESULT_SIZE_KB) {
+        if (size_kb > conf.MAX_RESULT_SIZE_KB) {
           logger.error("Database", `The query '${stripstr(querystr)}' had a result that was too long to be cached: ${size_kb} kb.`)
           resolve("Query result too long")
         } else {
-          if (size_kb > MAX_RESULT_SIZE_KB / 2)
+          if (size_kb > conf.MAX_RESULT_SIZE_KB / 2)
             logger.warn("Database", `The query '${stripstr(querystr)}' has a long result: ${size_kb} kb.`)
           resolve(res)
         }
       })
     })
-    cache.set(querystr, future_ret)
 
-    future_ret.then(ret => {
-      cache.update(querystr, ret)
-    })
+    cache.set(querystr, future_ret)
   } else {
     cache.increment(querystr)
   }
 
-  // note: might be a promise future_ret
+  // note: will be the promise future_ret
   return cache.get(querystr)
 }
 
-async function queryReader(querystr, params=[]) {
-  return query(await getReadCon(), querystr, params)
-}
-
-async function queryAdmin(querystr, params=[]) {
-  return query(await getAdminCon(), querystr, params)
-}
-
 function shutdown() {
-  for (let con of connections) {
-    con.end()
-  }
-  connections = {}
+  _adminCon.end()
+  _readerPool.end()
   logger.info("Database", "Closed all database connections.")
 }
 
@@ -200,13 +151,19 @@ function format(query, values) {
     });
 }
 
-async function defaultQuery(querystr, params=[], cache=true) {
+async function queryReader(querystr, params=[], cache=true) {
   if (querystr.endsWith(".sql"))
     querystr = await readQueryFile(querystr)
   if (cache)
-    return queryCached(await getReadCon(), querystr, params)
+    return queryCached(getConnection("reader"), querystr, params)
   else
-    return queryReader(querystr, params)
+    return query(getConnection("reader"), querystr, params)
+}
+
+async function queryAdmin(querystr, params=[]) {
+  if (querystr.endsWith(".sql"))
+    querystr = await readQueryFile(querystr)
+  return query(getConnection("admin"), querystr, params)
 }
 
 function setTestFunctions(onQuery, onConnect=() => {}) {
@@ -219,8 +176,7 @@ module.exports = {
   shutdown,
   clearCache,
   format,
-  query: defaultQuery,
+  query: queryReader,
   queryAdmin,
-  readQueryFile: readQueryFile,
   setTestFunctions
 }

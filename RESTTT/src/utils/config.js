@@ -4,7 +4,8 @@ let NODE_ENV = process.env.NODE_ENV
 
 module.exports = {
   "PORT": process.env.PORT || 3001,
-  "DB_TIMEOUT": 1000 * 60,
+  "DB_QER_TIMEOUT": 1000 * 60,
+  "DB_ACQ_TIMEOUT": 1000 * 10,
   NODE_ENV,
   "MySQL_READ_PASSWORD": process.env.READERPW,
   "MySQL_ADMIN_PASSWORD": process.env.ADMINPW,
