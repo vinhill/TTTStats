@@ -23,6 +23,11 @@ export class OverviewComponent implements OnInit {
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
 
+  multikills: {
+    data: {player: string, count: number, weapon: string, mid: number, time: number}[],
+    header: {[key: string] : string}
+  } = {data: [], header: {}};
+
   constructor(private resttt: RestttService) { }
 
   ngOnInit() {
@@ -40,6 +45,7 @@ export class OverviewComponent implements OnInit {
       this.loadRoundsPlayerTS(),
       this.loadRoleWonSurRate(),
       this.loadTeamWonSurRate(),
+      this.loadMultikills(),
     ]).catch(err => console.log(err));
   }
 
@@ -309,6 +315,20 @@ export class OverviewComponent implements OnInit {
             }
           }
         }
+      }
+    }
+  }
+
+  async loadMultikills() {
+    let res = await this.resttt.Multikills();
+    res = res.filter(x => x.count > 1);
+    res = res.splice(0, 5);
+    this.multikills = {
+      data: res,
+      header: {
+        "player": "Killer",
+        "count": "Kills",
+        "weapon": "Weapon",
       }
     }
   }

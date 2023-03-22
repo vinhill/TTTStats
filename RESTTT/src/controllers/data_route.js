@@ -284,16 +284,16 @@ router.get("/DeathsByWeapon/:player", function(req, res, next) {
   next()
 })
 
-router.get("/Multikills/:since", function(req, res, next) {
+router.get("/Multikills", function(req, res, next) {
+  const since = req.query.since
   req.sqlquery = `
     SELECT mid, time, causee AS player, weapon, COUNT(player) AS count
     FROM dies
     WHERE causee IS NOT NULL
-    AND mid >= :since
+    ${since ? 'AND mid >= :since' : ''}
     GROUP BY mid, causee, weapon, time
     ORDER BY count DESC
-    LIMIT 5`
-  req.sqlparams = {since: req.params.since}
+    LIMIT 10`
   next()
 })
 

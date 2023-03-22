@@ -32,4 +32,10 @@
 	<card title="Team winrate / surviverate" [loaded]="cTeamWonSurRate !== undefined" (reload)="loadTeamWonSurRate()">
 		<data-chart [data]="cTeamWonSurRate!" [legend]="LegendType.None"></data-chart>
 	</card>
+	<card title="Top 5 Multikills" [loaded]="multikills !== undefined" (reload)="loadMultikills()">
+		<div *ngIf="multikills?.data!.length == 0">
+			No multikills so far.
+		</div>
+		<data-table [data]="multikills?.data!" [headers]="multikills?.header!" columns="player, weapon, count" *ngIf="multikills?.data!.length > 0"></data-table>
+	</card>
 </div>
