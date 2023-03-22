@@ -35,4 +35,10 @@
 	<card title="Min Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
 		{{minKarma!.player}} got the worst karma with {{minKarma!.karma}}
 	</card>
+	<card title="Top Multikills" [loaded]="multikills !== undefined" (reload)="loadMultikills()">
+		<div *ngIf="multikills?.data!.length == 0">
+			No multikills this round.
+		</div>
+		<data-table [data]="multikills?.data!" [headers]="multikills?.header!" columns="player, weapon, count" *ngIf="multikills?.data!.length > 0"></data-table>
+	</card>
 </div>

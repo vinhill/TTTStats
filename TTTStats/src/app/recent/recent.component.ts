@@ -25,6 +25,10 @@ export class RecentComponent {
 
   mediumChats?: string;
   minKarma = {player: "", karma: 0};
+  multikills: {
+    data: {player: string, count: number, weapon: string, mid: number, time: number}[],
+    header: {[key: string] : string}
+  } = {data: [], header: {}};
 
   fillin = {
     datestr: "dd/mm/yyyy",
@@ -53,6 +57,7 @@ export class RecentComponent {
         this.loadRolesTreemap(),
         this.loadWhoKilledWho(),
         this.loadTeamWonSurRate(),
+        this.loadMultikills(),
       ]))
       .catch(err => console.log(err));
   }
@@ -65,7 +70,7 @@ export class RecentComponent {
 
     const mids = await this.resttt.MIDs(this.date.substring(0, 10));
     this.since = mids[0].mid;
-    
+    console.log("since", this.since)
 
     this.fillin.datestr = new Date(res[0].date).toLocaleDateString();
     this.fillin.dow = new Date(res[0].date).toLocaleDateString("en-US", { weekday: "long" });
@@ -341,6 +346,19 @@ export class RecentComponent {
             }
           }
         }
+      }
+    }
+  }
+
+  async loadMultikills() {
+    let res = await this.resttt.Multikills(this.since);
+    res = res.filter(x => x.count > 1);
+    this.multikills = {
+      data: res,
+      header: {
+        "player": "Killer",
+        "count": "Kills",
+        "weapon": "Weapon",
       }
     }
   }

@@ -239,4 +239,12 @@ export class RestttService {
 	{
 		return this.get("RoleDescriptions");
 	}
+
+	async Multikills(since: number)
+		: Promise<{
+			mid: number, time: number, player: string, weapon: string, count: number
+		}[]>
+	{
+		return this.get("Multikills/" + since);
+	}
 }
