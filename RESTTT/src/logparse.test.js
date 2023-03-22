@@ -249,10 +249,22 @@ describe('logparse', () => {
             ]);
             await game.submit();
 
-            expect(queries.includes(
-                "INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'vinno', 'GhastM4n', 'jackal')"
-            )).toBe(true);
             expect(queries.filter(q => q.includes("INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'vinno', 'GhastM4n', 'jackal')")).length).toBe(1);
+        });
+
+        test("captures sheriff teamup", async () => {
+            const game = new SimuGame();
+            game.addPlayer('GhastM4n', 'sheriff', 'innocent');
+            game.addPlayer('Dr Who', 'innocent', 'innocent');
+            game.prepare();
+            game.start([
+                'ServerLog: 00:09.36 - CP_RC: Dr Who [deputy, innocents] changed Role from [innocent] to [detective]',
+                'ServerLog: 00:09.36 - CP_DMG BULLET: GhastM4n [sheriff, innocents] <Weapon [110][weapon_ttt2_deputydeagle]>, (Player [3][GhastM4n], GhastM4n) damaged Dr Who [deputy, innocents] for 0',
+                'ServerLog: 00:09.36 - CP_DMG BULLET: GhastM4n [sheriff, innocents] <Weapon [110][weapon_ttt2_deputydeagle]>, (Player [3][GhastM4n], GhastM4n) damaged Dr Who [deputy, innocents] for 0',
+            ]);
+            await game.submit();
+
+            expect(queries.filter(q => q.includes("INSERT INTO teamup (mid, first, second, reason) VALUES (0, 'GhastM4n', 'Dr Who', 'sheriff')")).length).toBe(1);
         });
 
         test("lootgoblin win on survive", async () => {

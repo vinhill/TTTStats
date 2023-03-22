@@ -176,7 +176,16 @@ function jackalTeamup(match, state) {
   )
 }
 
-// TODO deputy teamup
+function sheriffTeamup(match, state) {
+  let weapon = parseEntity(match.weapon).entity
+  if (weapon !== "weapon_ttt2_deputydeagle")
+    return
+
+  db.queryAdmin(
+    "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'sheriff')",
+    [state.mid, match.attacker, match.victim]
+  )
+}
 
 const DamageHandler = {
   init() {
@@ -432,9 +441,6 @@ function createParser(date) {
   )
   lp.listen("team_change", onTeamChange)
   lp.subscribe("team_change", LoveHandle, "onTC")
-  // CP_TC is called twice, before and after CP_RC
-  // TODO still the case?
-  lp.subscribe("team_change", new DuplicateFilter(), 'filter', 999)
 
   lp.register(
    /ServerLog: (?<time>[0-9:.]*) - TTT2Revive: (?<name>(\w|\s)+) has been respawned./,
@@ -489,10 +495,12 @@ function createParser(date) {
   lp.subscribe("pve_dmg", DamageHandler, "pve")
   lp.subscribe("pvp_dmg", karmaTracker, "onPvPDmg")
   lp.listen("pvp_dmg", jackalTeamup)
-  // sidekick deagle for some reason fires twice
-  lp.subscribe("pvp_dmg", new DuplicateFilter(
-    (match) => parseEntity(match.weapon).entity === "weapon_ttt2_sidekickdeagle"
-  ), 'filter', 999)
+  lp.listen("pvp_dmg", sheriffTeamup)
+  // sidekick, deputy deagle for some reason fire twice
+  lp.subscribe("pvp_dmg", new DuplicateFilter((match) => {
+    const weapon = parseEntity(match.weapon).entity  
+    return weapon === "weapon_ttt2_sidekickdeagle" || weapon === "weapon_ttt2_deputydeagle"
+  }), 'filter', 999)
 
   lp.register(
     regex`
