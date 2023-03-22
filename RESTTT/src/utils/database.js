@@ -58,7 +58,7 @@ function getConnection(name, args) {
 
     // make sure the connection is still live
     logger.debug("Database", `Pinging ${name}...`)
-    connections[name].ping(err => {
+    connections[name].ping({timeout: DB_TIMEOUT}, err => {
       if (err) {
         logger.warn("Database", `Connection ${name} was dead, reconnecting...`)
         connections[name] = null

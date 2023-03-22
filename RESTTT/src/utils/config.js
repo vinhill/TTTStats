@@ -1,9 +1,6 @@
 require('dotenv').config()
 
 let NODE_ENV = process.env.NODE_ENV
-// for forcing dev mode in fly.io when using npm run start
-if (process.env.FORCE_DEV === 'true')
-  NODE_ENV = 'dev'
 
 module.exports = {
   "PORT": process.env.PORT || 3001,
@@ -16,4 +13,5 @@ module.exports = {
   "TTT_FTP_PW": process.env.TTTFTPPW,
   "FTP_PW": process.env.FTPPW,
   "REST_ADMIN_TOKEN": process.env.REST_ADMIN_TOKEN,
+  "DEFAULT_LOGLEVEL": NODE_ENV === "dev" || NODE_ENV === "test" ? 0 : 1,
 }

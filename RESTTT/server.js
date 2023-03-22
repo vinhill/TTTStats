@@ -47,7 +47,7 @@ if (NODE_ENV === 'dev') {
 }
 
 app.use("/", function(req, res) {
-  throw NotFoundError(`Unknown REST route ${req.originalUrl}`)
+  throw new NotFoundError(`Unknown REST route ${req.originalUrl}`)
 })
 
 app.use(errorHandler)

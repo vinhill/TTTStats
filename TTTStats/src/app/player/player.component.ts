@@ -26,7 +26,7 @@ export class PlayerComponent implements OnInit {
     kills: 0,
     teamkills: 0,
     kdratio: 0,
-    kgperc: 0,
+    kgratio: 0,
     winperc: 0,
     surviveperc: 0
   }
@@ -79,11 +79,12 @@ export class PlayerComponent implements OnInit {
     this.fillin.surviveperc = round(100 * participateStat.survived / participateStat.games, 0);
 
     const res2 = await this.resttt.KDStat();
-    const kdstats = res2.find((p: any) => p.player == this.player)!;
+    let kdstats = res2.find((p: any) => p.player == this.player)!;
+    kdstats.kills = kdstats.kills - kdstats.teamkills;
     this.fillin.kills = kdstats.kills;
     this.fillin.teamkills = kdstats.teamkills;
     this.fillin.kdratio = round(kdstats.kills / kdstats.deaths, 2);
-    this.fillin.kgperc = round(100 * kdstats.kills / this.fillin.rounds, 0);
+    this.fillin.kgratio = round(kdstats.kills / this.fillin.rounds, 2);
   }
 
   async loadPopularPurchases() {
@@ -129,7 +130,10 @@ export class PlayerComponent implements OnInit {
 
   async loadTS() {
     const pts = await this.resttt.ParticipateTS(this.player);
-    const kdts = await this.resttt.KDTS(this.player);
+    let kdts = await this.resttt.KDTS(this.player);
+    kdts.forEach(row => {
+      row.kills = row.kills - row.teamkills;
+    });
     const colors = getColormap("plotly", 3);
 
     const winrate = pts.map(p => round(p.won / p.participated, 2));
@@ -169,12 +173,14 @@ export class PlayerComponent implements OnInit {
         labels: getColumn(pts, "date")
       }
     }
+    console.log(this.cTS)
   }
 
   async loadWhoKilledWhoMore() {
     let res = await this.resttt.WhoKilledWho();
     res = res.filter(r => r.killer == this.player || r.victim == this.player);
 
+    // kills = player killed him, deahs = player was killed by him
     let player_kd: {[player: string]: {kills: number, deaths: number}} = {};
     res
       .map(r => r.killer == this.player ? r.victim : r.killer)
@@ -190,46 +196,33 @@ export class PlayerComponent implements OnInit {
     data.sort((a, b) => Math.abs(b.kills / b.deaths) - Math.abs(a.kills / a.deaths));
 
     const d_kills: ChartConfiguration["data"]["datasets"][0] = {
-      label: "kills",
+      label: "killed them",
       data: data.map(d => d.kills),
-      backgroundColor: "#d22722",
-      borderColor: "#d22722",
-      pointBorderColor: "#d2272280",
-      pointBackgroundColor: "#d2272280",
-      pointHoverBackgroundColor: "#d2272280",
-      pointHoverBorderColor: "#d2272280",
-      radius: 5,
-      hoverRadius: 6,
+      backgroundColor: "#00a01d",
+      borderColor: "#00a01d",
+      hoverBackgroundColor: "#00a01d80",
       xAxisID: "xAxis",
     }
     const d_deaths: ChartConfiguration["data"]["datasets"][0] = {
-      label: "deaths",
+      label: "killed you",
       data: data.map(d => d.deaths),
-      backgroundColor: "#00a01d",
-      borderColor: "#00a01d",
-      pointBorderColor: "#00a01d80",
-      pointBackgroundColor: "#00a01d80",
-      pointHoverBackgroundColor: "#00a01d80",
-      pointHoverBorderColor: "#00a01d80",
-      radius: 5,
-      hoverRadius: 6,
+      backgroundColor: "#d22722",
+      borderColor: "#d22722",
+      hoverBackgroundColor: "#d2272280",
       xAxisID: "xAxis",
     }
     const d_kd: ChartConfiguration["data"]["datasets"][0] = {
       label: "K/D",
       data: data.map(d => round(d.kills / Math.max(d.deaths, 0.5), 2)),
-      backgroundColor: "##242424",
-      borderColor: "##242424",
-      pointBorderColor: "##242424",
-      pointBackgroundColor: "##242424",
-      radius: 5,
-      hoverRadius: 6,
+      backgroundColor: "#242424",
+      borderColor: "#242424",
+      hoverBackgroundColor: "#24242480",
       xAxisID: "kd",
     }
 
     // no lines
     this.cWhoKilledWhoMore = {
-      type: "line" as ChartType,
+      type: "bar" as ChartType,
       options: {
         plugins: {legend: {position: 'bottom'}},
         aspectRatio: 1,
@@ -254,7 +247,7 @@ export class PlayerComponent implements OnInit {
       },
       data: {
         datasets: [
-          d_kills, d_deaths, d_kd
+          d_kd, d_kills, d_deaths
         ],
         labels: data.map(d => d.player)
       },
@@ -310,22 +303,30 @@ export class PlayerComponent implements OnInit {
         label: "your winrate",
         data: data.filter(d => roles.has(d.role)).map(d => d.win_rt),
         backgroundColor: colors,
+        hoverBackgroundColor: colors.map(x => x+"C0"),
+        borderColor: "#00000000",
       });
       datasets.push({
         label: "total winrate",
         data: data.filter(d => roles.has(d.role)).map(d => d.tot_win_rt),
         backgroundColor: colors.map(x => x+"80"),
+        hoverBackgroundColor: colors.map(x => x+"40"),
+        borderColor: "#00000000",
       });
     } else {
       datasets.push({
         label: "your surviverate",
         data: data.filter(d => roles.has(d.role)).map(d => d.surv_rt),
         backgroundColor: colors,
+        hoverBackgroundColor: colors.map(x => x+"C0"),
+        borderColor: "#00000000",
       });
       datasets.push({
         label: "total surviverate",
         data: data.filter(d => roles.has(d.role)).map(d => d.tot_surv_rt),
         backgroundColor: colors.map(x => x+"80"),
+        hoverBackgroundColor: colors.map(x => x+"40"),
+        borderColor: "#00000000",
       });
     }
 

@@ -96,6 +96,18 @@ const templates = {
     "method": "POST",
     "title": "Reset DB"
   },
+  "loglevel": {
+    "uri": "/api/v1/admin/loglevel",
+    "method": "POST",
+    "body": `level=0&token=`,
+    "encode": "application/x-www-form-urlencoded",
+    "title": "Set loglevel",
+  },
+  "parseprogress": {
+    "uri": "/api/v1/admin/parseprogress",
+    "method": "GET",
+    "title": "Parse progress"
+  },
 }
 
 function load_template(template) {

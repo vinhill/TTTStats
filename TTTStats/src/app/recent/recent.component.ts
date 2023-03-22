@@ -172,7 +172,11 @@ export class RecentComponent {
   }
   
   async loadKillsDeaths() {
-    const res = await this.resttt.KDStat(this.since);
+    let res = await this.resttt.KDStat(this.since);
+    res.forEach(row => {
+      row.kills = row.kills - row.teamkills
+    });
+    res = res.sort((a: any, b: any) => (b.kills/b.deaths) - (a.kills/a.deaths));
 
     const ds_kills = {
       label: "Kills",

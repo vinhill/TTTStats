@@ -33,6 +33,6 @@
 		<data-chart [data]="cTeamWonSurRate!" [legend]="LegendType.None"></data-chart>
 	</card>
 	<card title="Min Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
-		{{minKarma!.player}} got a {{minKarma!.karma < 900 ? 'very' : ''}} bad karma of {{minKarma!.karma}}
+		{{minKarma!.player}} got the worst karma with {{minKarma!.karma}}
 	</card>
 </div>

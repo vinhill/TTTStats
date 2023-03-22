@@ -68,6 +68,9 @@ export class OverviewComponent implements OnInit {
 
   async loadKillsDeaths() {
     let res = await this.resttt.KDStat();
+    res.forEach(row => {
+      row.kills = row.kills - row.teamkills
+    });
     res = res.sort((a: any, b: any) => (b.kills/b.deaths) - (a.kills/a.deaths));
 
     const ds_kills = {
@@ -94,7 +97,7 @@ export class OverviewComponent implements OnInit {
   }
 
   async loadPopularPurchases() {
-    const res = await this.resttt.Items();
+    let res = await this.resttt.Items();
 
     this.cPopularPurchases = {
       type: "doughnut" as ChartType,
@@ -109,7 +112,6 @@ export class OverviewComponent implements OnInit {
   async loadKillsPerWeapon() {
     var res = await this.resttt.Weapons();
     res = res.sort((a: any, b: any) => b.kills-a.kills);
-    res = res.splice(0, 20);
 
     this.cKillsPerWeapon = {
       type: "doughnut" as ChartType,
@@ -208,13 +210,17 @@ export class OverviewComponent implements OnInit {
       label: "rounds",
       data: getColumn(res, "rounds"),
       backgroundColor: colors[0],
-      borderColor: colors[0]
+      borderColor: colors[0],
+      pointBorderColor: colors[0],
+      pointBackgroundColor: colors[0],
     }
     const ds_players = {
       label: "player",
       data: getColumn(res, "participants"),
       backgroundColor: colors[1],
-      borderColor: colors[1]
+      borderColor: colors[1],
+      pointBorderColor: colors[1],
+      pointBackgroundColor: colors[1],
     }
 
     this.cRoundsPlayerTS = {
@@ -222,7 +228,7 @@ export class OverviewComponent implements OnInit {
       options: {plugins: {legend: {position: 'bottom'}}},
       data: {
         datasets: [ds_rounds, ds_players],
-        labels: getColumn(res, "count")
+        labels: getColumn(res, "date")
       }
     }
   }

@@ -1,3 +1,4 @@
+const logger = require('./logger.js')
 
 class ValidationError extends Error {
   constructor(message) {

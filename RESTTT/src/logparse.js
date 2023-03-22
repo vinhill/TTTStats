@@ -2,7 +2,7 @@
 Code for parsing a TTT logfile
 */
 const db = require("./utils/database.js")
-const LogParser = require("./utils/structs.js").LogParser
+const { LogParser, TrackableIterator } = require("./utils/structs.js")
 const groupBy = require("./group_by.js").groupBy
 
 const regex = (function() {
@@ -383,9 +383,9 @@ class Client {
   }
 }
 
-async function load_logfile(log, date) {
+function createParser(date) {
   // initial state
-  var lp = new LogParser({
+  const lp = new LogParser({
     clients: new Map(),
     date: date,
     mid: 0,
@@ -539,11 +539,20 @@ async function load_logfile(log, date) {
   lp.subscribe("game_end", DamageHandler, "insert")
   lp.subscribe("game_end", surviveTracker, "gameEnd")
 
+  return lp
+}
+
+let titer = new TrackableIterator([]);
+
+async function load_logfile(log, date) {
+  const lp = createParser(date)
+
   // speed up if many inserts come in a short time
   // otherwise, a flush to disk is performed after each modification
   await db.queryAdmin("SET autocommit=0")
 
-  await lp.read(log)
+  titer = new TrackableIterator(log)
+  await lp.read(titer)
 
   await db.queryAdmin("COMMIT")
   await db.queryAdmin("SET autocommit=1")
@@ -556,6 +565,11 @@ async function load_logfile(log, date) {
   }
 }
 
+function get_progress() {
+  return titer.progress()
+}
+
 module.exports = {
-  load_logfile
+  load_logfile,
+  get_progress
 }

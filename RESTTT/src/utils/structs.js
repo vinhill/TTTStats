@@ -183,6 +183,30 @@ class BoundedCache {
   }
 }
 
+class TrackableIterator {
+  constructor(data) {
+    this._data = data
+    this._idx = 0
+  }
+
+  [Symbol.iterator]() {
+    return this
+  }
+
+  next() {
+    if (this._idx < this._data.length) {
+      return {value: this._data[this._idx++], done: false}
+    } else {
+      return {done: true}
+    }
+  }
+
+  progress() {
+    if (this._data.length === 0) return 1
+    return this._idx / this._data.length
+  }
+}
+
 class LogParser {
   /*
   Class to make parsing logfiles easier.
@@ -250,12 +274,13 @@ class LogParser {
     }
   }
 
+  // can be used with TrackableIterator
   async read(lines) {
     if(!this.prepared)
       this.prepare()
 
     let startTime = performance.now()
-    for(let line of lines) {
+    for (let line of lines) {
       await this.read_line(line)
     }
     let endTime = performance.now()
@@ -267,5 +292,6 @@ class LogParser {
 module.exports = {
   Heap,
   BoundedCache,
-  LogParser
+  LogParser,
+  TrackableIterator
 }

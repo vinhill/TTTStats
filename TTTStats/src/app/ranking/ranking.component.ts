@@ -26,7 +26,8 @@ export class RankingComponent implements OnInit {
   }
 
   async loadRankings() {
-    const kdstat = await this.resttt.KDStat();
+    let kdstat = await this.resttt.KDStat();
+    kdstat.forEach(row => row.kills = row.kills - row.teamkills);
 
     let kdratio = kdstat.map(k => {
       return {name: k.player, value: round(k.kills / k.deaths, 2)}

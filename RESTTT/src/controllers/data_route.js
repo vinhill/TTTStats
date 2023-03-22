@@ -30,13 +30,13 @@ router.use(function(req, res, next) {
   
   if (req.sqlparams.since) {
     if (!req.sqlparams.since.match(/^\d+$/))
-      throw ValidationError("since must be a number")
+      throw new ValidationError("since must be a number")
     req.sqlparams.since = Number(req.sqlparams.since)
   }
 
   if (req.sqlparams.player) {
     if (!req.sqlparams.player.match(/^[a-zA-Z0-9_\s]+$/))
-      throw ValidationError("player must be alphanumeric")
+      throw new ValidationError("player must be alphanumeric")
   }
 
   next()
@@ -114,7 +114,8 @@ router.get("/Weapons", function(req, res, next) {
       since ? 'mid >= :since' : '',
       player ? 'causee = :player' : ''
     )}
-    GROUP BY weapon ORDER BY kills DESC`
+    GROUP BY weapon ORDER BY kills DESC
+    LIMIT 20`
   next()
 })
 
@@ -125,7 +126,8 @@ router.get("/Items", function(req, res, next) {
     SELECT item, COUNT(*) as count
     FROM buys
     ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
-    GROUP BY item ORDER BY count DESC`
+    GROUP BY item ORDER BY count DESC
+    LIMIT 20`
   next()
 })
 
@@ -201,7 +203,7 @@ router.get("/Teamup", function(req, res, next) {
   const since = req.query.since
   const player = req.query.player
   if (!since && !player)
-    throw ValidationError("You need to specify either player or a recent, minimum mid (since)")
+    throw new ValidationError("You need to specify either player or a recent, minimum mid (since)")
 
   req.sqlquery = `
     SELECT first, second, reason, COUNT(mid) as count FROM teamup
@@ -217,7 +219,7 @@ router.get("/KarmaTS", function(req, res, next) {
   const since = req.query.since
   const player = req.query.player
   if (!since && !player)
-    throw ValidationError("You need to specify either player or a recent, minimum mid (since)")
+    throw new ValidationError("You need to specify either player or a recent, minimum mid (since)")
 
   req.sqlquery = `
     SELECT mid, player, karma, time
@@ -276,7 +278,8 @@ router.get("/DeathsByWeapon/:player", function(req, res, next) {
     SELECT weapon, COUNT(*) AS count
     FROM dies
     WHERE weapon IS NOT NULL AND player = :player
-    GROUP BY weapon ORDER BY count DESC`
+    GROUP BY weapon ORDER BY count DESC
+    LIMIT 20`
   req.sqlparams = {player: req.params.player}
   next()
 })
@@ -290,7 +293,7 @@ router.use("/", async function(req, res, next) {
     // so block everything else to prevent abuse
     const since = req.sqlparams.since
     if (since && since != await firstMidLastDate())
-      throw ValidationError("The MID (since) has to be " + await firstMidLastDate())
+      throw new ValidationError("The MID (since) has to be " + await firstMidLastDate())
   }
 
   req.sqlquery = req.sqlquery.replace(/\n/g, " ").replace(/\s+/g, " ").trim()
