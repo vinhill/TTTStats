@@ -37,6 +37,9 @@ function errorHandler(err, req, res, next) {
     res.status(401).json(err.message)
   } else if (err.name === "ConflictError") {
     res.status(409).json(err.message)
+  } else if (err.code === "PROTOCOL_SEQUENCE_TIMEOUT") {
+    logger.warn("ErrorHandler", `MySQL Timeout: ${err}`)
+    res.status(504).json(`MySQL Timeout`)
   } else if (err.name === "FTPError") {
     if (err.status === 550)
       res.status(404).json(`FTP file not found, ${err.message}`)

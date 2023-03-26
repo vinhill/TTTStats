@@ -79,12 +79,12 @@ function query(con, querystr, params=[]) {
       },
       (err, result) => {
         const endTime = performance.now()
-        if (endTime - startTime > 5*1000) {
+        if (endTime - startTime > conf.DB_QER_TIMEOUT / 2) {
           logger.warn("Database", `Query ${querystr} took long (${endTime-startTime} ms)`)
         }
 
         if(err) {
-          logger.error("Database", `Error while querying db for "${querystr}, ${params}": ${err}`)
+          logger.warn("Database", `Error while querying db for "${querystr}, ${params}": ${err}`)
           rej(err)
         }else {
           res(result)
@@ -104,18 +104,20 @@ function queryCached(con, querystr, params=[]) {
     const future_res = query(con, querystr)
 
     // add promise to cache in case query is repeated while future_res is being awaited
-    const future_ret = new Promise(resolve => {
-      future_res.then(res => {
-        const size_kb = new TextEncoder().encode(JSON.stringify(res)).length / 1000
-        if (size_kb > conf.MAX_RESULT_SIZE_KB) {
-          logger.error("Database", `The query '${stripstr(querystr)}' had a result that was too long to be cached: ${size_kb} kb.`)
-          resolve("Query result too long")
-        } else {
-          if (size_kb > conf.MAX_RESULT_SIZE_KB / 2)
-            logger.warn("Database", `The query '${stripstr(querystr)}' has a long result: ${size_kb} kb.`)
-          resolve(res)
-        }
-      })
+    const future_ret = new Promise((resolve, reject) => {
+      future_res
+        .then(res => {
+          const size_kb = new TextEncoder().encode(JSON.stringify(res)).length / 1000
+          if (size_kb > conf.MAX_RESULT_SIZE_KB) {
+            logger.error("Database", `The query '${stripstr(querystr)}' had a result that was too long to be cached: ${size_kb} kb.`)
+            resolve("Query result too long")
+          } else {
+            if (size_kb > conf.MAX_RESULT_SIZE_KB / 2)
+              logger.warn("Database", `The query '${stripstr(querystr)}' has a long result: ${size_kb} kb.`)
+            resolve(res)
+          }
+        })
+        .catch(reject)
     })
 
     cache.set(querystr, future_ret)
