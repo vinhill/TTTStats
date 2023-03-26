@@ -118,7 +118,7 @@ function queryCached(con, querystr, params=[]) {
           }
         })
         .catch((err) => {
-          catche.delete(querystr)
+          cache.delete(querystr)
           reject(err)
         })
     })
