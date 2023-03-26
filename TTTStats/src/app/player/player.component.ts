@@ -173,7 +173,6 @@ export class PlayerComponent implements OnInit {
         labels: getColumn(pts, "date")
       }
     }
-    console.log(this.cTS)
   }
 
   async loadWhoKilledWhoMore() {

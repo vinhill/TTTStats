@@ -70,7 +70,7 @@ export class RecentComponent {
 
     const mids = await this.resttt.MIDs(this.date.substring(0, 10));
     this.since = mids[0].mid;
-    console.log("since", this.since)
+    console.log("Recent since MID", this.since)
 
     this.fillin.datestr = new Date(res[0].date).toLocaleDateString();
     this.fillin.dow = new Date(res[0].date).toLocaleDateString("en-US", { weekday: "long" });
