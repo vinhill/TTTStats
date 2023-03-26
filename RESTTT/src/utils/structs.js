@@ -51,6 +51,27 @@ class Heap {
     return root
   }
 
+  delete(index) {
+    let count = this.size()
+    if (count === 0) {
+      return null
+    }
+
+    let node = this._nodes[index]
+    node.index = -1
+
+    if (count === 1) {
+      this._nodes.pop()
+    } else {
+      // replace heap root with right leaf
+      this._nodes[index] = this._nodes.pop()
+      // move new root to the right position
+      this._moveDown(index)
+    }
+
+    return node
+  }
+
   _getLeftChildIndex(index) {
     return index * 2 + 1
   }
@@ -156,6 +177,11 @@ class BoundedCache {
   update(key, value) {
     let cache = this._map.get(key)
     cache.value = value
+  }
+
+  delete(key) {
+    let cache = this._map.get(key)
+    this._minHeap.delete(cache.index)
   }
 
   clear() {

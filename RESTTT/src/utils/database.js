@@ -16,7 +16,7 @@ const _readerPool = mysql.createPool({
   database: "ttt_stats",
   user: "reader",
   password: conf.MySQL_READ_PASSWORD,
-  acquireTimeout: conf.DB_ACQ_TIMEOUT
+  timeout: conf.DB_TIMEOUT
 })
 _readerPool.on("connection", () => logger.info("Database", "Connected to reader database."))
 const _adminCon = mysql.createPool({
@@ -27,7 +27,7 @@ const _adminCon = mysql.createPool({
   user: "admin",
   password: conf.MySQL_ADMIN_PASSWORD,
   multipleStatements: true,
-  acquireTimeout: conf.DB_ACQ_TIMEOUT
+  timeout: conf.DB_TIMEOUT
 })
 _adminCon.on("connection", () => logger.info("Database", "Connected to admin database."))
 
@@ -117,7 +117,10 @@ function queryCached(con, querystr, params=[]) {
             resolve(res)
           }
         })
-        .catch(reject)
+        .catch((err) => {
+          catche.delete(querystr)
+          reject(err)
+        })
     })
 
     cache.set(querystr, future_ret)
