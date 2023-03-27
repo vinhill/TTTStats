@@ -25,19 +25,31 @@ router.post("/unsetmutex", function(req, res) {
 })
 
 router.get("/health", async function(req, res) {
-  const configs = await db.query("SELECT * FROM configs", [], false)
-  const missing_roles = await db.query(`
-    SELECT DISTINCT *
-    FROM (
-      SELECT dest AS role FROM rolechange
-      UNION
-      SELECT startrole AS role FROM participates
-      ) AS sub
-    WHERE role NOT IN (SELECT name FROM role)
-  `, [], false);
+  const dbhealth = await db._healthcheck()
+
+  let configs, missing_roles
+  try {
+    configs = await db.query("SELECT * FROM configs", [], false)
+  } catch(e) {
+    configs = e
+  }
+  try {
+    missing_roles = await db.query(`
+      SELECT DISTINCT *
+      FROM (
+        SELECT dest AS role FROM rolechange
+        UNION
+        SELECT startrole AS role FROM participates
+        ) AS sub
+      WHERE role NOT IN (SELECT name FROM role)
+    `, [], false);
+  } catch(e) {
+    missing_roles = e
+  }
   res.status(200).json({
     "configs": configs,
-    "missing_roles": missing_roles
+    "missing_roles": missing_roles,
+    ...dbhealth
   })
 })
 
