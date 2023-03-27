@@ -182,7 +182,12 @@ function setTestFunctions(onQuery, onConnect=() => {}) {
 }
 
 async function healthcheck() {
-  const ping_vps = await require("ping").promise.probe(conf.VPS_DOMAIN)
+  const ping_vps = await new Promise(resolve => {
+    require("ping").sys.probe(conf.VPS_DOMAIN, (res, err) => {
+      if (err) resolve({err: err})
+      else resolve("success")
+    })
+  })
 
   const con = mysql.createConnection({
     host: conf.VPS_DOMAIN,
