@@ -33,5 +33,6 @@ export class AppComponent implements OnInit {
 
   setRestUrl() {
     this.resttt.baseURL.next(this.restUrlInput.nativeElement.value);
+	this.resttt.clearCache();
   }
 }

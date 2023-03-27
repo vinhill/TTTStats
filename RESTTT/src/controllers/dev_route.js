@@ -6,10 +6,9 @@ const express = require("express")
 const router = express.Router()
 const db = require("../utils/database.js")
 const logfile = require("../logfile.js")
-const logger = require("../utils/logger.js")
 
 router.post("/makedb", async function(req, res) {
-  db.queryAdmin("CreateDB.sql")
+  await db.queryAdmin("CreateDB.sql")
   res.status(200).end()
 })
 

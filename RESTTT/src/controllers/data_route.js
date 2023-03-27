@@ -14,14 +14,12 @@ function konjugateWhere(...conditions) {
   return "WHERE " + conditions.join(" AND ")
 }
 
-let _firstMidLastDate = -1
 async function firstMidLastDate() {
-  if (_firstMidLastDate == -1) {
-    const recent = await db.query(
-      "SELECT mid FROM game ORDER BY date DESC, mid ASC LIMIT 1")
-    _firstMidLastDate = recent[0].mid
-  }
-  return _firstMidLastDate
+  // query is cached
+  // and cannot save the mid here in case cache is reset after logparsing
+  const recent = await db.query(
+    "SELECT mid FROM game ORDER BY date DESC, mid ASC LIMIT 1")
+  return recent[0].mid
 }
 
 router.use(function(req, res, next) {

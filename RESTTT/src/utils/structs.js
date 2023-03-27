@@ -182,6 +182,7 @@ class BoundedCache {
   delete(key) {
     let cache = this._map.get(key)
     this._minHeap.delete(cache.index)
+    this._map.delete(key)
   }
 
   clear() {
