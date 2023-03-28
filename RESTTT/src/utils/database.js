@@ -3,37 +3,31 @@ const fs = require('fs')
 const { performance } = require('perf_hooks')
 const conf = require('./config.js')
 const logger = require('./logger.js')
-
+const Pool = require('./dbpool.js')
 const BoundedCache = require("./structs.js").BoundedCache
+
 const cache = new BoundedCache(conf.CACHE_SIZE)
 logger.info("Database", `Cache will use up to ${conf.CACHE_SIZE*conf.MAX_RESULT_SIZE_KB/1000} mb of memory.`)
 
-// automatically pings and, as needed, reconnects when retreiving connections
-const _readerPool = mysql.createPool({
-  connectionLimit: 5,
+const _readerPool = new Pool({
   host: conf.VPS_DOMAIN,
   port: 3306,
   database: "ttt_stats",
   user: "reader",
   password: conf.MySQL_READ_PASSWORD,
+  connectionLimit: 5,
   timeout: conf.DB_TIMEOUT,
-  acquireTimeout: conf.DB_TIMEOUT,
-  connectTimeout: conf.DB_TIMEOUT
 })
-_readerPool.on("connection", () => logger.info("Database", "Connected to reader database."))
-const _adminCon = mysql.createPool({
-  connectionLimit: 1,
+const _adminCon = new Pool({
   host: conf.VPS_DOMAIN,
   port: 3306,
   database: "ttt_stats",
   user: "admin",
   password: conf.MySQL_ADMIN_PASSWORD,
-  multipleStatements: true,
+  connectionLimit: 1,
   timeout: conf.DB_TIMEOUT,
-  acquireTimeout: conf.DB_TIMEOUT,
-  connectTimeout: conf.DB_TIMEOUT
+  multipleStatements: true
 })
-_adminCon.on("connection", () => logger.info("Database", "Connected to admin database."))
 
 let getTestConnection = () => console.warn("No test connection provider set.")
 let queryTest = () => console.warn("No test query provider set.")
@@ -182,81 +176,15 @@ function setTestFunctions(onQuery, onConnect=() => {}) {
 }
 
 async function healthcheck() {
-  const ping_vps = await new Promise(resolve => {
-    require("ping").sys.probe(conf.VPS_DOMAIN, (res, err) => {
-      if (err) resolve({err: err})
-      else resolve("success")
-    })
-  })
-
-  const con = mysql.createConnection({
-    host: conf.VPS_DOMAIN,
-    port: 3306,
-    database: "ttt_stats",
-    user: "reader",
-    password: conf.MySQL_READ_PASSWORD,
-    timeout: conf.DB_TIMEOUT,
-    acquireTimeout: conf.DB_TIMEOUT,
-    connectTimeout: conf.DB_TIMEOUT,
-    debug: true
-  })
-  const ping_reader_con = await new Promise(resolve => {
-    con.ping(err => {
-      if (err) resolve({err: err})
-      else resolve("success")
-    })
-  })
-  const con_select = await new Promise(resolve => {
-    con.query("SELECT 1", [], (err, res) => {
-      if (err) resolve({err: err})
-      else resolve("success")
-    })
-  })
-  await con.end()
-
-  const ping_admin_pool = await new Promise(resolve => {
-    getConnection("admin").getConnection((err, con) => {
-      if (err) resolve({err: err})
-      else {
-        con.ping(err => {
-          if (err) resolve({err: err})
-          else resolve("success")
-        })
-        con.release()
-      }
-    })
-  })
-  const ping_reader_pool = await new Promise(resolve => {
-    getConnection("reader").getConnection((err, con) => {
-      if (err) resolve({err: err})
-      else {
-        con.ping(err => {
-          if (err) resolve({err: err})
-          else resolve("success")
-        })
-        con.release()
-      }
-    })
-  })
   const pool_select = await new Promise(resolve => {
-    getConnection("reader").query("SELECT 1", [], (err, res) => {
+    getConnection("reader").query("SELECT 1", err => {
       if (err) resolve({err: err})
       else resolve("success")
     })
   })
-
-  delete ping_vps.output
-  delete ping_vps.inputHost
-  delete ping_vps.host
-  delete ping_vps.numeric_host
-
+  
   return {
-    ping_vps,
-    ping_admin_pool,
-    ping_reader_pool,
-    ping_reader_con,
-    pool_select,
-    con_select
+    pool_select
   }
 }
 
