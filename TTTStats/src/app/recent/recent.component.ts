@@ -118,12 +118,14 @@ export class RecentComponent {
         y: row.karma
       });
     }
+    // replicate last value at the highest x so that all lines go to the end of the plot
     players.forEach(p => {
       playerts[p].push({
         x: xmax,
         y: reverseIndex(playerts[p], 0).y
       });
     });
+    console.log(playerts)
 
     // create plot
     const datasets: ChartConfiguration["data"]["datasets"] = [];

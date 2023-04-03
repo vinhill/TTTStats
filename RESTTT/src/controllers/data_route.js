@@ -177,6 +177,7 @@ router.get("/WhoKilledWho", function(req, res, next) {
     SELECT causee AS killer, player AS victim, COUNT(*) AS count
     FROM dies
     WHERE causee IS NOT NULL
+    AND teamkill = 0
     ${since ? 'AND mid >= :since' : ''}
     GROUP BY player, causee
   `
@@ -222,7 +223,8 @@ router.get("/KarmaTS", function(req, res, next) {
   req.sqlquery = `
     SELECT mid, player, karma, time
     FROM karma
-    ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}`
+    ${konjugateWhere(since ? 'mid >= :since' : '', player ? 'player = :player' : '')}
+    ORDER BY mid, time ASC`
   next()
 })
 
@@ -253,7 +255,8 @@ router.get("/KDTS/:player", function(req, res, next) {
       JOIN game ON dies.mid = game.mid
       WHERE player = :player
       GROUP BY date
-    ) AS s2`
+    ) AS s2
+    ON s1.date = s2.date`
   req.sqlparams = {player: req.params.player}
   next()
 })
