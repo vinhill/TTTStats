@@ -114,7 +114,7 @@ class Pool {
         } else {
           logger.debug("DBPool", "Failed to establish new connection, retrying...")
           if (this.retry_after > 0) {
-            setTimeout(() => this._addConnection(retry++), this.retry_after)
+            setTimeout(() => this._createConnection(retry++), this.retry_after)
           } else {
             this._addConnection(retry++)
           }
