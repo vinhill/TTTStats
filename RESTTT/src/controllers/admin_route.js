@@ -93,8 +93,7 @@ router.post("/loglevel", function(req, res) {
   res.status(200).end()
 })
 
-router.post("/parselog", async function(req, res, next) {
-  // check request parameters
+router.post("/parselog", async function(req, res) {
   const fname = req.body.fname
   if (!fname)
     throw new ValidationError("The parselog route requires the 'fname' field in the body.")
@@ -102,42 +101,30 @@ router.post("/parselog", async function(req, res, next) {
   const fname_re = /^....-..-../
   if(!fname_re.exec(fname))
     throw new ValidationError("Filename not in the format YYYY-MM-DD")
-
   const date = fname.substring(0, 10)
 
-  // race condition with the check for presence, fetching file and declaring presence
-  if (_mutex) {
+  // possible race condition with the check for presence, fetching file and inserting config
+  if (_mutex)
     throw new Error("Mutex locked, possible race condition")
-  } else {
-    _mutex = true
-  }
-
-  // check if already present
-  const config = await db.query("SELECT * FROM configs WHERE filename = ?", [fname], false)
-  if (config.length !== 0) {
-    _mutex = false
-    throw new ConflictError(`Config with filename '${fname}' was already parsed.`)
-  }
-
-  // retreive log
-  let data = ""
+  _mutex = true
   try {
+    // check if already present
+    const config = await db.query("SELECT * FROM configs WHERE filename = ?", [fname], false)
+    if (config.length !== 0)
+      throw new ConflictError(`Config with filename '${fname}' was already parsed.`)
+  
     data = await logfile.get_log(fname)
-  } catch (e) {
+  
+    res.status(200).json({
+      msg: "start parsing logfile",
+      log_length: data.length,
+    })
+
+    // will insert fname in configs and parse logfile
+    await logparse.load_logfile(data.split("\n"), fname, date)
+  } finally {
     _mutex = false
-    throw e
   }
-
-  // before adding anything to the db, add filename to configs table
-  await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [fname])
-  _mutex = false
-
-  // parse, will continue after this function returns
-  logparse.load_logfile(data.split("\n"), date)
-
-  res.status(200).json({
-    log_length: data.length,
-  })
 })
 
 router.get("/parseprogress", async function(req, res) {

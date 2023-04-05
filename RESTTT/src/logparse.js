@@ -552,12 +552,15 @@ function createParser(date) {
 
 let titer = new TrackableIterator([]);
 
-async function load_logfile(log, date) {
+async function load_logfile(log, fname, date) {
   const lp = createParser(date)
 
-  // speed up if many inserts come in a short time
+  // 1. Speed up if many inserts come in a short time
   // otherwise, a flush to disk is performed after each modification
+  // 2. Makes sure log marked as parsed and successfully parsed or neither 
   await db.queryAdmin("SET autocommit=0")
+
+  await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [fname])
 
   titer = new TrackableIterator(log)
   await lp.read(titer)
