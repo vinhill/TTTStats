@@ -1,8 +1,6 @@
-/*
-Code for parsing a TTT logfile
-*/
+const { performance } = require('perf_hooks')
 const db = require("./utils/database.js")
-const { LogParser, TrackableIterator } = require("./utils/structs.js")
+const { TrackableIterator } = require("./utils/structs.js")
 const groupBy = require("./group_by.js").groupBy
 
 const regex = (function() {
@@ -389,6 +387,88 @@ class Client {
     this.team = undefined
     this.karma = 10000
     this.alive = true
+  }
+}
+
+class LogParser {
+  /*
+  Class to make parsing logfiles easier.
+
+  It handles iterating lines and testing regexes.
+  So one only has to provide the regexes and callbacks.
+  */
+
+  constructor(state={}) {
+    this.state = state
+    this.events = []
+    this.prepared = true
+  }
+
+  register(regex, eventname) {
+    if (this.events.filter(e => e.name === eventname).length > 0)
+      throw `Event ${eventname} already registered`
+    this.events.push({
+      regex: regex,
+      name: eventname,
+      listeners: []
+    })
+    logger.debug("LogParser", `registered event '${eventname}' to regex ${regex}`)
+  }
+
+  subscribe(event, object, method, priority=0) {
+    const callback = object[method].bind(object)
+    return this.listen(event, callback, priority)
+  }
+
+  listen(event, callback, priority=0) {
+    this.prepared = false
+    const e = this.events.find(e => e.name === event)
+    if (e === undefined)
+      throw `Event ${event} not found`
+    e.listeners.push({callback: callback, priority: priority})
+    logger.debug("LogParser", `attached callback ${callback.name} to event ${e.name}`)
+  }
+
+  prepare() {
+    for (let event of this.events)
+      event.listeners.sort((a, b) => b.priority - a.priority)
+    this.prepared = true
+  }
+
+  async read_line(line) {
+    if (!this.prepared)
+      throw "LogParser wasn't prepared, call prepare"
+
+    logger.info("LogParser", `Executing line ${line}`)
+
+    for (let event of this.events) {
+      const match = event.regex.exec(line)
+      if (match === null)
+        continue
+      
+      logger.debug("LogParser", `emitting event ${event.name}`)
+
+      for (let listener of event.listeners) {
+        logger.debug("LogParser", `executing callback ${listener.callback.name}`)
+        if (await listener.callback(match.groups, this.state) === false) {
+          return
+        }
+      }
+    }
+  }
+
+  // can be used with TrackableIterator
+  async read(lines) {
+    if(!this.prepared)
+      this.prepare()
+
+    let startTime = performance.now()
+    for (let line of lines) {
+      await this.read_line(line)
+    }
+    let endTime = performance.now()
+
+    logger.info("LogParser", `Logfile finished parsing (took ${endTime-startTime} ms).`)
   }
 }
 

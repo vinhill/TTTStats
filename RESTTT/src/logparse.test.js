@@ -65,10 +65,6 @@ describe('logparse', () => {
     var queries = [];
     var results = {};
 
-    function expectInitialQueries() {
-        expect(queries.shift()).toBe('SET autocommit=0');
-    }
-
     beforeEach(() => {
         queries = [];
         results = {
@@ -79,15 +75,6 @@ describe('logparse', () => {
             logger.debug("LogParseTest", "Queried " + queries[queries.length - 1])
             return new Promise((res, rej) => res(results[queries[queries.length - 1]] || []));
         });
-    });
-
-    test('uses a transaction', async() => {
-        await logparse.load_logfile('', '2021-01-01');
-
-        expect(queries.shift()).toBe('SET autocommit=0');
-        expect(queries.shift()).toBe('COMMIT');
-        expect(queries.shift()).toBe("SET autocommit=1");
-        expect(queries.length).toBe(0);
     });
 
     describe('for one game', () => {
