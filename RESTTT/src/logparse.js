@@ -404,22 +404,29 @@ class LogParser {
     this.prepared = true
   }
 
-  register(regex, eventname) {
+  // higher priority events are tested first
+  register(regex, eventname, priority=0) {
     if (this.events.filter(e => e.name === eventname).length > 0)
       throw `Event ${eventname} already registered`
     this.events.push({
       regex: regex,
       name: eventname,
-      listeners: []
+      listeners: [],
+      priority: priority
     })
     logger.debug("LogParser", `registered event '${eventname}' to regex ${regex}`)
   }
 
+  // this.listen, but for object.method instead of callback
   subscribe(event, object, method, priority=0) {
     const callback = object[method].bind(object)
     return this.listen(event, callback, priority)
   }
 
+  /*
+  Higher priority callbacks are called first, as with events
+  If cb returns false, parser moves on to next line
+   */
   listen(event, callback, priority=0) {
     this.prepared = false
     const e = this.events.find(e => e.name === event)
@@ -432,6 +439,7 @@ class LogParser {
   prepare() {
     for (let event of this.events)
       event.listeners.sort((a, b) => b.priority - a.priority)
+    this.events.sort((a, b) => b.priority - a.priority)
     this.prepared = true
   }
 
