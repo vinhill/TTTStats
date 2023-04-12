@@ -112,11 +112,11 @@ class Pool {
         if (retry > this.retry_count && this.retry_count >= 0) {
           this._fatal(err)
         } else {
-          logger.debug("DBPool", "Failed to establish new connection, retrying...")
+          logger.debug("DBPool", `Failed to establish new connection, retrying (${retry+1})...`)
           if (this.retry_after > 0) {
-            setTimeout(() => this._createConnection(retry++), this.retry_after)
+            setTimeout(() => this._createConnection(retry+1), this.retry_after)
           } else {
-            this._addConnection(retry++)
+            this._createConnection(retry++)
           }
         }
       } else {
@@ -166,13 +166,17 @@ class Pool {
 
   query(query, cb=default_cb) {
     this.acquire((err, con) => {
-      logger.debug("DBPool", "Acquired connection for query")
-      if (err) cb(err)
-      else con.query(query, (err, res) => {
-        if (err) this._checkAlive(con)
-        else this.release(con)
-        cb(err, res)
-      })
+      if (err) {
+        cb(err)
+        logger.debug("DBPool", "Error while acquiring connection for query.")
+      } else {
+        logger.debug("DBPool", "Acquired connection for query.")
+        con.query(query, (err, res) => {
+          if (err) this._checkAlive(con)
+          else this.release(con)
+          cb(err, res)
+        })
+      }
     })
   }
 }
