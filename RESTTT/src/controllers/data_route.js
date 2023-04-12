@@ -157,7 +157,7 @@ router.get("/GameDays", function(req, res, next) {
     SELECT DATE_FORMAT(date, '%Y-%m-%d') AS date,
     COUNT(DISTINCT game.mid) AS rounds, COUNT(DISTINCT player) AS participants
     FROM game
-    JOIN participates ON game.mid = participates.mid
+    LEFT JOIN participates ON game.mid = participates.mid
     GROUP BY game.date ORDER BY game.date DESC`
   next()
 })
