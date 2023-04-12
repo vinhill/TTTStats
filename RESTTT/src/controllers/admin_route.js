@@ -132,4 +132,15 @@ router.get("/parseprogress", async function(req, res) {
   res.status(200).json(progress)
 })
 
+router.post("/restart", function(req, res) {
+  if (req.body.token !== REST_ADMIN_TOKEN)
+    throw new AuthorizationError("restart route requires 'token' in the body.")
+
+  res.status(200).end()
+
+  setTimeout(() => {
+    process.exit(0)
+  }, 500)
+})
+
 module.exports = router

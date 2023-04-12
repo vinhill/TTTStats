@@ -108,6 +108,13 @@ const templates = {
     "method": "GET",
     "title": "Parse progress"
   },
+  "restart": {
+    "uri": "/api/v1/admin/restart",
+    "method": "POST",
+    "title": "Restart",
+    "body": `token=`,
+    "encode": "application/x-www-form-urlencoded",
+  },
 }
 
 function load_template(template) {
