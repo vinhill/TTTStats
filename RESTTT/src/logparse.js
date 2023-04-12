@@ -276,6 +276,10 @@ const gameEndListener = {
     this.winner = unifyTeamname(match.team)
     this.trySubmit(state)
   },
+  onTie(match, state) {
+    this.winner = "No-one"
+    this.trySubmit(state)
+  },
   onTimeout(match, state) {
     this.winner = "Innocent"
     this.trySubmit(state)
@@ -615,9 +619,14 @@ function createParser(date) {
 
   lp.register(
     /ServerLog: Result: (?<team>\w+) wins?/,
-    "result"
+    "result_win"
   )
-  lp.subscribe("result", gameEndListener, "onResult")
+  lp.subscribe("result_win", gameEndListener, "onResult")
+  lp.register(
+    /ServerLog: Result: No-one wins?/,
+    "result_tie"
+  )
+  lp.subscribe("result_tie", gameEndListener, "onTie")
   lp.register(
     /ServerLog: Result: (?<timeout>timelimit) reached, traitors lose./,
     "timeout"

@@ -34,6 +34,7 @@ const keep_loglines = [
     "ServerLog: \\w+ took \\d+ credits? from the body of",
     'ServerLog: [0-9.:]+ - TTT2Revive:',
     'ServerLog: Result: \\w+ wins?.',
+    'ServerLog: Result: No-one wins?.',
     'ServerLog: Result: timelimit reached',
     'ServerLog: [0-9.:]+ - ROUND_END:',
     'ServerLog: [0-9.:]+ - ROUND_ENDED at given time',
