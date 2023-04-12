@@ -208,7 +208,8 @@ export class OverviewComponent implements OnInit {
   }
 
   async loadRoundsPlayerTS() {
-    const res = await this.resttt.GameDays();
+    let res = await this.resttt.GameDays();
+    res.sort((a: any, b: any) => a.date - b.date);
 
     const colors = getColormap("plotly", 2);
 
