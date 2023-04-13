@@ -136,6 +136,12 @@ class Pool {
     })
   }
 
+  end() {
+    for (const con of this.connections) {
+      con.destroy()
+    }
+  }
+
   listen(type, cb) {
     this.listeners.push({type, cb: cb})
   }

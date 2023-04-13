@@ -209,7 +209,7 @@ export class OverviewComponent implements OnInit {
 
   async loadRoundsPlayerTS() {
     let res = await this.resttt.GameDays();
-    res.sort((a: any, b: any) => a.date - b.date);
+    res.sort((a: any, b: any) => a.date.localeCompare(b.date));
 
     const colors = getColormap("plotly", 2);
 

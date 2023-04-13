@@ -42,13 +42,15 @@ router.post("/parsealllogs", async function(req, res) {
     await load_logfile(titer_minor, fname, date)
   }
 
-  req.status(200).end()
+  res.status(200).json(
+    "Started re-parsing all logs. Note: not checking if log was already parsed!"
+  )
 })
 
 router.get("/parsealllogsprogress", function (req, res) {
-  const progress = titer_major.progress() + "." + titer_minor.progress();
   res.status(200).json({
-    progress
+    "major": titer_major.progress(),
+    "minor": titer_minor.progress()
   })
 })
 
