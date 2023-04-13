@@ -4,8 +4,9 @@ REST routes for loading game configs
 const express = require("express")
 const router = express.Router()
 const db = require("../utils/database.js")
-const logparse = require("../logparse.js")
+const logparsing = require("../logparsing.js")
 const logfile = require("../logfile.js")
+const logger = require("../utils/logger.js")
 const { REST_ADMIN_TOKEN } = require("../utils/config.js")
 const { AuthorizationError, ValidationError, ConflictError } = require("../utils/error.js")
 const { setLogLevel } = require("../utils/logger.js")
@@ -109,26 +110,30 @@ router.post("/parselog", async function(req, res) {
   _mutex = true
   try {
     // check if already present
+    logger.debug("AdminRoute", "Checking if config already present")
     const config = await db.query("SELECT * FROM configs WHERE filename = ?", [fname], false)
     if (config.length !== 0)
       throw new ConflictError(`Config with filename '${fname}' was already parsed.`)
   
+    logger.debug("AdminRoute", "Getting logfile for parse")
     data = await logfile.get_log(fname)
   
+    logger.debug("AdminRoute", "Sending response for parse route")
     res.status(200).json({
       msg: "start parsing logfile",
       log_length: data.length,
     })
 
     // will insert fname in configs and parse logfile
-    await logparse.load_logfile(data.split("\n"), fname, date)
+    logger.debug("AdminRoute", "Start parsing logfile")
+    await logparsing.load_logfile(data.split("\n"), fname, date)
   } finally {
     _mutex = false
   }
 })
 
 router.get("/parseprogress", async function(req, res) {
-  const progress = logparse.get_progress()
+  const progress = logparsing.get_progress()
   res.status(200).json(progress)
 })
 

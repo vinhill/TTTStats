@@ -1,11 +1,12 @@
-const db = require('../src/utils/database.js');
-const logparse = require('../src/logparse.js');
-const logger = require('../src/utils/logger.js');
+const db = require('./utils/database.js');
+const logparsing = require('../src/logparsing.js');
+const logger = require('./utils/logger.js');
 
 class SimuGame {
-    constructor(map = "", date = "") {
+    constructor(map = "", fname = "", date = "") {
         this.map = map
         this.date = date
+        this.fname = fname
         this.players = []
         this.logs = []
     }
@@ -47,7 +48,7 @@ class SimuGame {
     }
 
     async submit() {
-        await logparse.load_logfile(this.logs, this.date)
+        await logparsing.load_logfile(this.logs, this.fname, this.date)
     }
 
     async run(steps=[2,3,4]) {
@@ -61,7 +62,7 @@ class SimuGame {
     }
 }
 
-describe('logparse', () => {
+describe('logparsing', () => {
     var queries = [];
     var results = {};
 
@@ -81,12 +82,15 @@ describe('logparse', () => {
         test('creates a game and stores duration.', async () => {
             results["SELECT mid FROM game ORDER BY mid DESC LIMIT 1"] = [{mid: 5}]
 
-            const game = new SimuGame(map="ttt_rooftops_2016_v1", date="2021-01-01");
+            const game = new SimuGame(map="ttt_rooftops_2016_v1", fname="test", date="2021-01-01");
             game.prepare();
             game.start();
             game.end(false, "traitors win.", "4:02.01");
             await game.submit();
 
+            expect(queries.includes(
+                "INSERT INTO configs (filename) VALUES ('test')"
+            )).toBe(true);
             expect(queries.includes(
                 "INSERT INTO game (map, date, duration) VALUES ('ttt_rooftops_2016_v1', '2021-01-01', 0)"
                 )).toBe(true);
@@ -138,7 +142,7 @@ describe('logparse', () => {
     });
 
     test('captures bought items', async () => {
-        await logparse.load_logfile([
+        await logparsing.load_logfile([
             'ServerLog: 01:05.55 - CP_OE: Zumoari [survivalist, t] ordered weapon_ttt_sandwich'
         ], "");
 
@@ -461,7 +465,7 @@ describe('logparse', () => {
     });
 
     test("stores medium messages", async () => {
-        await logparse.load_logfile([
+        await logparsing.load_logfile([
             '[TTT2 Medium Role] Noisified chat: mrkus retess'
         ], "");
 

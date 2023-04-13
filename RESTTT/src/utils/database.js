@@ -36,7 +36,7 @@ function stripstr(str) {
   return str.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ")
 }
 
-function getConnection(name) {
+function getPool(name) {
   if (conf.NODE_ENV === "test")
     return getTestConnection(name)
 
@@ -158,15 +158,15 @@ async function queryReader(querystr, params=[], cache=true) {
   if (querystr.endsWith(".sql"))
     querystr = await readQueryFile(querystr)
   if (cache)
-    return queryCached(getConnection("reader"), querystr, params)
+    return queryCached(getPool("reader"), querystr, params)
   else
-    return query(getConnection("reader"), querystr, params)
+    return query(getPool("reader"), querystr, params)
 }
 
 async function queryAdmin(querystr, params=[]) {
   if (querystr.endsWith(".sql"))
     querystr = await readQueryFile(querystr)
-  return query(getConnection("admin"), querystr, params)
+  return query(getPool("admin"), querystr, params)
 }
 
 function setTestFunctions(onQuery, onConnect=() => {}) {
@@ -177,7 +177,7 @@ function setTestFunctions(onQuery, onConnect=() => {}) {
 
 async function healthcheck() {
   const pool_select = await new Promise(resolve => {
-    getConnection("reader").query("SELECT 1", err => {
+    getPool("reader").query("SELECT 1", err => {
       if (err) resolve({err: err})
       else resolve("success")
     })
@@ -196,4 +196,5 @@ module.exports = {
   queryAdmin,
   setTestFunctions,
   _healthcheck: healthcheck,
+  getPool,
 }
