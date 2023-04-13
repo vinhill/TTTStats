@@ -178,6 +178,7 @@ export class PlayerComponent implements OnInit {
   async loadWhoKilledWhoMore() {
     let res = await this.resttt.WhoKilledWho();
     res = res.filter(r => r.killer == this.player || r.victim == this.player);
+    res = res.filter(r => r.killer != r.victim);
 
     // kills = player killed him, deahs = player was killed by him
     let player_kd: {[player: string]: {kills: number, deaths: number}} = {};
