@@ -37,15 +37,24 @@ class PooledConnection {
       cb(err, res)
     })
   }
-
+  
   release() {
-    this.pool.releaseConnection(this)
+    this.pool.release(this)
   }
 
   destroy() {
     if (this.con)
       this.con.destroy()
   }
+}
+
+function promisefy(func, ...args) {
+  return new Promise((resolve, reject) => {
+    func(...args, (err, res) => {
+      if (err) reject(err)
+      else resolve(res)
+    })
+  })
 }
 
 class Pool {
@@ -173,7 +182,7 @@ class Pool {
         logger.debug("DBPool", "Acquired connection for query.")
         con.query(query, (err, res) => {
           if (err) this._checkAlive(con)
-          else this.release(con)
+          else con.release()
           cb(err, res)
         })
       }
@@ -181,4 +190,7 @@ class Pool {
   }
 }
 
-module.exports = Pool
+module.exports = {
+  Pool,
+  promisefy
+}

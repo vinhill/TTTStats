@@ -115,6 +115,16 @@ const templates = {
     "body": `token=`,
     "encode": "application/x-www-form-urlencoded",
   },
+  "parsealllogs": {
+    "uri": "/api/v1/dev/parsealllogs",
+    "method": "POST",
+    "title": "Parse all logs",
+  },
+  "parsealllogsprogress": {
+    "uri": "/api/v1/dev/parsealllogsprogress",
+    "method": "GET",
+    "title": "Parse all logs progress",
+  }
 }
 
 function load_template(template) {

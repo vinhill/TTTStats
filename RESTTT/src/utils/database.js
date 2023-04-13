@@ -3,7 +3,7 @@ const fs = require('fs')
 const { performance } = require('perf_hooks')
 const conf = require('./config.js')
 const logger = require('./logger.js')
-const Pool = require('./dbpool.js')
+const { Pool } = require('./dbpool.js')
 const BoundedCache = require("./structs.js").BoundedCache
 
 const cache = new BoundedCache(conf.CACHE_SIZE)

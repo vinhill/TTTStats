@@ -1,8 +1,21 @@
 const db = require("./utils/database.js")
-const { TrackableIterator } = require("./utils/structs.js")
 const groupBy = require("./group_by.js").groupBy
 const logger = require("./utils/logger.js")
 const { LogParser, DuplicateFilter } = require("./logparser.js")
+const { promisefy } = require("./utils/dbpool.js")
+const { DB_QER_TIMEOUT } = require("./utils/config.js")
+
+let con;
+
+function query(querystr, params=[]) {
+  if (con === undefined)
+    throw new Error("Database connection not established")
+  return promisefy(con.query.bind(con), {
+    sql: querystr,
+    values: params,
+    timeout: DB_QER_TIMEOUT
+  },)
+}
 
 const regex = (function() {
   //build regexes without worrying about
@@ -77,7 +90,7 @@ async function onRoleAssigned(match, state) {
   client.team = unifyTeamname(match.team)
   state.clients.set(match.name, client)
 
-  await db.queryAdmin(
+  await query(
     "INSERT IGNORE INTO player (name) VALUES (?)",
     [match.name]
   )
@@ -85,16 +98,16 @@ async function onRoleAssigned(match, state) {
 
 async function onGameStart(match, state) {
   // captures: nothing
-  await db.queryAdmin(
+  await query(
     "INSERT INTO game (map, date, duration) VALUES (?, ?, ?)",
     [state.map, state.date, 0]
   )
+
   // get the mid of the just inserted round
-  await db.queryAdmin("COMMIT")
-  let res = await db.query("SELECT mid FROM game ORDER BY mid DESC LIMIT 1", [], false)
+  let res = await query("SELECT mid FROM game ORDER BY mid DESC LIMIT 1", [], false)
   state.mid = res[0].mid
   for (let [name, client] of state.clients) {
-    await db.queryAdmin(
+    await query(
       "INSERT INTO participates (mid, player, startrole) VALUES (?, ?, ?)",
       [state.mid, name, client.role]
     )
@@ -114,7 +127,7 @@ function onRoleChange(match, state) {
 
   // TODO the cause for rolechange would be interesting
 
-  db.queryAdmin(
+  query(
     "INSERT INTO rolechange (mid, player, orig, dest, time) VALUES (?, ?, ?, ?, ?)",
     [state.mid, match.name, fromrole, torole, time]
   )
@@ -130,7 +143,7 @@ function onBuy(match, state) {
   // not critical so no await
   const role = capitalizeFirstLetter(match.role)
   const time = timeToSeconds(match.time)
-  db.queryAdmin(
+  query(
     "INSERT INTO buys (mid, player, item, time, role) VALUES (?, ?, ?, ?, ?)",
     [state.mid, match.name, match.equipment, time, role]
   )
@@ -156,7 +169,7 @@ const LoveHandle = {
   },
   _pushdb(newlover, mid) {
     for (const lover of this.lovers) {
-      db.queryAdmin(
+      query(
         "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'love')",
         [mid, ...([lover, newlover]).sort()]
       )
@@ -169,7 +182,7 @@ function jackalTeamup(match, state) {
   if (weapon !== "weapon_ttt2_sidekickdeagle")
     return
 
-  db.queryAdmin(
+  query(
     "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'jackal')",
     [state.mid, match.attacker, match.victim]
   )
@@ -180,7 +193,7 @@ function sheriffTeamup(match, state) {
   if (weapon !== "weapon_ttt2_deputydeagle")
     return
 
-  db.queryAdmin(
+  query(
     "INSERT INTO teamup (mid, first, second, reason) VALUES (?, ?, ?, 'sheriff')",
     [state.mid, match.attacker, match.victim]
   )
@@ -222,7 +235,8 @@ const DamageHandler = {
 
     const PvPDmgArgs = groupBy(this.pvp_dmg, [0, 1, 2, 3, 4, 5, 6, 7], sum)
     for (let args of PvPDmgArgs) {
-      db.queryAdmin(
+      args[8] = Math.min(args[8], 2147483647) // clamp to max int32
+      query(
         "INSERT INTO damage (mid, player, vktrole, reason, causee, atkrole, weapon, teamdmg, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         args
       )
@@ -230,7 +244,8 @@ const DamageHandler = {
 
     const PvEDmgArgs = groupBy(this.pve_dmg, [0, 1, 2, 3], sum)
     for (let args of PvEDmgArgs) {
-      db.queryAdmin(
+      args[4] = Math.min(args[4], 2147483647) // clamp to max int32
+      query(
         "INSERT INTO damage (mid, player, vktrole, reason, damage) VALUES (?, ?, ?, ?, ?)",
         args
       )
@@ -251,7 +266,7 @@ async function onPvPKill(match, state) {
   if (inflictor.class !== "Player")
     weapon = inflictor.entity
 
-  db.queryAdmin(
+  query(
     "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [state.mid, match.victim, vktrole, time, match.attacker, atkrole, weapon, teamkill]
   )
@@ -262,7 +277,7 @@ async function onPvEKill(match, state) {
   const vktrole = capitalizeFirstLetter(match.vktrole)
   const time = timeToSeconds(match.time)
 
-  db.queryAdmin(
+  query(
     "INSERT INTO dies (mid, player, vktrole, time) VALUES (?, ?, ?, ?)",
     [state.mid, match.victim, vktrole, time]
   )
@@ -293,7 +308,7 @@ const gameEndListener = {
     if (this.winner === undefined || this.duration === undefined)
       return
     
-    db.queryAdmin(
+    query(
       "UPDATE game SET duration = ? WHERE mid = ?",
       [this.duration, state.mid]
     )
@@ -302,7 +317,7 @@ const gameEndListener = {
       let won = this.winner === client.team
       if (client.role === "Lootgoblin")
         won = client.alive
-      db.queryAdmin(
+      query(
         "UPDATE participates SET won = ? WHERE mid = ? AND player = ?",
         [won, state.mid, name]
       )
@@ -316,7 +331,7 @@ function resetState(match, state) {
 
 function onMediumMsg(match, state) {
   // captures: msg
-  db.queryAdmin("INSERT INTO mediumchat (mid, msg) VALUES (?, ?)", [state.mid, match.msg])
+  query("INSERT INTO mediumchat (mid, msg) VALUES (?, ?)", [state.mid, match.msg])
 }
 
 const karmaTracker = {
@@ -331,7 +346,7 @@ const karmaTracker = {
     const client = state.clients.get(match.name)
     if (client.karma < 10000 || match.karma < 10000) {
       client.karma = Number(match.karma)
-      db.queryAdmin(
+      query(
         "INSERT INTO karma (mid, player, karma, time) VALUES (?, ?, ?, ?)",
         [state.mid, match.name, client.karma, this.last_dmg_time]
       )
@@ -358,7 +373,7 @@ const surviveTracker = {
   },
   gameEnd(match, state) {
     for (const [name, client] of state.clients)
-      db.queryAdmin(
+      query(
         "UPDATE participates SET survived = ? WHERE mid = ? AND player = ?",
         [client.alive, state.mid, name]
     )
@@ -538,23 +553,28 @@ function createParser(date) {
   return lp
 }
 
-let titer = new TrackableIterator([]);
-
+// log can be a TrackableIterator
 async function load_logfile(log, fname, date) {
   const lp = createParser(date)
 
-  // 1. Speed up if many inserts come in a short time
-  // otherwise, a flush to disk is performed after each modification
-  // 2. Makes sure log marked as parsed and successfully parsed or neither 
-  await db.queryAdmin("SET autocommit=0")
+  const pool = db.getPool("admin")
+  con = await promisefy(pool.acquire.bind(pool))
 
-  await db.queryAdmin("INSERT INTO configs (filename) VALUES (?)", [fname])
-
-  titer = new TrackableIterator(log)
-  await lp.read(titer)
-
-  await db.queryAdmin("COMMIT")
-  await db.queryAdmin("SET autocommit=1")
+  try {
+    await query("START TRANSACTION")
+  
+    await query("INSERT INTO configs (filename) VALUES (?)", [fname])
+  
+    await lp.read(log)
+  
+    await query("COMMIT")
+  } catch(e) {
+    await query("ROLLBACK")
+    throw e
+  } finally {
+    con.release()
+  }
+  
   db.clearCache()
 
   if (Object.keys(lp.state).length != 4) {
@@ -564,11 +584,4 @@ async function load_logfile(log, fname, date) {
   }
 }
 
-function get_progress() {
-  return titer.progress()
-}
-
-module.exports = {
-  load_logfile,
-  get_progress
-}
+module.exports = load_logfile

@@ -4,12 +4,13 @@ REST routes for loading game configs
 const express = require("express")
 const router = express.Router()
 const db = require("../utils/database.js")
-const logparsing = require("../logparsing.js")
+const load_logfile = require("../logparsing.js")
 const logfile = require("../logfile.js")
 const logger = require("../utils/logger.js")
 const { REST_ADMIN_TOKEN } = require("../utils/config.js")
 const { AuthorizationError, ValidationError, ConflictError } = require("../utils/error.js")
 const { setLogLevel } = require("../utils/logger.js")
+const { TrackableIterator } = require("../utils/structs.js")
 
 /*
 Mutex for making sure a file isn't parsed twice
@@ -18,6 +19,8 @@ to keep track of which files have been parsed and then adds it.
 As this involves two async db queries, a mutex here might be good.
 */
 let _mutex = false
+
+let titer = new TrackableIterator([])
 
 router.post("/unsetmutex", function(req, res) {
   _mutex = false
@@ -126,14 +129,15 @@ router.post("/parselog", async function(req, res) {
 
     // will insert fname in configs and parse logfile
     logger.debug("AdminRoute", "Start parsing logfile")
-    await logparsing.load_logfile(data.split("\n"), fname, date)
+    titer = new TrackableIterator(data.split("\n"))
+    await load_logfile(titer, fname, date)
   } finally {
     _mutex = false
   }
 })
 
 router.get("/parseprogress", async function(req, res) {
-  const progress = logparsing.get_progress()
+  const progress = titer.progress()
   res.status(200).json(progress)
 })
 

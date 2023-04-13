@@ -67,5 +67,6 @@ function shutdown() {
   server.close(function() {
     require("./src/utils/database.js").shutdown()
     require("./src/utils/filebase.js").shutdown()
+    process.exit(0)
   })
 }
