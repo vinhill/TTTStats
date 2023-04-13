@@ -141,6 +141,7 @@ export class RecentComponent {
         pointBorderColor: cmap[pidx],
         pointHoverBackgroundColor: cmap[pidx],
         pointHoverBorderColor: cmap[pidx],
+        stepped: true
       });
       pidx++;
     }
