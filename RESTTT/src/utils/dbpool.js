@@ -184,6 +184,7 @@ class Pool {
       if (err) {
         cb(err)
         logger.debug("DBPool", "Error while acquiring connection for query.")
+		this._checkAlive(con)
       } else {
         logger.debug("DBPool", "Acquired connection for query.")
         con.query(query, (err, res) => {
