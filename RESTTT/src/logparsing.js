@@ -364,6 +364,11 @@ function captureVampireDmg(match, state) {
   return true
 }
 
+function captureCursed(match, state) {
+  if (match.vktrole == "cursed") return false;
+  return true;
+}
+
 const surviveTracker = {
   death(match, state) {
     state.clients.get(match.victim).alive = false
@@ -509,6 +514,7 @@ function createParser(date) {
     `,
     "pvp_kill"
   )
+  lp.listen("pvp_kill", captureCursed, 999)
   lp.listen("pvp_kill", onPvPKill)
   lp.subscribe("pvp_kill", surviveTracker, "death")
   lp.register(
@@ -520,6 +526,7 @@ function createParser(date) {
     `,
     "pve_kill"
   )
+  lp.listen("pve_kill", captureCursed, 999)
   lp.listen("pve_kill", onPvEKill)
   lp.subscribe("pve_kill", surviveTracker, "death")
 

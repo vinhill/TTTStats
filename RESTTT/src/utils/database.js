@@ -29,8 +29,18 @@ const _adminCon = new Pool({
   multipleStatements: true
 })
 
-let getTestConnection = () => console.warn("No test connection provider set.")
-let queryTest = () => console.warn("No test query provider set.")
+let getTestConnection = () => {
+  return {
+    end() {},
+    listen() {},
+    release() {},
+    acquire(cb) {
+      cb(null, this);
+    },
+    query(query, cb) { cb(null, queryTest(this, query.sql, query.values)); }
+  }
+}
+let queryTest = (con, querystr, params) => logger.warn("Database", "No test query provider set.")
 
 function stripstr(str) {
   return str.replace(/(\r\n|\n|\r)/gm, " ").replace(/\s+/g, " ")
@@ -169,10 +179,12 @@ async function queryAdmin(querystr, params=[]) {
   return query(getPool("admin"), querystr, params)
 }
 
-function setTestFunctions(onQuery, onConnect=() => {}) {
+function setTestFunctions(onQuery, onConnect) {
   logger.info("Database", "Enabling test mode for database.js")
-  queryTest = onQuery
-  getTestConnection = onConnect
+  if (onQuery) queryTest = onQuery
+  else logger.warn("Database", "No test query function set.")
+  if (onConnect) getTestConnection = onConnect
+  else logger.info("Database", "No test get connection function set.")
 }
 
 async function healthcheck() {

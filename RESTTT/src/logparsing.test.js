@@ -1,5 +1,5 @@
 const db = require('./utils/database.js');
-const logparsing = require('../src/logparsing.js');
+const load_logfile = require('../src/logparsing.js');
 const logger = require('./utils/logger.js');
 
 class SimuGame {
@@ -48,7 +48,7 @@ class SimuGame {
     }
 
     async submit() {
-        await logparsing.load_logfile(this.logs, this.fname, this.date)
+        await load_logfile(this.logs, this.fname, this.date)
     }
 
     async run(steps=[2,3,4]) {
@@ -142,7 +142,7 @@ describe('logparsing', () => {
     });
 
     test('captures bought items', async () => {
-        await logparsing.load_logfile([
+        await load_logfile([
             'ServerLog: 01:05.55 - CP_OE: Zumoari [survivalist, t] ordered weapon_ttt_sandwich'
         ], "");
 
@@ -285,6 +285,22 @@ describe('logparsing', () => {
             expect(queries.includes(
                 "UPDATE participates SET won = false WHERE mid = 0 AND player = 'Zumoari'"
             )).toBe(true);
+        });
+
+        test("Cursed deaths don't count", async() => {
+            let game = new SimuGame();
+            game.addPlayer("Zumoari", "cursed", "nones");
+            game.prepare();
+            game.start([
+                "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Zumoari [cursed, nones]",
+                "ServerLog: 02:58.71 - CP_KILL: P1 [r1, t1] <Weapon [1126][w1]>, (Player [4][P1], P1) killed Zumoari [cursed, nones]"
+            ]);
+            game.end();
+            await game.submit();
+            
+            expect(queries.some(
+                (value, _i, _a) => /dies/.exec(value)
+            )).toBe(false);
         });
     });
 
@@ -465,7 +481,7 @@ describe('logparsing', () => {
     });
 
     test("stores medium messages", async () => {
-        await logparsing.load_logfile([
+        await load_logfile([
             '[TTT2 Medium Role] Noisified chat: mrkus retess'
         ], "");
 

@@ -11,7 +11,7 @@
 		"scope": "javascript",
 		"prefix": "expectsomeregex",
 		"body": [
-			"expect(queries.some(\n\t/${1:regex}/.exec\n)).toBe(${2:true});"
+			"expect(queries.some(\n\t(value, _i, _a) => /${1:regex}/.exec(value)\n)).toBe(${2:true});"
 		],
 		"description": "jest expect query array to match regex somewhere"
 	},

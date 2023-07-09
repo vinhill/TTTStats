@@ -217,8 +217,8 @@ router.get("/Teamup", function(req, res, next) {
 router.get("/KarmaTS", function(req, res, next) {
   const since = req.query.since
   const player = req.query.player
-  if (!since && !player)
-    throw new ValidationError("You need to specify either player or a recent, minimum mid (since)")
+  if (!since)
+    throw new ValidationError("You need to specify a recent, minimum mid (since)")
 
   req.sqlquery = `
     SELECT mid, player, karma, time
