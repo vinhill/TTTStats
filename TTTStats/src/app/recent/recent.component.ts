@@ -115,7 +115,9 @@ export class RecentComponent {
     let playerts: {[player: string]: {x: number, y: number}[]} = {};
     players.forEach(x => playerts[x] = []);
     for (const row of karmats) {
-      playerts[row.player].push({
+      let ts = playerts[row.player];
+      if (ts[ts.length - 1].y == row.karma) continue;
+      ts.push({
         x: get_xpos(row.mid, row.time),
         y: row.karma
       });
