@@ -26,19 +26,24 @@
 	<card title="Top 10 weapons (kills)" [loaded]="cKillsPerWeapon !== undefined" (reload)="loadKillsPerWeapon()">
 		<data-chart [data]="cKillsPerWeapon!"></data-chart>
 	</card>
-	<card title="Who understands this?" [loaded]="true" (reload)="loadMediumChat()" *ngIf="mediumChats">
-		{{mediumChats}}
-	</card>
 	<card title="Team winrate / surviverate" [loaded]="cTeamWonSurRate !== undefined" (reload)="loadTeamWonSurRate()">
 		<data-chart [data]="cTeamWonSurRate!" [legend]="LegendType.None"></data-chart>
 	</card>
-	<card title="Min Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
-		{{minKarma!.player}} got the worst karma with {{minKarma!.karma}}
+	<card title="Who understands this?" [loaded]="mediumChats !== undefined" (reload)="loadMediumChat()" *ngIf="mediumChats" aspect="2/1">
+		{{mediumChats}}
 	</card>
-	<card title="Top Multikills" [loaded]="multikills !== undefined" (reload)="loadMultikills()">
+	<card title="Curse transmission" [loaded]="cursedGraph !== undefined" (reload)="loadCursedGraph()" aspect="2/1">
+		<div style="white-space: pre-line">
+			{{cursedGraph}}
+		</div>
+	</card>
+	<card title="Top Multikills" [loaded]="multikills !== undefined" (reload)="loadMultikills()" aspect="2/1">
 		<div *ngIf="multikills?.data!.length == 0">
 			No multikills this round.
 		</div>
 		<data-table [data]="multikills?.data!" [headers]="multikills?.header!" columns="player, weapon, count" *ngIf="multikills?.data!.length > 0"></data-table>
+	</card>
+	<card title="Min Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
+		{{minKarma!.player}} got the worst karma with {{minKarma!.karma}}
 	</card>
 </div>

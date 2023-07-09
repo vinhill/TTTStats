@@ -22,7 +22,8 @@ export class RecentComponent {
   cTeamWonSurRate: ChartConfiguration | undefined;
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
-
+  
+  cursedGraph?: string;
   mediumChats?: string;
   minKarma = {player: "", karma: 0};
   multikills: {
@@ -58,6 +59,7 @@ export class RecentComponent {
         this.loadWhoKilledWho(),
         this.loadTeamWonSurRate(),
         this.loadMultikills(),
+        this.loadCursedGraph(),
       ]))
       .catch(err => console.log(err));
   }
@@ -363,6 +365,40 @@ export class RecentComponent {
         "player": "Killer",
         "count": "Kills",
         "weapon": "Weapon",
+      }
+    }
+  }
+
+  async loadCursedGraph() {
+    let res = await this.resttt.CursedChanges(this.since);
+
+    // from a list of mid and edges pfrom -> pto
+    // to a text like
+    // match 1: p1 -> p2 -> p3
+    // match 1: p2 -> p4 -> p7
+    // match 2: ...
+
+    let lines = new Map<number, string[][]>();
+    for (const c of res) {
+      if (!lines.has(c.mid)) lines.set(c.mid, []);
+
+      for (const line of lines.get(c.mid)!) {
+        if (line[line.length-1] == c.pfrom) {
+          line.push(c.pto);
+          break;
+        }
+      }
+
+      lines.get(c.mid)!.push([c.pfrom, c.pto]);
+    }
+
+    let matches = Array.from(lines.entries());
+    matches.sort((a, b) => a[0] - b[0]);
+
+    this.cursedGraph = "";
+    for (const [mid, lines] of matches) {
+      for (const line of lines) {
+        this.cursedGraph += `Match ${mid - this.since + 1}: ${line.join(" -> ")}\n`;
       }
     }
   }
