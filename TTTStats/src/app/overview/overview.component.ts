@@ -324,6 +324,7 @@ export class OverviewComponent implements OnInit {
     let res = await this.resttt.Multikills();
     res = res.filter(x => x.count > 1);
     res = res.splice(0, 5);
+    res = res.map(mk => { return {...mk, weapon: ttt_prettify_label(mk.weapon)}; });
     this.multikills = {
       data: res,
       header: {

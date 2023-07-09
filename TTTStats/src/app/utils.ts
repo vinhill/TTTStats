@@ -224,7 +224,7 @@ export function deepcopy(obj: any) {
 }
 
 export function ttt_prettify_label(label: string) {
-  return label.replace(/(item_|weapon_|ttt_)/g, "");
+  return label.replace(/(item_|weapon_|ttt_|arccw_)/g, "");
 }
 
 export function reverseIndex(array: any[], i: number) {
