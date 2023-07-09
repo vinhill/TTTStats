@@ -57,7 +57,7 @@ const server = app.listen(PORT, function(err, address) {
     logger.error("Server", err)
     process.exit(1)
   }
-  logger.info("Server", `RESTTT is listening on ${address}`)
+  logger.info("Server", `RESTTT is listening on ${address}:${PORT}`)
 })
 
 process.on('SIGINT', shutdown)

@@ -12,7 +12,7 @@ module.exports = {
   "VPS_DOMAIN": "vmd76968.contaboserver.net",
   "CACHE_SIZE": 50,
   "MAX_RESULT_SIZE_KB": 40,
-  "TTT_FTP_PW": process.env.TTTFTPPW,
+  "TTT_VPS_PW": process.env.TTT_VPS_PW,
   "FTP_PW": process.env.FTPPW,
   "REST_ADMIN_TOKEN": process.env.REST_ADMIN_TOKEN,
   "DEFAULT_LOGLEVEL": NODE_ENV === "dev" || NODE_ENV === "test" ? 0 : 1,

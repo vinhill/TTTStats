@@ -28,7 +28,7 @@ export class RestttService {
 	private async getUncached(route: string): Promise<any[]> {
 		let res = await fetch(`${this.baseURL.getValue()}/data/${route}`, {
 			method: "GET",
-			headers: { // TODO do we need this?
+			headers: {
 				'Content-Type': "application/json"
 			}
 		});

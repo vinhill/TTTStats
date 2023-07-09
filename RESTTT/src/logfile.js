@@ -1,9 +1,11 @@
 const fb = require("./utils/filebase.js")
 const logger = require("./utils/logger.js")
 
+LOGPATH = "serverfiles/garrysmod/console.log"
+
 // Fetches the current console.log from game server
 async function fetch_current_log(cleaned=false) {
-    let data = await fb.read("garrysmod/garrysmod/console.log", false, "nitrado")
+    let data = await fb.read(LOGPATH, false, "vps")
     data = data.toString()
     if (cleaned)
         data = clean_log(data)
@@ -79,7 +81,7 @@ async function process_current_log(fname) {
     await save_log(path2, log)
     await save_log(path1, clean)
 
-    await fb.remove("garrysmod/garrysmod/console.log", "nitrado")
+    await fb.remove(LOGPATH, "vps")
 
     return path1
 }

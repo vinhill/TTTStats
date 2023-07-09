@@ -1,34 +1,66 @@
 const { Readable, Writable } = require("stream")
-const { FTP_PW, TTT_FTP_PW, NODE_ENV } = require("./config.js")
+const { FTP_PW, TTT_VPS_PW, NODE_ENV } = require("./config.js")
 const ftp = require("basic-ftp")
+let Client = require('ssh2-sftp-client');
 const AdmZip  = require("adm-zip")
 const logger = require("./logger.js")
 
 let connections = {}
 
+class SFTPToFTP {
+    constructor() {
+        this._sftp = new Client()
+    }
+    access(options) {
+        return this._sftp.connect(options)
+    }
+    close() {
+        return this._sftp.end()
+    }
+    list(path) {
+        return this._sftp.list(path)
+    }
+    remove(path) {
+        return this._sftp.delete(path)
+    }
+    ensureDir(path) {
+        return this._sftp.mkdir(path, true)
+    }
+    uploadFrom(readable, path) {
+        return this._sftp.put(readable, path)
+    }
+    downloadTo(writable, path) {
+        return this._sftp.get(path, writable)
+    }
+}
+
 function getConnection(con) {
     return new Promise((res, rej) => {
         if (!connections[con] || connections[con].closed) {
-            const client = new ftp.Client()
-            if (NODE_ENV === "dev")
-                client.ftp.verbose = true
 
-            options = {}
-            if (con == "infinity")
-                // infinity free hosting
+            let options = {}
+            let client = null
+            if (con == "infinity") {
                 options = {
                     host: "ftpupload.net",
                     user: "epiz_33726584",
                     password: FTP_PW,
                     secure: false
                 }
-            else if (con == "nitrado")
+                client = new ftp.Client()
+                if (NODE_ENV === "dev")
+                    client.ftp.verbose = true
+            }else if (con == "vps") {
                 options = {
-                    host: "ms2730.gamedata.io",
-                    user: "ni851794_1",
-                    password: TTT_FTP_PW,
-                    secure: true
+                    host: "vmd76968.contaboserver.net",
+                    port: 22,
+                    username: "gmodserver",
+                    password: TTT_VPS_PW,
                 }
+                if (NODE_ENV === "dev")
+                    options.debug = (msg) => logger.debug("SFTP", msg)
+                client = new SFTPToFTP()
+            }
             else
                 rej(`Invalid ftp connection ${con}.`)
 
@@ -39,6 +71,7 @@ function getConnection(con) {
                 })
                 .catch(err => {
                     logger.error("Filebase", err)
+                    connections[con] = null
                     rej(err)
                 })
 
