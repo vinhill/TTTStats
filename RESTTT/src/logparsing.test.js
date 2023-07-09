@@ -544,6 +544,25 @@ describe('logparsing', () => {
                 "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 9989.5, 0)"
             )).toBe(true);
         });
+
+        test("by storing the initial karma always", async () => {
+            const game = new SimuGame();
+            game.addPlayer("V8Block");
+            game.addPlayer("Schnitzelboy")
+            game.prepare();
+            game.start([
+                "ServerLog: 00:00.00 - INIT_KARMA: V8Block [r1, t1] karma 10000",
+                "ServerLog: 00:00.00 - INIT_KARMA: Schnitzelboy [r1, t1] karma 900",
+            ]);
+            await game.submit();
+
+            expect(queries.includes(
+                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'V8Block', 10000, 0)"
+            )).toBe(true);
+            expect(queries.includes(
+                "INSERT INTO karma (mid, player, karma, time) VALUES (0, 'Schnitzelboy', 900, 0)"
+            )).toBe(true);
+        });
     });
 
     describe("tracks survival", () => {

@@ -335,10 +335,18 @@ function onMediumMsg(match, state) {
 }
 
 const karmaTracker = {
+  // TODO maybe aggregate many small karma changed from damage?
   init() {
     this.last_dmg_time = 0
   },
+  onInitKarma(match, state) {
+    query(
+      "INSERT INTO karma (mid, player, karma, time) VALUES (?, ?, ?, ?)",
+      [state.mid, match.name, Number(match.karma), 0]
+    )
+  },
   onPvPDmg(match, state) {
+    // to track the time of the next karma change
     this.last_dmg_time = timeToSeconds(match.time)
   },
   onKarma(match, state) {
@@ -425,6 +433,12 @@ function createParser(date) {
     "initial_role"
   )
   lp.listen("initial_role", onRoleAssigned)
+
+  lp.register(
+    /ServerLog: (?<time>[0-9:.]*) - INIT_KARMA: (?<name>(\w|\s)+) \[\w+, \w+\] karma (?<karma>[0-9.]*)/,
+    "init_karma"
+  )
+  lp.subscribe("init_karma", karmaTracker, "onInitKarma")
 
   lp.register(
     /CP round state: active/,

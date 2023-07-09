@@ -113,7 +113,7 @@ export class RecentComponent {
     const players = new Set<string>(karmats.map(x => x.player));
 
     let playerts: {[player: string]: {x: number, y: number}[]} = {};
-    players.forEach(x => playerts[x] = [{x: 1, y: 10000}]);
+    players.forEach(x => playerts[x] = []);
     for (const row of karmats) {
       playerts[row.player].push({
         x: get_xpos(row.mid, row.time),
@@ -123,11 +123,10 @@ export class RecentComponent {
     // replicate last value at the highest x so that all lines go to the end of the plot
     players.forEach(p => {
       playerts[p].push({
-        x: xmax,
+        x: xmax+1,
         y: reverseIndex(playerts[p], 0).y
       });
     });
-    console.log(playerts)
 
     // create plot
     const datasets: ChartConfiguration["data"]["datasets"] = [];
