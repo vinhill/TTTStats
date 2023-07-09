@@ -3,7 +3,9 @@
 		<h5 class="card-header" *ngIf="title">{{title}}</h5>
 	  	<div class="card-body">
 			<!-- Container for dynamic content from where the tag is used -->
-			<ng-content *ngIf="loaded"></ng-content>
+			<div [style.aspect-ratio]="aspect" [style.overflow-y]="aspect ? 'scroll' : undefined">
+				<ng-content *ngIf="loaded"></ng-content>
+			</div>
 			<div *ngIf="!loaded">
 				<div class="row">
 					<div class="col-4"></div>

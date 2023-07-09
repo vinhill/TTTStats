@@ -8,6 +8,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 export class CardComponent {
   @Input() title!: string;
   @Input() loaded: boolean = true;
+  @Input() aspect?: string;
 
   @Output() reload = new EventEmitter<void>();
 
