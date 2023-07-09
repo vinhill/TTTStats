@@ -116,7 +116,7 @@ export class RecentComponent {
     players.forEach(x => playerts[x] = []);
     for (const row of karmats) {
       let ts = playerts[row.player];
-      if (ts[ts.length - 1].y == row.karma) continue;
+      if (ts.length > 0 && ts[ts.length - 1].y == row.karma) continue;
       ts.push({
         x: get_xpos(row.mid, row.time),
         y: row.karma
