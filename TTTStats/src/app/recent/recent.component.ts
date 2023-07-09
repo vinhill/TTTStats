@@ -111,7 +111,6 @@ export class RecentComponent {
     const players = new Set<string>(karmats.map(x => x.player));
 
     let playerts: {[player: string]: [{x: number, y: number}]} = {};
-    players.forEach(x => playerts[x] = [{x: 1, y: 10000}]);
     for (const row of karmats) {
       playerts[row.player].push({
         x: get_xpos(row.mid, row.time),
@@ -356,6 +355,7 @@ export class RecentComponent {
   async loadMultikills() {
     let res = await this.resttt.Multikills(this.since);
     res = res.filter(x => x.count > 1);
+    res = res.map(mk => { return {...mk, weapon: ttt_prettify_label(mk.weapon)}; });
     this.multikills = {
       data: res,
       header: {
