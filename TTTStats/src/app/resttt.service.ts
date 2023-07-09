@@ -247,4 +247,12 @@ export class RestttService {
 	{
 		return this.get(this.urlencode("Multikills", {since: since}));
 	}
+
+	async CursedChanges(since: number)
+		: Promise<{
+			mid: number, pfrom: string, pto: string
+		}[]>
+	{
+		return this.get("CursedChanges/" + since);
+	}
 }

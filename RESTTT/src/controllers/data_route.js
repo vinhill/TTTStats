@@ -23,7 +23,7 @@ async function firstMidLastDate() {
 }
 
 router.use(function(req, res, next) {
-  // default case, can be changed to object for key-value pairs
+  // default case, key-value pairs
   req.sqlparams = req.query
   
   if (req.sqlparams.since) {
@@ -295,6 +295,24 @@ router.get("/Multikills", function(req, res, next) {
     GROUP BY mid, causee, weapon, time
     ORDER BY count DESC
     LIMIT 10`
+  next()
+})
+
+router.get("/CursedChanges/:since", function(req, res, next) {
+  req.sqlquery = `
+    SELECT mid, MAX(pfrom) AS pfrom, MAX(pto) AS pto
+    FROM (
+      SELECT mid, time, player AS pfrom, null AS pto
+      FROM rolechange
+      WHERE orig = 'cursed' AND mid >= :since
+      UNION ALL
+      SELECT mid, time, null AS pfrom, player AS pto
+      FROM rolechange
+      WHERE dest = 'cursed' AND mid >= :since
+    ) AS sub
+    GROUP BY mid, time
+    ORDER BY mid, time`
+    req.sqlparams = {since: req.params.since}
   next()
 })
 

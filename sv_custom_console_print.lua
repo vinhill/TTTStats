@@ -100,6 +100,7 @@ end)
 hook.Add("TTTBeginRound", "CP_round_start_role_print", function()
 	for i, v in ipairs( player.GetAll() ) do
 		DamageLog( "ROUND_START: " .. PlayerStr(v))
+		DamageLog( "INIT_KARMA: " .. PlayerStr(v)  .. " karma " .. v:GetLiveKarma())
 	end
 	roundOver = false
 end)

@@ -33,3 +33,5 @@ To generate the statistics you need to add the file sv_custom_console_print.lua 
 The folder structure might be a little bit different, depending if you are hosting a local server or using a dedicated provider. However you should at least find ...\lua\autorun\server, so you can just put it there.
 
 The file sv_custom_console_print.lua generates the custom outputs and writes it in the following file: ...\steamapps\common\GarrysMod\garrysmod\console.log. 
+
+To edit this file, I recommend VS Code with the GLua Enhanced Addon. Also see [API Docs](https://api-docs.ttt2.neoxult.de/)
