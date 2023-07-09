@@ -28,7 +28,6 @@ end
 ]]
 function AttackerStr(att, infl)
 	if att:IsPlayer() then
-		--if att:GetRoleString() == "jester" then return end
 		return PlayerStr(att) .. "<" .. tostring(att:GetActiveWeapon()) .. ">, (" .. InflictorStr(infl) .. ")"
 	else
 		return "nonplayer (" .. InflictorStr(infl) ..")"
@@ -127,7 +126,6 @@ end)
 	- no damage amount
 ]]
 hook.Add( "PlayerDeath", "CP_player_death", function(ent, infl, att)
-	--if ent.GetRoleString ~= "cursed" then return end --Dont print when player is cursed
 	if not ent:IsPlayer() or roundOver then return end
 
 	DamageLog( "CP_KILL: " .. AttackerStr(att, infl) .. " killed " .. VictimStr(ent) )

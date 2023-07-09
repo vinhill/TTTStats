@@ -12,7 +12,7 @@ It uses a mysql database hosted at [Contabo](https://vmd76968.contaboserver.net)
 
 ### Backend
 
-- go to RESTTT and run `npm run deploy`
+- go to RESTTT and run `npm run deploy` or use the `Dockerfile``
 
 ### Frontend
 
@@ -26,7 +26,7 @@ If some bundle is too large, do
 
 ### Custom Output Generator
 
-To generate the statistics you need to add the file sv_custom_print.lua to the following folder:
+To generate the statistics you need to add the file sv_custom_console_print.lua to the following folder:
 
 ...\steamapps\common\GarrysMod\garrysmod\lua\autorun\server
 
