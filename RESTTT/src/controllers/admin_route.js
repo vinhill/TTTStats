@@ -11,6 +11,7 @@ const { REST_ADMIN_TOKEN } = require("../utils/config.js")
 const { AuthorizationError, ValidationError, ConflictError } = require("../utils/error.js")
 const { setLogLevel } = require("../utils/logger.js")
 const { TrackableIterator } = require("../utils/structs.js")
+const telemetry = require("../utils/telemetry.js")
 
 /*
 Mutex for making sure a file isn't parsed twice
@@ -150,6 +151,10 @@ router.post("/restart", function(req, res) {
   setTimeout(() => {
     process.exit(0)
   }, 500)
+})
+
+router.get("/telemetryreport", async function(req, res) {
+  res.status(200).json(telemetry.report())
 })
 
 module.exports = router

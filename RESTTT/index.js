@@ -124,6 +124,11 @@ const templates = {
     "uri": "/api/v1/dev/parsealllogsprogress",
     "method": "GET",
     "title": "Parse all logs progress",
+  },
+  "telemetryreport": {
+    "uri": "/api/v1/admin/telemetryreport",
+    "method": "GET",
+    "title": "Telemetry report",
   }
 }
 

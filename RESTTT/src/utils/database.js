@@ -1,10 +1,10 @@
 const mysql = require('mysql')
 const fs = require('fs')
-const { performance } = require('perf_hooks')
 const conf = require('./config.js')
 const logger = require('./logger.js')
 const { Pool } = require('./dbpool.js')
 const BoundedCache = require("./structs.js").BoundedCache
+const { startTimer } = require("./timer.js")
 
 const cache = new BoundedCache(conf.CACHE_SIZE)
 logger.info("Database", `Cache will use up to ${conf.CACHE_SIZE*conf.MAX_RESULT_SIZE_KB/1000} mb of memory.`)
@@ -77,7 +77,7 @@ function query(con, querystr, params=[]) {
     return queryTest(con, querystr, params)
 
   return new Promise((res, rej) => {
-    const startTime = performance.now()
+    const timer = startTimer()
 
     con.query(
       {
@@ -86,8 +86,8 @@ function query(con, querystr, params=[]) {
         timeout: conf.DB_QER_TIMEOUT
       },
       (err, result) => {
-        const endTime = performance.now()
-        if (endTime - startTime > conf.DB_QER_TIMEOUT / 2) {
+        timer.stop()
+        if (timer.ms() > conf.DB_QER_TIMEOUT / 2) {
           logger.warn("Database", `Query ${querystr} took long (${endTime-startTime} ms)`)
         }
 

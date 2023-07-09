@@ -1,5 +1,7 @@
 const mysql = require("mysql")
 const logger = require("./logger.js")
+const telemetry = require("./telemetry.js")
+const { startTimer } = require("./timer.js")
 
 function default_cb(err, res) {
   if (err) throw err
@@ -32,8 +34,11 @@ class PooledConnection {
     if (this.con === null)
       cb(new Error("Connection not established"))
 
+    let timer = startTimer()
     this.con.query(query, (err, res) => {
-      this.idel_since = Date.now()
+      this.idle_since = Date.now()
+      timer.stop()
+      telemetry.get("DB_Query_Duration").add(timer.ms())
       cb(err, res)
     })
   }
@@ -67,10 +72,10 @@ class Pool {
       password: config.password,
       multipleStatements: config.multipleStatements || false
     }
-    this.ping_after = config.ping_after || 1000  * 60
+    this.ping_after = config.ping_after || 1000  * 60 * 5
     this.connectionLimit = config.connectionLimit || 5
-    this.timeout = config.timeout || 1000 * 60 * 5
-    this.retry_after = config.retry_after || 1000 * 10
+    this.timeout = config.timeout || 500
+    this.retry_after = config.retry_after || 1000 * 5
     this.retry_count = config.retry_count || 5
 
     this.size = 0
@@ -82,12 +87,15 @@ class Pool {
 
   _checkAlive(con) {
     logger.debug("DBPool", "Pinging connection...")
+    let timer = startTimer()
     con.query(
       {
         sql: "SELECT 1",
         timeout: this.timeout
       },
       err => {
+        timer.stop()
+        telemetry.get("DB_CheckAlive_Duration").add(timer.ms())
         if (err) {
           logger.warn("DBPool", "Connection is dead, destroying...")
           con.destroy()
@@ -164,7 +172,7 @@ class Pool {
 
     if (this.connections.length > 0) {
       const con = this.connections.pop()
-      if (con.last_query + this.ping_after < Date.now()) {
+      if (con.idle_since + this.ping_after < Date.now()) {
         this.waiting.push(cb)
         this._checkAlive(con)
       } else {
