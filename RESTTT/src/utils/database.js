@@ -88,7 +88,7 @@ function query(con, querystr, params=[]) {
       (err, result) => {
         timer.stop()
         if (timer.ms() > conf.DB_QER_TIMEOUT / 2) {
-          logger.warn("Database", `Query ${querystr} took long (${endTime-startTime} ms)`)
+          logger.warn("Database", `Query ${querystr} took long (${timer.ms()} ms)`)
         }
 
         if(err) {
