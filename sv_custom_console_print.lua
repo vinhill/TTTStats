@@ -78,24 +78,9 @@ hook.Add("TTTPrepareRound", "CP_prep", function()
 end)
 
 --[[
-	Gets called when game started
-	Returns round state
-]]
-hook.Add("TTTBeginRound", "CP_active", function()
-	print("CP round state: active")
-end)
-
---[[
-	Gets called when game ended
-	Returns round state
-]]
-hook.Add("TTTEndRound", "CP_post", function()
-	print("CP round state: post")
-end)
-
---[[
 	Gets called when the round starts:
 	Returns Name and Role and Team of each player
+	Returns round state
 ]]
 hook.Add("TTTBeginRound", "CP_round_start_role_print", function()
 	for i, v in ipairs( player.GetAll() ) do
@@ -103,6 +88,7 @@ hook.Add("TTTBeginRound", "CP_round_start_role_print", function()
 		DamageLog( "INIT_KARMA: " .. PlayerStr(v)  .. " karma " .. v:GetLiveKarma())
 	end
 	roundOver = false
+	print("CP round state: active")
 end)
 
 --[[
@@ -149,6 +135,7 @@ end)
 	Gets called on Round End
 ]]
 hook.Add("TTTEndRound", "CP_round_end_role_print", function()
+	print("CP round state: post")
 	DamageLog( "ROUND_ENDED at given time")
 	for i, v in ipairs( player.GetAll() ) do
     		DamageLog( "ROUND_END: " .. v:Nick() .. " was " .. v:GetRoleString() .. " team " .. v:GetTeam())
