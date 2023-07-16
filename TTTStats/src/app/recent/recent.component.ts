@@ -380,17 +380,26 @@ export class RecentComponent {
     // match 2: ...
 
     let lines = new Map<number, string[][]>();
-    for (const c of res) {
+    outer: for (const c of res) {
       if (!lines.has(c.mid)) lines.set(c.mid, []);
 
-      for (const line of lines.get(c.mid)!) {
+      const midlines = lines.get(c.mid)!;
+
+      for (const line of midlines) {
         if (line[line.length-1] == c.pfrom) {
-          line.push(c.pto);
-          break;
+          // to might be null if not received via cursed deagle
+          if (c.pto != null) line.push(c.pto);
+          continue outer;
         }
       }
 
-      lines.get(c.mid)!.push([c.pfrom, c.pto]);
+      const line = []
+      // first edge might start at null if received not via cursed deagle
+      if (c.pfrom != null) line.push(c.pfrom);
+      // to might be null if not received via cursed deagle
+      // or first cursed never passed it on
+      if (c.pto != null) line.push(c.pto);
+      midlines.push(line);
     }
 
     let matches = Array.from(lines.entries());

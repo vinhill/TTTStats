@@ -74,7 +74,7 @@ class Pool {
     }
     this.ping_after = config.ping_after || 1000  * 60 * 5
     this.connectionLimit = config.connectionLimit || 5
-    this.timeout = config.timeout || 500
+    this.timeout = config.timeout || 200
     this.retry_after = config.retry_after || 1000 * 5
     this.retry_count = config.retry_count || 5
 

@@ -157,4 +157,12 @@ router.get("/telemetryreport", async function(req, res) {
   res.status(200).json(telemetry.report())
 })
 
+router.post("/cleardbcache", function (req, res) {
+  if (req.body.token !== REST_ADMIN_TOKEN)
+    throw new AuthorizationError("restart route requires 'token' in the body.")
+    
+  db.clearCache();
+  res.status(200).end();
+})
+
 module.exports = router

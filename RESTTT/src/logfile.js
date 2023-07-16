@@ -27,6 +27,7 @@ const keep_loglines = [
     'CP map:',
     'CP round state',
     'ServerLog: [0-9.:]+ - ROUND_START',
+    'ServerLog: [0-9.:]+ - INIT_KARMA',
     'ServerLog: [0-9.:]+ - CP_RC',
     'ServerLog: [0-9.:]+ - CP_TC',
     'ServerLog: [0-9.:]+ - CP_OE',

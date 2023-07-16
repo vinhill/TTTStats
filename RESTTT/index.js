@@ -129,6 +129,13 @@ const templates = {
     "uri": "/api/v1/admin/telemetryreport",
     "method": "GET",
     "title": "Telemetry report",
+  },
+  "Cleardbcache": {
+    "uri": "/api/v1/admin/cleardbcache",
+    "method": "POST",
+    "title": "Clear DB cache",
+    "body": `token=`,
+    "encode": "application/x-www-form-urlencoded",
   }
 }
 
