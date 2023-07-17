@@ -106,6 +106,8 @@ export class RecentComponent {
     const xmax = games[games.length - 1].mid - first_mid + 1;
     const get_xpos = (mid: number, time: number) => {
       // 1+ for xmin = 1
+      if (!games[mid-first_mid])
+        console.log(mid, games, karmats)
       return mid - first_mid + 1 + time / games[mid - first_mid].duration
     };
 
@@ -117,6 +119,7 @@ export class RecentComponent {
     for (const row of karmats) {
       let ts = playerts[row.player];
       if (ts.length > 0 && ts[ts.length - 1].y == row.karma) continue;
+      if (!games[row.mid - first_mid]) continue;
       ts.push({
         x: get_xpos(row.mid, row.time),
         y: row.karma
