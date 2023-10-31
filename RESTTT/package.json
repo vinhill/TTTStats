@@ -7,7 +7,6 @@
     "start": "cross-env NODE_ENV=prod node server.js",
     "dev": "cross-env NODE_ENV=dev nodemon server.js",
     "eslint": "eslint .",
-    "deploy": "flyctl deploy",
     "test": "cross-env NODE_ENV=test jest --verbose --coverage"
   },
   "dependencies": {
