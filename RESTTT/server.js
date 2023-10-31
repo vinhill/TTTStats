@@ -1,3 +1,6 @@
+const https = require('https')
+const fs = require('fs')
+
 const express = require("express")
 require('express-async-errors')
 const app = express()
@@ -52,7 +55,18 @@ app.use("/", function(req, res) {
 
 app.use(errorHandler)
 
-const server = app.listen(PORT, function(err, address) {
+let server;
+if (NODE_ENV === "dev") {
+  server = app
+} else {
+  const https_opt = {
+    key: fs.readFileSync("./certs/privkey.pem", "utf8"),
+    cert: fs.readFileSync("./certs/fullchain.pem", "utf8"),
+    ca: fs.readFileSync("./certs/chain.pem", "utf8")
+  }
+  server = https.createServer(https_opt, app)
+}
+server.listen(PORT, function(err, address) {
   if(err) {
     logger.error("Server", err)
     process.exit(1)

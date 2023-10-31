@@ -15,7 +15,7 @@ export class RestttService {
 			this.baseURL = new BehaviorSubject<string>('http://localhost:3001/api/v1');
 			console.log("Running in dev mode, using root: " + this.baseURL.getValue());
 		} else {
-			this.baseURL = new BehaviorSubject<string>('http://vmd76968.contaboserver.net:3001/api/v1');
+			this.baseURL = new BehaviorSubject<string>('https://vmd76968.contaboserver.net:3001/api/v1');
 		}
 		this.baseURL.subscribe(() => this.clearCache());
 		this.baseURL.subscribe({next: (url) => console.log("Using REST base URL: " + url)});
