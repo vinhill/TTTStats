@@ -116,6 +116,7 @@ class Pool {
     for (const cb of this.waiting) {
       cb(err)
     }
+    logger.error("DBPool", `Fatal error: ${err}`)
   }
 
   _createConnection(retry=0) {
@@ -129,6 +130,7 @@ class Pool {
         if (retry > this.retry_count && this.retry_count >= 0) {
           this._fatal(err)
         } else {
+          logger.debug("DBPool", `Error ${err}`)
           logger.debug("DBPool", `Failed to establish new connection, retrying (${retry+1})...`)
           if (this.retry_after > 0) {
             setTimeout(() => this._createConnection(retry+1), this.retry_after)
@@ -192,7 +194,7 @@ class Pool {
       if (err) {
         cb(err)
         logger.debug("DBPool", "Error while acquiring connection for query.")
-		    this._checkAlive(con)
+        this._checkAlive(con)
       } else {
         logger.debug("DBPool", "Acquired connection for query.")
         con.query(query, (err, res) => {
