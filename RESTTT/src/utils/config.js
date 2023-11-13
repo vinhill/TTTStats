@@ -10,6 +10,7 @@ module.exports = {
   "MySQL_READ_PASSWORD": process.env.READERPW,
   "MySQL_ADMIN_PASSWORD": process.env.ADMINPW,
   "VPS_DOMAIN": "75.119.148.220",
+  "FILE_SERVER": "ftpupload.net",
   "CACHE_SIZE": 50,
   "MAX_RESULT_SIZE_KB": 40,
   "TTT_VPS_PW": process.env.TTT_VPS_PW,

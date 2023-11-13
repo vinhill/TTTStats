@@ -1,5 +1,5 @@
 const { Readable, Writable } = require("stream")
-const { FTP_PW, TTT_VPS_PW, NODE_ENV } = require("./config.js")
+const config = require("./config.js")
 const ftp = require("basic-ftp")
 let Client = require('ssh2-sftp-client');
 const AdmZip  = require("adm-zip")
@@ -42,22 +42,22 @@ function getConnection(con) {
             let client = null
             if (con == "infinity") {
                 options = {
-                    host: "ftpupload.net",
+                    host: config.FILE_SERVER,
                     user: "epiz_33726584",
-                    password: FTP_PW,
+                    password: config.FTP_PW,
                     secure: false
                 }
                 client = new ftp.Client()
                 if (NODE_ENV === "dev")
                     client.ftp.verbose = true
-            }else if (con == "vps") {
+            } else if (con == "vps") {
                 options = {
-                    host: "vmd76968.contaboserver.net",
+                    host: config.VPS_DOMAIN,
                     port: 22,
                     username: "gmodserver",
-                    password: TTT_VPS_PW,
+                    password: config.TTT_VPS_PW,
                 }
-                if (NODE_ENV === "dev")
+                if (config.NODE_ENV === "dev")
                     options.debug = (msg) => logger.debug("SFTP", msg)
                 client = new SFTPToFTP()
             }
