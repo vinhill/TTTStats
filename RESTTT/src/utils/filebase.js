@@ -48,7 +48,7 @@ function getConnection(con) {
                     secure: false
                 }
                 client = new ftp.Client()
-                if (NODE_ENV === "dev")
+                if (config.NODE_ENV === "dev")
                     client.ftp.verbose = true
             } else if (con == "vps") {
                 options = {
