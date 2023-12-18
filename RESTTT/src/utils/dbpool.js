@@ -54,6 +54,7 @@ class PooledConnection {
 }
 
 function promisefy(func, ...args) {
+  // Promisefy a function that takes a callback as last argument
   return new Promise((resolve, reject) => {
     func(...args, (err, res) => {
       if (err) reject(err)

@@ -14,7 +14,10 @@ function query(querystr, params=[]) {
     sql: querystr,
     values: params,
     timeout: DB_QER_TIMEOUT
-  },)
+  },).catch(err => { 
+    logger.error("Logparser", `Query '${querystr}' failed: ${err}`)
+    throw err
+  })
 }
 
 const regex = (function() {
@@ -579,6 +582,7 @@ async function load_logfile(log, fname, date) {
   const lp = createParser(date)
 
   const pool = db.getPool("admin")
+  // acquire a single connection for the whole file for the transaction to work
   con = await promisefy(pool.acquire.bind(pool))
 
   try {
@@ -591,6 +595,7 @@ async function load_logfile(log, fname, date) {
     await query("COMMIT")
   } catch(e) {
     await query("ROLLBACK")
+    logger.error("Logparser", "Crashed while parsing log, rolling back. Re-throwing...")
     throw e
   } finally {
     con.release()
