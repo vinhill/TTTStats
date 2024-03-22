@@ -43,6 +43,8 @@ end
 function PlayerStr(ply)
 	if ply:IsPlayer() then
 		return ply:Nick() .. " [" .. ply:GetRoleString() ..  ", " .. ply:GetTeam() .. "] "
+	else
+		return "null [null, null]"
 	end
 end
 
@@ -84,8 +86,10 @@ end)
 ]]
 hook.Add("TTTBeginRound", "CP_round_start_role_print", function()
 	for i, v in ipairs( player.GetAll() ) do
-		DamageLog( "ROUND_START: " .. PlayerStr(v))
-		DamageLog( "INIT_KARMA: " .. PlayerStr(v)  .. " karma " .. v:GetLiveKarma())
+		if v:IsPlayer() do
+			DamageLog( "ROUND_START: " .. PlayerStr(v))
+			DamageLog( "INIT_KARMA: " .. PlayerStr(v)  .. " karma " .. v:GetLiveKarma())
+		end
 	end
 	roundOver = false
 	print("CP round state: active")
@@ -156,7 +160,7 @@ end)
 	Gets called when a player changes the team
 ]]
 hook.Add("TTT2UpdateTeam", "CP_update_team", function(ply, oldTeam, newTeam)
-	if not transition and roundOver ~= true then
+	if not transition and roundOver ~= true and oldTeam then
 		DamageLog( "CP_TC: " .. PlayerStr(ply) .. "changed Team from [" .. oldTeam .. "] to [" .. newTeam .. "]")
 	end
 end)
