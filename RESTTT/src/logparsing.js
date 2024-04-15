@@ -118,6 +118,7 @@ async function onGameStart(match, state) {
 }
 
 function onRoleChange(match, state) {
+  if (state.stage !== "active") return
   // captures: time, name, oldrole, newrole
   const player = match.name
   const fromrole = capitalizeFirstLetter(match.oldrole)
@@ -138,6 +139,7 @@ function onRoleChange(match, state) {
 }
 
 function onTeamChange(match, state) {
+  if (state.stage !== "active") return
   state.clients.get(match.name).team = unifyTeamname(match.newteam)
 }
 
@@ -412,7 +414,8 @@ function createParser(date) {
     clients: new Map(),
     date: date,
     mid: 0,
-    map: ""
+    map: "",
+    stage: null
   })
 
   lp.register(
@@ -420,6 +423,12 @@ function createParser(date) {
     "mapname"
   )
   lp.listen("mapname", onSelectMap)
+
+  lp.register(
+    /CP round state: (?<stage>\w+)/,
+    "round_state"
+  )
+  lp.listen("round_state", (match, state) => state.stage = match.stage)
 
   lp.register(
     /CP round state: prep/,
@@ -603,7 +612,7 @@ async function load_logfile(log, fname, date) {
   
   db.clearCache()
 
-  if (Object.keys(lp.state).length != 4) {
+  if (Object.keys(lp.state).length != 5) {
     // this can happen if listener object has lambda functions
     // prefer function definitions with usage of lp.subscribe for binding this
     logger.error("Logparser", "listener modified logparse state: " + Object.keys(lp.state))
