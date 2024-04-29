@@ -27,6 +27,7 @@ class SFTPToFTP {
         return this._sftp.mkdir(path, true)
     }
     uploadFrom(readable, path) {
+        // Promise<string>
         return this._sftp.put(readable, path)
     }
     downloadTo(writable, path) {
@@ -40,7 +41,7 @@ function getConnection(con) {
 
             let options = {}
             let client = null
-            if (con == "infinity") {
+            /*if (con == "storage") {
                 options = {
                     host: config.FILE_SERVER,
                     user: "epiz_33726584",
@@ -50,15 +51,16 @@ function getConnection(con) {
                 client = new ftp.Client()
                 if (config.NODE_ENV === "dev")
                     client.ftp.verbose = true
-            } else if (con == "vps") {
+            }*/
+            if (con == "gmod" || con == "storage") {
                 options = {
                     host: config.VPS_DOMAIN,
                     port: 22,
                     username: "gmodserver",
                     password: config.TTT_VPS_PW,
                 }
-                if (config.NODE_ENV === "dev")
-                    options.debug = (msg) => logger.debug("SFTP", msg)
+                //if (config.NODE_ENV === "dev")
+                //    options.debug = (msg) => logger.debug("SFTP", msg)
                 client = new SFTPToFTP()
             }
             else
@@ -89,18 +91,18 @@ function shutdown() {
     }
 }
 
-async function list(path, con="infinity") {
+async function list(path, con="storage") {
     const client = await getConnection(con)
     return client.list(path)
 }
 
-async function remove(path, con="infinity") {
+async function remove(path, con="storage") {
     const client = await getConnection(con)
     await client.remove(path)
 }
 
 // write Buffer to path
-async function write(path, data, compress=true, con="infinity") {
+async function write(path, data, compress=true, con="storage") {
     if (compress) {
         const zip = new AdmZip()
         zip.addFile("data", data)
@@ -111,11 +113,11 @@ async function write(path, data, compress=true, con="infinity") {
     stream.push(null)
 
     const client = await getConnection(con)
-    await client.uploadFrom(stream, path)
+    return client.uploadFrom(stream, path)
 }
 
 // read Buffer from path
-async function read(path, decompress=true, con="infinity") {
+async function read(path, decompress=true, con="storage") {
     const client = await getConnection(con)
 
     const stream = new Writable()
@@ -134,7 +136,7 @@ async function read(path, decompress=true, con="infinity") {
     }
 }
 
-async function ensureDir(path, con="infinity") {
+async function ensureDir(path, con="storage") {
     const client = await getConnection(con)
     await client.ensureDir(path)
 }

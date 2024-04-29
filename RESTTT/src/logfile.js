@@ -1,11 +1,12 @@
 const fb = require("./utils/filebase.js")
 const logger = require("./utils/logger.js")
 
-LOGPATH = "serverfiles/garrysmod/console.log"
+CURRENTLOG = "serverfiles/garrysmod/console.log"
+LOGSTORAGE = "tttstats/consolelogs"
 
 // Fetches the current console.log from game server
 async function fetch_current_log(cleaned=false) {
-    let data = await fb.read(LOGPATH, false, "vps")
+    let data = await fb.read(CURRENTLOG, false, "gmod")
     data = data.toString()
     if (cleaned)
         data = clean_log(data)
@@ -13,14 +14,14 @@ async function fetch_current_log(cleaned=false) {
 }
 
 async function get_log(name) {
-    const buffer = await fb.read("/logs/"+name)
+    const buffer = await fb.read(LOGSTORAGE + "/" + name)
     return buffer.toString()
 }
 
 async function save_log(name, log) {
     const buffer = Buffer.from(log)
-    await fb.ensureDir("/logs")
-    await fb.write("/logs/"+name, buffer)
+    await fb.ensureDir(LOGSTORAGE)
+    return fb.write(LOGSTORAGE + "/" + name, buffer)
 }
 
 const keep_loglines = [
@@ -69,7 +70,7 @@ async function process_current_log(fname) {
     const log = await fetch_current_log()
     const clean = clean_log(log)
 
-    const files = await fb.list()
+    const files = (await list_logs()).map(log => log.name)
     let path1 = fname + ".log.zip"
     let path2 = fname + ".raw.log.zip"
     let i = 0
@@ -81,14 +82,20 @@ async function process_current_log(fname) {
 
     await save_log(path2, log)
     await save_log(path1, clean)
-
-    await fb.remove(LOGPATH, "vps")
-
+	
+	// check if the file is there
+    const files2 = (await list_logs()).map(log => log.name)
+    if (!files2.includes(path1)) {
+        throw new Error("Failed to save logfile")
+    }
+    
+    await fb.remove(CURRENTLOG, "gmod")
+    
     return path1
 }
 
 async function list_logs() {
-    return fb.list("/logs")
+    return fb.list(LOGSTORAGE)
 }
 
 module.exports = {

@@ -46,6 +46,7 @@ function errorHandler(err, req, res, next) {
     else
       res.status(500).json(`FTP Error, ${err.message}`)
   } else {
+    console.error(err.stack)
     logger.error("ErrorHandler", err.message)
     res.status(500).json(err.message)
   }
