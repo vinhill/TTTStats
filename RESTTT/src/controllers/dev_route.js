@@ -9,6 +9,10 @@ const logfile = require("../logfile.js")
 const load_logfile = require("../logparsing.js")
 const { TrackableIterator } = require("../utils/structs.js")
 
+router.get("/active", function(req, res) {
+  res.status(200).send("Dev routes active")
+})
+
 router.post("/makedb", async function(req, res) {
   await db.queryAdmin("CreateDB.sql")
   res.status(200).end()

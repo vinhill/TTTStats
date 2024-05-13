@@ -61,7 +61,7 @@ const today = (() => {
   return `${year}-${month}-${day}`;
 })();
 
-const templates = {
+const normal_templates = {
   "health_checks": {
     "uri": "/api/v1/admin/health",
     "method": "GET",
@@ -91,11 +91,6 @@ const templates = {
     "method": "POST",
     "title": "Unset mutex"
   },
-  "reset_db": {
-    "uri": "/api/v1/dev/makedb",
-    "method": "POST",
-    "title": "Reset DB"
-  },
   "loglevel": {
     "uri": "/api/v1/admin/loglevel",
     "method": "POST",
@@ -115,16 +110,6 @@ const templates = {
     "body": `token=`,
     "encode": "application/x-www-form-urlencoded",
   },
-  "parsealllogs": {
-    "uri": "/api/v1/dev/parsealllogs",
-    "method": "POST",
-    "title": "Parse all logs",
-  },
-  "parsealllogsprogress": {
-    "uri": "/api/v1/dev/parsealllogsprogress",
-    "method": "GET",
-    "title": "Parse all logs progress",
-  },
   "telemetryreport": {
     "uri": "/api/v1/admin/telemetryreport",
     "method": "GET",
@@ -137,6 +122,24 @@ const templates = {
     "body": `token=`,
     "encode": "application/x-www-form-urlencoded",
   }
+}
+
+const dev_templates = {
+  "reset_db": {
+    "uri": "/api/v1/dev/makedb",
+    "method": "POST",
+    "title": "Reset DB"
+  },
+  "parsealllogs": {
+    "uri": "/api/v1/dev/parsealllogs",
+    "method": "POST",
+    "title": "Parse all logs",
+  },
+  "parsealllogsprogress": {
+    "uri": "/api/v1/dev/parsealllogsprogress",
+    "method": "GET",
+    "title": "Parse all logs progress",
+  },
 }
 
 function load_template(template) {
@@ -152,7 +155,7 @@ function load_template(template) {
     tf_encode.value = templates[template].encode;
 }
 
-function init_templates() {
+function init_templates(templates) {
   const container = document.getElementById("template-buttons");
 
   for (let template in templates) {
@@ -166,17 +169,24 @@ function init_templates() {
   }
 }
 
+async function dev_active() {
+  const res = await fetch("/api/v1/dev/active");
+  return res.status === 200;
+}
+
 function copy_urlencoded() {
   const enc = document.getElementById("urlencodedtf").value;
   navigator.clipboard.writeText(enc);
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", async function() {
   document.getElementById("submitbtn").addEventListener("click", submit);
   
   document.getElementById("urlencodetf").addEventListener("input", update_urlencoded);
   document.getElementById("btn-clip-urlencoded").addEventListener("click", copy_urlencoded);
   update_urlencoded();
 
-  init_templates();
+  const dev_active = await dev_active();
+  let templates = dev_active ? { ...normal_templates, ...dev_templates } : normal_templates;
+  init_templates(templates);
 });
