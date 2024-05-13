@@ -316,6 +316,17 @@ router.get("/CursedChanges/:since", function(req, res, next) {
   next()
 })
 
+router.get("/DeathTypes", function(req, res, next) {
+  const since = req.query.since
+  req.sqlquery = `
+    SELECT player, reason, COUNT(*) AS count
+    FROM dies
+    ${since ? 'WHERE mid >= :since' : ''}
+    GROUP BY player, reason
+    ORDER BY count DESC`
+  next()
+})
+
 router.use("/", async function(req, res, next) {
   if(!req.sqlquery)
     return next()

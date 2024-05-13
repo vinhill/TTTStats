@@ -258,34 +258,75 @@ const DamageHandler = {
   }
 }
 
-async function onPvPKill(match, state) {
-  // captures: time, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam
-  const atkrole = capitalizeFirstLetter(match.atkrole)
-  const vktrole = capitalizeFirstLetter(match.vktrole)
-  let weapon = parseEntity(match.weapon).entity
-  const inflictor = parseEntity(match.inflictor)
-  const time = timeToSeconds(match.time)
-  const teamkill = match.atkteam === match.vktteam && match.attacker !== match.victim
+const PvPKillHandler = {
+  init() {
+    // map from player name to {time, type}
+    this.last_damages = new Map()
+  },
+  onPvPDmg(match, state) {
+    // captures: time, type, dmgtype, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam, damage
+    const time = timeToSeconds(match.time)
+    const type = match.type
+    this.last_damages.set(match.victim, {time, type})
+  },
+  onPvPKill(match, state) {
+    // captures: time, attacker, atkrole, atkteam, weapon, inflictor, victim, vktrole, vktteam
+    const atkrole = capitalizeFirstLetter(match.atkrole)
+    const vktrole = capitalizeFirstLetter(match.vktrole)
+    let weapon = parseEntity(match.weapon).entity
+    const inflictor = parseEntity(match.inflictor)
+    const time = timeToSeconds(match.time)
+    const teamkill = match.atkteam === match.vktteam && match.attacker !== match.victim
+  
+    // see onPvPDmg
+    if (inflictor.class !== "Player")
+      weapon = inflictor.entity
 
-  // see onPvPDmg
-  if (inflictor.class !== "Player")
-    weapon = inflictor.entity
-
-  query(
-    "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [state.mid, match.victim, vktrole, time, match.attacker, atkrole, weapon, teamkill]
-  )
+    const last_dmg = this.last_damages.get(match.victim)
+    let reason = "OTHER<0>"
+    if (last_dmg !== undefined && last_dmg.time - time < 0.01) {
+      reason = last_dmg.type
+    }
+  
+    query(
+      "INSERT INTO dies (mid, player, vktrole, reason, time, causee, atkrole, weapon, teamkill) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [state.mid, match.victim, vktrole, reason, time, match.attacker, atkrole, weapon, teamkill]
+    )
+  }
 }
 
-async function onPvEKill(match, state) {
-  // captures: time, inflictor, victim, vktrole, vktteam
-  const vktrole = capitalizeFirstLetter(match.vktrole)
-  const time = timeToSeconds(match.time)
 
-  query(
-    "INSERT INTO dies (mid, player, vktrole, time) VALUES (?, ?, ?, ?)",
-    [state.mid, match.victim, vktrole, time]
-  )
+/*
+The PvE kill log does not unclude the reason, we need to infer it from last damage.
+*/
+const PvEKillHandler = {
+  init() {
+    // map from player name to {time, type}
+    this.last_damages = new Map()
+  },
+  onPvEDmg(match, state) {
+    // captures: time, type, dmgtype, weapon, inflictor, victim, vktrole, vktteam, damage
+    const time = timeToSeconds(match.time)
+    const type = match.type
+    this.last_damages.set(match.victim, {time, type})
+  },
+  onPvEKill(match, state) {
+    // captures: time, inflictor, victim, vktrole, vktteam
+    const vktrole = capitalizeFirstLetter(match.vktrole)
+    const time = timeToSeconds(match.time)
+
+    const last_dmg = this.last_damages.get(match.victim)
+    let reason = "OTHER<0>"
+    if (last_dmg !== undefined && last_dmg.time - time < 0.01) {
+      reason = last_dmg.type
+    }
+
+    // TODO update table schema to include reason
+    query(
+      "INSERT INTO dies (mid, player, vktrole, reason, time) VALUES (?, ?, ?, ?, ?)",
+      [state.mid, match.victim, vktrole, reason, time]
+    )
+  }
 }
 
 const gameEndListener = {
@@ -438,6 +479,8 @@ function createParser(date) {
   lp.subscribe("init_round", gameEndListener, "init")
   lp.subscribe("init_round", DamageHandler, "init")
   lp.subscribe("init_round", LoveHandle, "init")
+  lp.subscribe("init_round", PvEKillHandler, "init")
+  lp.subscribe("init_round", PvPKillHandler, "init")
   lp.listen("init_round", resetState)
 
   lp.register(
@@ -522,6 +565,8 @@ function createParser(date) {
   lp.listen("pve_dmg", captureVampireDmg, 999)
   lp.subscribe("pvp_dmg", DamageHandler, "pvp")
   lp.subscribe("pve_dmg", DamageHandler, "pve")
+  lp.subscribe("pve_dmg", PvEKillHandler, "onPvEDmg")
+  lp.subscribe("pvp_dmg", PvPKillHandler, "onPvPDmg")
   lp.subscribe("pvp_dmg", karmaTracker, "onPvPDmg")
   lp.listen("pvp_dmg", jackalTeamup)
   lp.listen("pvp_dmg", sheriffTeamup)
@@ -541,7 +586,7 @@ function createParser(date) {
     "pvp_kill"
   )
   lp.listen("pvp_kill", captureCursed, 999)
-  lp.listen("pvp_kill", onPvPKill)
+  lp.subscribe("pvp_kill", PvPKillHandler, "onPvPKill")
   lp.subscribe("pvp_kill", surviveTracker, "death")
   lp.register(
     regex`
@@ -553,7 +598,7 @@ function createParser(date) {
     "pve_kill"
   )
   lp.listen("pve_kill", captureCursed, 999)
-  lp.listen("pve_kill", onPvEKill)
+  lp.subscribe("pve_kill", PvEKillHandler, "onPvEKill")
   lp.subscribe("pve_kill", surviveTracker, "death")
 
   lp.register(
@@ -593,6 +638,8 @@ async function load_logfile(log, fname, date) {
   const pool = db.getPool("admin")
   // acquire a single connection for the whole file for the transaction to work
   con = await promisefy(pool.acquire.bind(pool))
+
+  // TODO this is a problem if the con times out due to being active too long, right?
 
   try {
     await query("START TRANSACTION")

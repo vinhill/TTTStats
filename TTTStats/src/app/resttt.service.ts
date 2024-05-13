@@ -255,4 +255,12 @@ export class RestttService {
 	{
 		return this.get("CursedChanges/" + since);
 	}
+
+	async DeathTypes(since?: number)
+		: Promise<{
+			player: string, reason: string, count: number
+		}[]>
+	{
+		return this.get(this.urlencode("DeathTypes", {since: since}));
+	}
 }

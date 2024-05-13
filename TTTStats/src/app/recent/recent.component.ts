@@ -22,6 +22,7 @@ export class RecentComponent {
   cTeamWonSurRate: ChartConfiguration | undefined;
   cRoles: any[] | undefined;
   cWhoKilledWho: any[] | undefined;
+  cDeathTypes: ChartConfiguration | undefined;
   
   cursedGraph?: string;
   mediumChats?: string;
@@ -60,6 +61,7 @@ export class RecentComponent {
         this.loadTeamWonSurRate(),
         this.loadMultikills(),
         this.loadCursedGraph(),
+        this.loadDeathTypes(),
       ]))
       .catch(err => console.log(err));
   }
@@ -412,6 +414,38 @@ export class RecentComponent {
     for (const [mid, lines] of matches) {
       for (const line of lines) {
         this.cursedGraph += `Match ${mid - this.since + 1}: ${line.join(" -> ")}\n`;
+      }
+    }
+  }
+
+  async loadDeathTypes() {
+    let res = await this.resttt.DeathTypes(this.since);
+
+    // {reason: {player: count}}
+    let datasets = new Map<string, {[player: string]: number}>();
+    for (const row of res) {
+      if (!datasets.has(row.reason)) datasets.set(row.reason, {});
+      datasets.get(row.reason)![row.player] = row.count;
+    }
+
+    const players = Array.from(new Set(res.map(x => x.player)));
+
+    // datasets -> [{label: reason, data: [count]}]
+    let datasets_arr = [];
+    for (const [reason, data] of datasets) {
+      if (reason.startsWith("OTHER")) continue;
+      datasets_arr.push({
+        label: reason,
+        data: players.map(p => data[p] ?? 0)
+      });
+    }
+
+    this.cDeathTypes = {
+      type: "bar" as ChartType,
+      options: {plugins: {legend: {position: 'bottom'}}, scales: {x: {stacked: true}}},
+      data: {
+        labels: players,
+        datasets: datasets_arr
       }
     }
   }

@@ -304,18 +304,19 @@ describe('logparsing', () => {
         });
     });
 
-    describe('handles kills', () => {
+    describe('handles kills', () => {     
         test("for PvE", async () => {
             const game = new SimuGame();
             game.addPlayer('Schnitzelboy', 'traitor', 'traitors');
             game.prepare();
             game.start([
-                "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]",
+                "ServerLog: 02:57.16 - CP_DMG FALL: nonplayer (Entity [0][worldspawn]) damaged Schnitzelboy [traitor, traitors] for 1.1",
+                "ServerLog: 02:57.16 - CP_KILL: nonplayer (Entity [0][worldspawn]) killed Schnitzelboy [traitor, traitors]"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO dies (mid, player, vktrole, time) VALUES (0, 'Schnitzelboy', 'Traitor', 177.16)"
+                "INSERT INTO dies (mid, player, vktrole, reason, time) VALUES (0, 'Schnitzelboy', 'Traitor', 'FALL', 177.16)"
             )).toBe(true);
         });
 
@@ -325,12 +326,13 @@ describe('logparsing', () => {
             game.addPlayer("Poci", "amnesiac", "nones");
             game.prepare();
             game.start([
+                "ServerLog: 02:58.71 - CP_DMG BULLET: g [g, t] <Weapon [1][a]>, (Player [2][g], g) damaged Poci [amnesiac, nones] for 1.1",
                 "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [amnesiac, nones]"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 178.71, 'GhastM4n', 'Glutton', 'w1', false)"
+                "INSERT INTO dies (mid, player, vktrole, reason, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 'BULLET', 178.71, 'GhastM4n', 'Glutton', 'w1', false)"
             )).toBe(true);
         });
 
@@ -340,12 +342,13 @@ describe('logparsing', () => {
             game.addPlayer("Poci", "amnesiac", "nones");
             game.prepare();
             game.start([
+                "ServerLog: 02:58.71 - CP_DMG BULLET: g [g, t] <Weapon [1][a]>, (Player [2][g], g) damaged Poci [amnesiac, nones] for 1.1",
                 "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed Poci [amnesiac, nones]"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
+                "INSERT INTO dies (mid, player, vktrole, reason, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Amnesiac', 'BULLET', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
             )).toBe(true);
         });
 
@@ -354,12 +357,13 @@ describe('logparsing', () => {
             game.addPlayer("vinno", "traitor", "traitors");
             game.prepare();
             game.start([
+                "ServerLog: 02:58.71 - CP_DMG BULLET: g [g, t] <Weapon [1][a]>, (Player [2][g], g) damaged vinno [traitor, traitors] for 1.1",
                 "ServerLog: 04:28.22 - CP_KILL: vinno [traitor, traitors] <[NULL Entity]>, (Entity [263][env_explosion], ) killed vinno [traitor, traitors]"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
+                "INSERT INTO dies (mid, player, vktrole, reason, time, causee, atkrole, weapon, teamkill) VALUES (0, 'vinno', 'Traitor', 'BULLET', 268.22, 'vinno', 'Traitor', 'env_explosion', false)"
             )).toBe(true);
         });
 
@@ -369,12 +373,13 @@ describe('logparsing', () => {
             game.addPlayer("Poci", "glutton", "traitors");
             game.prepare();
             game.start([
+                "ServerLog: 02:58.71 - CP_DMG BULLET: g [g, t] <Weapon [1][a]>, (Player [2][g], g) damaged Poci [glutton, traitors] for 1.1",
                 "ServerLog: 02:58.71 - CP_KILL: GhastM4n [glutton, traitors] <Weapon [1126][w1]>, (Player [4][GhastM4n], GhastM4n) killed Poci [glutton, traitors]"
             ]);
             await game.submit();
 
             expect(queries.includes(
-                "INSERT INTO dies (mid, player, vktrole, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', 178.71, 'GhastM4n', 'Glutton', 'w1', true)"
+                "INSERT INTO dies (mid, player, vktrole, reason, time, causee, atkrole, weapon, teamkill) VALUES (0, 'Poci', 'Glutton', 'BULLET', 178.71, 'GhastM4n', 'Glutton', 'w1', true)"
             )).toBe(true);
         });
     });

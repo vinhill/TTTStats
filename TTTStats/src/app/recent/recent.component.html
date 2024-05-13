@@ -43,6 +43,9 @@
 		</div>
 		<data-table [data]="multikills?.data!" [headers]="multikills?.header!" columns="player, weapon, count" *ngIf="multikills?.data!.length > 0"></data-table>
 	</card>
+	<card title="Death Types" [loaded]="cDeathTypes !== undefined" (reload)="loadDeathTypes()">
+		<data-chart [data]="cDeathTypes!" [legend]="LegendType.ChartJS"></data-chart>
+	</card>
 	<card title="Min Karma" [loaded]="minKarma.player !== ''" (reload)="loadKarma()" size="tiny">
 		{{minKarma!.player}} got the worst karma with {{minKarma!.karma}}
 	</card>

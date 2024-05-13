@@ -138,6 +138,7 @@ CREATE TABLE dies (
   mid INT NOT NULL,
   player VARCHAR(20) NOT NULL,
   vktrole VARCHAR(15) NOT NULL,
+  reason VARCHAR(20) NOT NULL,
   causee VARCHAR(20),  -- optional, if not fight
   atkrole VARCHAR(15),  -- optional, if not fight
   weapon VARCHAR(30),  -- optional, if unknown
