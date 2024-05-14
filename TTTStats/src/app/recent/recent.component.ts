@@ -433,6 +433,7 @@ export class RecentComponent {
     // datasets -> [{label: reason, data: [count]}]
     let datasets_arr = [];
     for (const [reason, data] of datasets) {
+      // https://wiki.facepunch.com/gmod/Enums/DMG
       if (reason.startsWith("OTHER")) continue;
       datasets_arr.push({
         label: reason,
@@ -442,7 +443,7 @@ export class RecentComponent {
 
     this.cDeathTypes = {
       type: "bar" as ChartType,
-      options: {plugins: {legend: {position: 'bottom'}}, scales: {x: {stacked: true}}},
+      options: {plugins: {legend: {position: 'bottom'}}, scales: {x: {stacked: true}, y: {stacked: true}}},
       data: {
         labels: players,
         datasets: datasets_arr
