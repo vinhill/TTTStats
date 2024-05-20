@@ -142,17 +142,19 @@ const dev_templates = {
   },
 }
 
+const all_templates = { ...normal_templates, ...dev_templates };
+
 function load_template(template) {
   const tf_uri = document.getElementById("uritf");
   const tf_method = document.getElementById("method");
   const tf_body = document.getElementById("bodytf");
   const tf_encode = document.getElementById("encode");
 
-  tf_uri.value = templates[template].uri;
-  tf_method.value = templates[template].method;
-  tf_body.value = templates[template].body || "";
-  if (templates[template].encode)
-    tf_encode.value = templates[template].encode;
+  tf_uri.value = all_templates[template].uri;
+  tf_method.value = all_templates[template].method;
+  tf_body.value = all_templates[template].body || "";
+  if (all_templates[template].encode)
+    tf_encode.value = all_templates[template].encode;
 }
 
 function init_templates(templates) {
@@ -186,7 +188,7 @@ document.addEventListener("DOMContentLoaded", async function() {
   document.getElementById("btn-clip-urlencoded").addEventListener("click", copy_urlencoded);
   update_urlencoded();
 
-  const dev_active = await dev_active();
-  let templates = dev_active ? { ...normal_templates, ...dev_templates } : normal_templates;
+  const dev = await dev_active();
+  let templates = dev ? { ...normal_templates, ...dev_templates } : normal_templates;
   init_templates(templates);
 });
