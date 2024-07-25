@@ -1,4 +1,3 @@
-const https = require('https')
 const fs = require('fs')
 
 const express = require("express")
@@ -55,18 +54,15 @@ app.use("/", function(req, res) {
 
 app.use(errorHandler)
 
-let server;
-if (NODE_ENV === "dev") {
-  server = app
-} else {
-  const https_opt = {
-    key: fs.readFileSync("./certs/privkey.pem", "utf8"),
-    cert: fs.readFileSync("./certs/fullchain.pem", "utf8"),
-    ca: fs.readFileSync("./certs/chain.pem", "utf8")
-  }
-  server = https.createServer(https_opt, app)
+/*
+const https_opt = {
+  key: fs.readFileSync("./certs/privkey.pem", "utf8"),
+  cert: fs.readFileSync("./certs/fullchain.pem", "utf8"),
+  ca: fs.readFileSync("./certs/chain.pem", "utf8")
 }
-server.listen(PORT, function(err, address) {
+server = https.createServer(https_opt, app)
+*/
+app.listen(PORT, function(err, address) {
   if(err) {
     logger.error("Server", err)
     process.exit(1)

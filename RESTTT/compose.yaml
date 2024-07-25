@@ -3,5 +3,5 @@ services:
     build:
       context: ./  # Path to the directory containing your Dockerfile
     ports:
-      - "3001:3001"
+      - "3000:3001"
     restart: always
