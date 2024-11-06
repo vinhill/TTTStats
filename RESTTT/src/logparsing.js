@@ -451,6 +451,10 @@ class Client {
 
 function createParser(date) {
   // initial state
+  // TODO increase fault resistance
+  // we occasionally crash due to events happening in the wrong stage
+  // i.e. some bug causing the round to not fully activate and then a revive happening during preparing
+  // i.e. due to some bug, a role change happening after round end
   const lp = new LogParser({
     clients: new Map(),
     date: date,

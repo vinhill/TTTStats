@@ -74,7 +74,7 @@ process.on('SIGINT', shutdown)
 process.on('SIGTERM', shutdown)
 function shutdown() {
   logger.info("Server", 'Server is shutting down...')
-  server.close(function() {
+  app.close(function() {
     require("./src/utils/database.js").shutdown()
     require("./src/utils/filebase.js").shutdown()
     process.exit(0)

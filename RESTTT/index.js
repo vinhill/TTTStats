@@ -121,6 +121,11 @@ const normal_templates = {
     "title": "Clear DB cache",
     "body": `token=`,
     "encode": "application/x-www-form-urlencoded",
+  },
+  "Monthlyplayers": {
+    "uri": "/api/v1/data/Players?year=2021&month=1",
+    "method": "GET",
+    "title": "Monthly players",
   }
 }
 

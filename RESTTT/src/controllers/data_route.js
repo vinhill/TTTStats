@@ -41,7 +41,19 @@ router.use(function(req, res, next) {
 })
 
 router.get("/Players", function (req, res, next) {
-  req.sqlquery = "SELECT name FROM player ORDER BY name ASC"
+  const year = req.query.year, month = req.query.month
+  if (year && month) {
+    req.sqlquery = `SELECT player, COUNT(DISTINCT date) AS days
+      FROM participates
+      JOIN game ON game.mid = participates.mid
+      WHERE YEAR(DATE) = :year AND MONTH(DATE) = :month
+      GROUP BY player ORDER BY days DESC`
+    req.sqlparams = {year, month}
+  } else if (year || month) {
+    throw new ValidationError("You need to specify both year and month")
+  } else {
+    req.sqlquery = "SELECT name FROM player ORDER BY name ASC"
+  }
   next()
 })
 
